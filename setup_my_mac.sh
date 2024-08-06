@@ -130,3 +130,5 @@ oh-my-posh init fish --config $(brew --prefix oh-my-posh)/themes/jandedobbeleer.
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
 echo "Mac setup is complete!"
+echo "Don't forget to set your terminal font to JetBrains Mono Nerd Font and Symbols Only"
+echo "Restart your terminal to apply changes"
