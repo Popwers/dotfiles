@@ -84,6 +84,10 @@ EOF
 # Create .config/fish/config.fish file
 mkdir -p ~/.config/fish
 cat << EOF > ~/.config/fish/config.fish
+if status is-interactive
+    printf '\eP\$f{"hook": "SourcedRcFileForWarp", "value": { "shell": "fish"}}\x9c'
+end
+
 set fish_greeting ""
 set -gx TERM xterm-256color
 
@@ -102,6 +106,9 @@ alias l "eza --long --color=always --icons=always --all"
 alias cat bat
 alias vim nvim
 alias vi nvim
+alias "git commit" "git cz"
+alias "git c" "git cz"
+alias cz "git cz"
 alias upsys "brew update && brew upgrade && brew cleanup && brew doctor && bun -g update"
 
 # Path
@@ -122,6 +129,13 @@ if test "\$TERM_PROGRAM" = "vscode" -o "\$TERM_PROGRAM" = "cursor"
 end
 
 oh-my-posh init fish --config (brew --prefix oh-my-posh)/themes/jandedobbeleer.omp.json | source
+EOF
+
+# Create .czrc file
+cat << EOF > ~/.czrc
+{
+    "path": "cz-conventional-changelog"
+}
 EOF
 
 # Setup brew
