@@ -37,11 +37,13 @@ oh-my-posh font install
 echo $(which fish) | sudo tee -a /etc/shells
 chsh -s $(which fish)
 
+# Switch to fish shell and execute commands
+fish <<EOF
+source ~/.config/fish/config.fish
+
 fish_add_path /opt/homebrew/bin
 fish_add_path /opt/homebrew/sbin
 fish_add_path /usr/local/bin
-
-fish_update_completions
 
 # Add Fisher
 curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher install jorgebucaran/fisher
@@ -50,13 +52,19 @@ curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fi
 fisher install jorgebucaran/nvm.fish
 fisher install rstacruz/fish-npm-global
 
-# Install NVM
-#curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash
+# Install NVM and use LTS version
 nvm install lts
 nvm use lts
 
 # Install global packages
 bun install -g eslint prettier ngrok npm-check-updates pm2 typescript commitizen cz-conventional-changelog nx@latest
+
+# Add paths to fish config
+fish_add_path "/Users/lionel/.bun/bin"
+
+# Update fish completions
+fish_update_completions
+EOF
 
 # Cleanup
 brew cleanup
