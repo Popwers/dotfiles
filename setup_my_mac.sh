@@ -14,24 +14,25 @@ brew update && brew upgrade
 # Install packages
 brew install curl wget bash git vim neovim oven-sh/bun/bun fish jandedobbeleer/oh-my-posh/oh-my-posh bat eza
 
-# Install JetBrains Mono Nerdfont and Icon Font
-# Check if font is already installed
-if [ -d "~/Library/Fonts/JetBrainsMono-Regular.ttf" ]; then
-  echo "JetBrains Mono is already installed."
-else
-  echo "Installing JetBrains Mono for you."
-  brew install --cask font-jetbrains-mono-nerd-font
-fi
+# Function to install fonts
+install_font() {
+    local font_name=$1
+    local font_file=$2
+    local cask_name=$3
 
-# Check if font is already installed
-if [ -d "~/Library/Fonts/SymbolsOnly.ttf" ]; then
-  echo "Symbols Only is already installed."
-else
-  echo "Installing Symbols Only for you."
-  brew install --cask font-symbols-only-nerd-font
-fi
+    if [ -f "$HOME/Library/Fonts/$font_file" ]; then
+        echo "$font_name is already installed."
+    else
+        echo "Installing $font_name for you."
+        brew install --cask $cask_name
+    fi
+}
 
-oh-my-posh font install
+# Install fonts
+install_font "JetBrains Mono" "JetBrainsMono-Regular.ttf" "font-jetbrains-mono-nerd-font"
+install_font "Symbols Only" "SymbolsNerdFont-Regular.ttf" "font-symbols-only-nerd-font"
+
+#oh-my-posh font install
 
 # Init fish shell as default shell
 echo $(which fish) | sudo tee -a /etc/shells
@@ -70,26 +71,24 @@ EOF
 brew cleanup
 
 # Create .profile file
-touch ~/.profile
-echo '
-eval "$(/opt/homebrew/bin/brew shellenv)"
+cat << EOF > ~/.profile
+eval "\$(/opt/homebrew/bin/brew shellenv)"
 
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+export NVM_DIR="\$HOME/.nvm"
+[ -s "\$NVM_DIR/nvm.sh" ] && \. "\$NVM_DIR/nvm.sh"  # This loads nvm
 
-export PATH="$HOME/.node_modules/bin:$PATH"
-export npm_config_prefix="~/.node_modules"
-' > ~/.profile
+export PATH="\$HOME/.node_modules/bin:\$PATH"
+export npm_config_prefix="\$HOME/.node_modules"
+EOF
 
 # Create .config/fish/config.fish file
 mkdir -p ~/.config/fish
-touch ~/.config/fish/config.fish
-echo '
+cat << EOF > ~/.config/fish/config.fish
 set fish_greeting ""
 set -gx TERM xterm-256color
 
 # Setup brew
-eval "$(/opt/homebrew/bin/brew shellenv)"
+eval "\$(/opt/homebrew/bin/brew shellenv)"
 
 # aliases
 alias .. "cd .."
@@ -106,25 +105,24 @@ alias vi nvim
 alias upsys "brew update && brew upgrade && brew cleanup && brew doctor && bun -g update"
 
 # Path
-set -gx PATH /opt/homebrew/bin $PATH
-set -gx PATH /opt/homebrew/sbin $PATH
-set -gx PATH /usr/local/bin $PATH
-
-set -gx PATH bin $PATH
-set -gx PATH ~/bin $PATH
-set -gx PATH ~/.local/bin $PATH
+fish_add_path /opt/homebrew/bin
+fish_add_path /opt/homebrew/sbin
+fish_add_path /usr/local/bin
+fish_add_path bin
+fish_add_path ~/bin
+fish_add_path ~/.local/bin
+fish_add_path node_modules/.bin
 
 # NodeJS
-set -gx PATH node_modules/.bin $PATH
 set --universal nvm_default_version lts
 
-#VSCODE
-string match -q "$TERM_PROGRAM" "vscode"
-and . (code --locate-shell-integration-path fish)
+#VSCODE AND CURSOR
+if test "\$TERM_PROGRAM" = "vscode" -o "\$TERM_PROGRAM" = "cursor"
+    . (code --locate-shell-integration-path fish)
+end
 
-oh-my-posh init fish --config $(brew --prefix oh-my-posh)/themes/jandedobbeleer.omp.json | source
-
-' > ~/.config/fish/config.fish
+oh-my-posh init fish --config (brew --prefix oh-my-posh)/themes/jandedobbeleer.omp.json | source
+EOF
 
 # Setup brew
 eval "$(/opt/homebrew/bin/brew shellenv)"
