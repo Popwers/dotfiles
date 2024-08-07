@@ -64,3 +64,7 @@ set colorcolumn=80
 
 " Enable mouse support
 set mouse=a
+
+" Set background to transparent
+highlight Normal guibg=NONE ctermbg=NONE
+highlight NonText guibg=NONE ctermbg=NONE

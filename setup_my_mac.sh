@@ -107,9 +107,16 @@ alias cat bat
 alias vim nvim
 alias vi nvim
 alias "git commit" "git cz"
-alias "git c" "git cz"
 alias cz "git cz"
 alias upsys "brew update && brew upgrade && brew cleanup && brew doctor && bun -g update"
+
+function git
+    if test "$argv[1]" = "c"
+        git cz $argv[2..-1]
+    else
+        command git $argv
+    end
+end
 
 # Path
 fish_add_path /opt/homebrew/bin
@@ -206,6 +213,10 @@ set colorcolumn=80
 
 " Enable mouse support
 set mouse=a
+
+" Set background to transparent
+highlight Normal guibg=NONE ctermbg=NONE
+highlight NonText guibg=NONE ctermbg=NONE
 EOF
 
 # Setup brew
