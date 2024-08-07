@@ -59,9 +59,6 @@ set foldlevelstart=1
 " Neovim only
 set termguicolors
 
-" Show character column
-set colorcolumn=80
-
 " Enable mouse support
 set mouse=a
 
