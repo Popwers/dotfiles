@@ -13,7 +13,7 @@ The `setup_my_mac.sh` script automates the installation and configuration of var
 5. Installs Fisher (plugin manager for Fish)
 6. Sets up Node Version Manager (NVM) and installs the latest LTS version of Node.js
 7. Installs global npm packages using Bun
-8. Creates and configures `.profile` and `config.fish` files
+8. Creates and configures `.profile`, `config.fish`, `.czrc`, and `init.vim` files
 
 To run the setup script:
 
@@ -29,13 +29,14 @@ The Fish shell is configured with various aliases, path settings, and integratio
 - Aliases for common commands and navigation
 - Path configurations for Homebrew, local binaries, and Node.js
 - Integration with Oh My Posh for a customized prompt
-- VSCode shell integration
+- VSCode and Cursor shell integration
+- Custom `git` function to use Commitizen for commits
 
 For more details, see the `config.fish` file
 
 ## Profile Configuration
 
-The `.profile` file is set up with environment variables for Cargo, NVM, and npm. It ensures that these tools are properly loaded and configured in the shell environment.
+The `.profile` file is set up with environment variables for Homebrew, NVM, and npm. It ensures that these tools are properly loaded and configured in the shell environment.
 
 ## Installed Tools and Utilities
 
@@ -54,9 +55,26 @@ The setup includes various tools and utilities to enhance the development experi
 
 The setup installs JetBrains Mono Nerd Font and Symbols Only Nerd Font, which are optimized for development environments and terminal use.
 
+## Neovim Configuration
+
+A basic Neovim configuration is provided in the `init.vim` file, which includes settings for:
+
+- File searching and encoding
+- Line numbers and indentation
+- Performance optimizations
+- Search behavior
+- Folding
+- Clipboard integration
+- Mouse support
+- Transparent background
+
+## Commitizen Configuration
+
+The `.czrc` file is set up to use the `cz-conventional-changelog` adapter for Commitizen, ensuring consistent commit messages.
+
 ## Customization
 
-Feel free to modify the `setup_my_mac.sh`, `config.fish`, or `.profile` files to suit your specific needs. You can add or remove packages, change aliases, or adjust environment variables as needed.
+Feel free to modify the `setup_my_mac.sh`, `config.fish`, `.profile`, `init.vim`, or `.czrc` files to suit your specific needs. You can add or remove packages, change aliases, or adjust environment variables as needed.
 
 ## Maintenance
 
