@@ -106,13 +106,12 @@ alias l "eza --long --color=always --icons=always --all"
 alias cat bat
 alias vim nvim
 alias vi nvim
-alias "git commit" "git cz"
 alias cz "git cz"
 alias upsys "brew update && brew upgrade && brew cleanup && brew doctor && bun -g update"
 
 function git
-    if test "$argv[1]" = "c"
-        git cz $argv[2..-1]
+    if test "$argv[1]" = "c"; or test "$argv[1]" = "commit"
+        command git cz $argv[2..-1]
     else
         command git $argv
     end
