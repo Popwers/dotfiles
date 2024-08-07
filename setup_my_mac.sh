@@ -109,14 +109,6 @@ alias vi nvim
 alias cz "git cz"
 alias upsys "brew update && brew upgrade && brew cleanup && brew doctor && bun -g update"
 
-function git
-    if test "$argv[1]" = "c"; or test "$argv[1]" = "commit"
-        command git cz $argv[2..-1]
-    else
-        command git $argv
-    end
-end
-
 # Path
 fish_add_path /opt/homebrew/bin
 fish_add_path /opt/homebrew/sbin
