@@ -21,7 +21,7 @@ alias cat bat
 alias vim nvim
 alias vi nvim
 alias cz "git cz"
-alias upsys "brew update && brew upgrade && brew cleanup && brew doctor && bun -g update"
+alias upsys "brew update && brew upgrade && brew cleanup && brew doctor && bun upgrade && bun -g update"
 
 # Path
 fish_add_path /opt/homebrew/bin
