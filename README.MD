@@ -88,4 +88,4 @@ This alias runs the following commands:
 - `brew update && brew upgrade && brew cleanup && brew doctor`
 - `bun -g update`
 
-Enjoy your new development environment!
+Enjoy your new development environment !
