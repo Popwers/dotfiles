@@ -35,8 +35,13 @@ install_font "Symbols Only" "SymbolsNerdFont-Regular.ttf" "font-symbols-only-ner
 #oh-my-posh font install
 
 # Init fish shell as default shell
-echo $(which fish) | sudo tee -a /etc/shells
-chsh -s $(which fish)
+if ! grep -q $(which fish) /etc/shells; then
+    echo $(which fish) | sudo tee -a /etc/shells
+    chsh -s $(which fish)
+    echo "Fish shell is now the default shell."
+else
+    echo "Fish shell is already the default shell."
+fi
 
 # Switch to fish shell and execute commands
 fish <<EOF
@@ -103,10 +108,12 @@ alias grep "grep --color=auto"
 alias mkdir "mkdir -p"
 alias ls "eza --long --color=always --icons=always --all"
 alias l "eza --long --color=always --icons=always --all"
+alias lss "eza --long --color=always --icons=always --all --total-size --sort=size"
 alias cat bat
 alias vim nvim
 alias vi nvim
 alias cz "git cz"
+alias ga "git add . && git cz"
 alias upsys "brew update && brew upgrade && brew cleanup && brew doctor && bun upgrade && bun -g update"
 
 # Path
@@ -216,13 +223,27 @@ brew install --cask git-credential-manager
 git config --global user.name "Popwers"
 git config --global user.email "lionel.bataille@hotmail.com"
 git config --global color.ui auto
-git config --global credential.helper osxkeychain
 git config --global core.editor "nvim"
 git config --global init.defaultBranch "master"
 git config --global commit.gpgsign true
-git config --global commit.signingkey AD871AD3647CE96D
+git config --global user.signingkey AD871AD3647CE96D
 
-git-credential-manager github login
+# Check if already logged in to GitHub
+if git-credential-manager github list | grep -q 'Popwers'; then
+    echo "Already logged in to GitHub. Skipping login process."
+else
+    echo "Not logged in to GitHub. Proceeding with login."
+    git-credential-manager github login
+fi
+
+# Create git alias
+git config --global alias.amend "git commit --amend --no-edit"
+git config --global alias.co "checkout"
+git config --global alias.br "branch"
+git config --global alias.cm "commit"
+git config --global alias.st "status"
+git config --global alias.df "diff"
+git config --global alias.lg "log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative"
 
 echo "Mac setup is complete!"
 echo "Don't forget to set your terminal font to JetBrains Mono Nerd Font and Symbols Only"
