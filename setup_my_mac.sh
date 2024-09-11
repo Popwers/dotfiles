@@ -211,10 +211,18 @@ EOF
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
 # Setup git
+brew install --cask git-credential-manager
+
 git config --global user.name "Popwers"
 git config --global user.email "lionel.bataille@hotmail.com"
+git config --global color.ui auto
+git config --global credential.helper osxkeychain
 git config --global core.editor "nvim"
 git config --global init.defaultBranch "master"
+git config --global commit.gpgsign true
+git config --global commit.signingkey AD871AD3647CE96D
+
+git-credential-manager github login
 
 echo "Mac setup is complete!"
 echo "Don't forget to set your terminal font to JetBrains Mono Nerd Font and Symbols Only"
