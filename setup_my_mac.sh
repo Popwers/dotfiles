@@ -210,6 +210,12 @@ EOF
 # Setup brew
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
+# Setup git
+git config --global user.name "Popwers"
+git config --global user.email "lionel.bataille@hotmail.com"
+git config --global core.editor "nvim"
+git config --global init.defaultBranch "master"
+
 echo "Mac setup is complete!"
 echo "Don't forget to set your terminal font to JetBrains Mono Nerd Font and Symbols Only"
 echo "Restart your terminal to apply changes"
