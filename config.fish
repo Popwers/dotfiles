@@ -1,12 +1,12 @@
 if status is-interactive
-    printf '\eP\$f{"hook": "SourcedRcFileForWarp", "value": { "shell": "fish"}}\x9c'
+    printf '\eP$f{"hook": "SourcedRcFileForWarp", "value": { "shell": "fish"}}\x9c'
 end
 
 set fish_greeting ""
 set -gx TERM xterm-256color
 
 # Setup brew
-eval "\$(/opt/homebrew/bin/brew shellenv)"
+eval "$(/opt/homebrew/bin/brew shellenv)"
 
 # aliases
 alias .. "cd .."
@@ -38,7 +38,7 @@ fish_add_path node_modules/.bin
 set --universal nvm_default_version lts
 
 #VSCODE AND CURSOR
-if test "\$TERM_PROGRAM" = "vscode" -o "\$TERM_PROGRAM" = "cursor"
+if test "$TERM_PROGRAM" = "vscode" -o "$TERM_PROGRAM" = "cursor"
     . (code --locate-shell-integration-path fish)
 end
 
