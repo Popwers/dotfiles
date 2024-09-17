@@ -237,7 +237,7 @@ else
 fi
 
 # Create git alias
-git config --global alias.amend "git commit --amend --no-edit"
+git config --global alias.amend "commit --amend --no-edit"
 git config --global alias.co "checkout"
 git config --global alias.br "branch"
 git config --global alias.cm "commit"
