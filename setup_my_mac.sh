@@ -220,6 +220,7 @@ eval "$(/opt/homebrew/bin/brew shellenv)"
 # Setup git
 brew install --cask git-credential-manager
 
+git config --global core.ignorecase false
 git config --global user.name "Popwers"
 git config --global user.email "lionel.bataille@hotmail.com"
 git config --global color.ui auto
