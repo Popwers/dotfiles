@@ -219,7 +219,6 @@ EOF
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
 # Setup git
-brew install --cask git-credential-manager
 
 git config --global core.ignorecase false
 git config --global user.name "Popwers"
@@ -228,15 +227,8 @@ git config --global color.ui auto
 git config --global core.editor "nvim"
 git config --global init.defaultBranch "master"
 git config --global commit.gpgsign true
+git config --global tag.gpgSign true
 git config --global user.signingkey AD871AD3647CE96D
-
-# Check if already logged in to GitHub
-if git-credential-manager github list | grep -q 'Popwers'; then
-    echo "Already logged in to GitHub. Skipping login process."
-else
-    echo "Not logged in to GitHub. Proceeding with login."
-    git-credential-manager github login
-fi
 
 # Create git alias
 git config --global alias.amend "commit --amend --no-edit"

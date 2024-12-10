@@ -1,0 +1,26 @@
+[user]
+    name = Popwers
+    email = lionel.bataille@hotmail.com
+    signingkey = AD871AD3647CE96D
+[commit]
+    gpgsign = true
+[core]
+    editor = nvim
+    ignorecase = false
+[init]
+    defaultBranch = master
+[alias]
+    amend = commit --amend --no-edit
+    co = checkout
+    br = branch
+    cm = commit
+    st = status
+    df = diff
+    lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative
+    pr = pull --rebase
+    pl = pull
+    pu = push
+[color]
+    ui = auto
+[tag]
+    gpgSign = true
