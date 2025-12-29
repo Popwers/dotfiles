@@ -48,8 +48,22 @@ The setup includes various tools and utilities to enhance the development experi
 - Bun (JavaScript runtime and toolkit)
 - Bat (alternative to `cat`)
 - Eza (modern replacement for `ls`)
+- Fd (modern replacement for `find`)
+- Ripgrep (modern replacement for `grep`)
+- FFmpeg (video/audio processing)
+- Scrcpy (Android screen mirroring)
+- Mole (SSH tunnel manager)
+- OpenCode (AI coding agent for terminal)
+- Android Platform Tools (ADB, fastboot)
 - Node.js (via NVM)
 - Global npm packages: eslint, prettier, ngrok, npm-check-updates, pm2, typescript, commitizen, cz-conventional-changelog, nx
+
+## OpenCode
+
+OpenCode is an AI coding agent for the terminal. Installed with the following plugins:
+
+- `oh-my-opencode` - Battery-included plugin with async subagents, curated agents (Oracle, Librarian, Explore), LSP/AST tools, and Claude Code compatibility
+- `opencode-supermemory` - Persistent memory system that remembers context across sessions and projects
 
 ## Fonts
 

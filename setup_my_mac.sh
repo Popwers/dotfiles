@@ -12,7 +12,10 @@ fi
 brew update && brew upgrade
 
 # Install packages
-brew install curl wget bash git vim neovim oven-sh/bun/bun fish jandedobbeleer/oh-my-posh/oh-my-posh bat eza
+brew install curl wget bash git vim neovim oven-sh/bun/bun fish jandedobbeleer/oh-my-posh/oh-my-posh bat eza fd ripgrep ffmpeg scrcpy tw93/tap/mole
+
+# Install casks
+brew install --cask android-platform-tools
 
 # Function to install fonts
 install_font() {
@@ -74,6 +77,21 @@ EOF
 
 # Cleanup
 brew cleanup
+
+# Install OpenCode via official installer (not brew - avoids node dependency conflict with nvm.fish)
+curl -fsSL https://opencode.ai/install | bash
+
+# Install OpenCode plugins
+bunx oh-my-opencode install --no-tui --claude=yes --chatgpt=no --gemini=no
+bunx opencode-supermemory install --no-tui
+
+# Configure oh-my-opencode to let supermemory handle context compaction
+mkdir -p ~/.config/opencode
+cat << EOF > ~/.config/opencode/oh-my-opencode.json
+{
+  "disabled_hooks": ["anthropic-auto-compact"]
+}
+EOF
 
 # Create .profile file
 cat << EOF > ~/.profile
