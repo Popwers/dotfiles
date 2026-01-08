@@ -1,0 +1,15 @@
+{
+	"$schema": "https://raw.githubusercontent.com/code-yeongyu/oh-my-opencode/master/assets/oh-my-opencode.schema.json",
+	"ralph_loop": {
+		"enabled": true,
+		"default_max_iterations": 100
+	},
+	"agents": {
+		"Sisyphus": {
+			"prompt_append": "\n\n<persistence>\n- Do not ask the human to confirm or clarify assumptions, as you can always adjust later\n- Decide what the most reasonable assumption is, proceed with it, and document it for the user's reference after you finish acting\n</persistence>"
+		}
+	},
+	"disabled_hooks": [
+		"anthropic-context-window-limit-recovery"
+	]
+}

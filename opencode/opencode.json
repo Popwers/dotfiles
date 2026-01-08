@@ -1,0 +1,7 @@
+{
+  "plugin": [
+    "oh-my-opencode",
+    "opencode-supermemory"
+  ],
+  "$schema": "https://opencode.ai/config.json"
+}

@@ -85,13 +85,12 @@ curl -fsSL https://opencode.ai/install | bash
 bunx oh-my-opencode install --no-tui --claude=yes --chatgpt=no --gemini=no
 bunx opencode-supermemory install --no-tui
 
-# Configure oh-my-opencode to let supermemory handle context compaction
-mkdir -p ~/.config/opencode
-cat << EOF > ~/.config/opencode/oh-my-opencode.json
-{
-  "disabled_hooks": ["anthropic-auto-compact"]
-}
-EOF
+# Copy OpenCode configuration files
+mkdir -p ~/.config/opencode/command
+cp "$(dirname "$0")/opencode/opencode.json" ~/.config/opencode/
+cp "$(dirname "$0")/opencode/oh-my-opencode.json" ~/.config/opencode/
+cp "$(dirname "$0")/opencode/AGENTS.md" ~/.config/opencode/
+cp "$(dirname "$0")/opencode/command/supermemory-init.md" ~/.config/opencode/command/
 
 # Create .profile file
 cat << EOF > ~/.profile
@@ -262,4 +261,6 @@ git config --global alias.pu "push"
 
 echo "Mac setup is complete!"
 echo "Don't forget to set your terminal font to JetBrains Mono Nerd Font and Symbols Only"
+echo "To configure Supermemory, create ~/.config/opencode/supermemory.jsonc with your API key:"
+echo '  { "apiKey": "your_supermemory_api_key" }'
 echo "Restart your terminal to apply changes"
