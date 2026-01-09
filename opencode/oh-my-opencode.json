@@ -4,12 +4,30 @@
 		"enabled": true,
 		"default_max_iterations": 100
 	},
+	"disabled_hooks": [
+		"anthropic-context-window-limit-recovery"
+	],
 	"agents": {
 		"Sisyphus": {
 			"prompt_append": "\n\n<persistence>\n- Do not ask the human to confirm or clarify assumptions, as you can always adjust later\n- Decide what the most reasonable assumption is, proceed with it, and document it for the user's reference after you finish acting\n</persistence>"
+		},
+		"librarian": {
+			"model": "opencode/glm-4.7-free"
+		},
+		"explore": {
+			"model": "opencode/glm-4.7-free"
+		},
+		"oracle": {
+			"model": "anthropic/claude-opus-4-5"
+		},
+		"frontend-ui-ux-engineer": {
+			"model": "anthropic/claude-opus-4-5"
+		},
+		"document-writer": {
+			"model": "anthropic/claude-opus-4-5"
+		},
+		"multimodal-looker": {
+			"model": "anthropic/claude-opus-4-5"
 		}
-	},
-	"disabled_hooks": [
-		"anthropic-context-window-limit-recovery"
-	]
+	}
 }

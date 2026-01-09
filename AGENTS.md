@@ -11,11 +11,16 @@ macOS dev environment bootstrap. Fish shell, Neovim, Bun, Node.js (NVM). Automat
 ```
 dotfiles/
 ├── setup_my_mac.sh     # Main bootstrap script (bash)
-├── config.fish         # Fish shell config template
-├── init.vim            # Neovim config (vimscript)
+├── config.fish         # Fish shell config (copied to ~/.config/fish/)
+├── init.vim            # Neovim config (copied to ~/.config/nvim/)
 ├── .gitconfig          # Git config (GPG signing)
 ├── .profile            # Bash/sh environment vars
 ├── .czrc               # Commitizen config
+├── opencode/           # OpenCode AI agent config
+│   ├── opencode.json   # Plugin list
+│   ├── oh-my-opencode.json  # Agent settings
+│   ├── AGENTS.md       # Global coding guidelines
+│   └── command/        # Custom slash commands
 └── .cursor/rules/      # Editor AI rules (Snyk)
 ```
 
@@ -36,12 +41,12 @@ fish -n config.fish                            # Validate fish syntax
 | Task | Location | Notes |
 |------|----------|-------|
 | Add shell alias | `config.fish` L11-26 | alias section |
-| Add brew package | `setup_my_mac.sh` L15 | `brew install` line |
-| Add Fisher plugin | `setup_my_mac.sh` L58-59 | `fisher install` section |
-| Add global npm pkg | `setup_my_mac.sh` L66 | `bun install -g` line |
-| Change git settings | `setup_my_mac.sh` L221-244 | `git config --global` section |
+| Add brew package | `setup_my_mac.sh` L18 | `brew install` line |
+| Add Fisher plugin | `setup_my_mac.sh` L62-63 | `fisher install` section |
+| Add global npm pkg | `setup_my_mac.sh` L70 | `bun install -g` line |
+| Change git settings | `.gitconfig` | Edit file directly |
 | Modify vim settings | `init.vim` | Standard vimscript |
-| Add PATH entry | `config.fish` L28-36 | `fish_add_path` section |
+| Add PATH entry | `config.fish` L28-37 | `fish_add_path` section |
 
 ## CODE STYLE
 
@@ -145,13 +150,13 @@ if ! grep -q $(which fish) /etc/shells; then  # Check before modifying
 
 ## INSTALLED TOOLS
 
-**Via Homebrew:** curl, wget, bash, git, vim, neovim, bun, fish, oh-my-posh, bat, eza, fd, ripgrep, ffmpeg, scrcpy, mole, opencode
+**Via Homebrew:** curl, wget, bash, git, vim, neovim, bun, fish, oh-my-posh, bat, eza, fd, ripgrep, ffmpeg, scrcpy, mole
 
 **Via Cask:** android-platform-tools
 
 **Via Bun (global):** eslint, prettier, ngrok, npm-check-updates, pm2, typescript, commitizen, cz-conventional-changelog, nx
 
-**OpenCode plugins:** oh-my-opencode, opencode-supermemory
+**OpenCode plugins:** oh-my-opencode, opencode-supermemory, opencode-anthropic-auth
 
 **Fonts:** JetBrains Mono Nerd Font, Symbols Only Nerd Font
 
