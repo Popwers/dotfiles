@@ -156,7 +156,7 @@ if ! grep -q $(which fish) /etc/shells; then  # Check before modifying
 
 **Via Bun (global):** eslint, prettier, ngrok, npm-check-updates, pm2, typescript, commitizen, cz-conventional-changelog, nx
 
-**OpenCode plugins:** oh-my-opencode, opencode-supermemory, opencode-anthropic-auth
+**OpenCode plugins:** oh-my-opencode, opencode-supermemory
 
 **Fonts:** JetBrains Mono Nerd Font, Symbols Only Nerd Font
 

@@ -94,7 +94,7 @@ cp "$SCRIPT_DIR/init.vim" ~/.config/nvim/init.vim
 curl -fsSL https://opencode.ai/install | bash
 
 # Install OpenCode plugins
-bunx oh-my-opencode install --no-tui --claude=yes --chatgpt=no --gemini=no
+bunx oh-my-opencode install --no-tui --claude=no --chatgpt=yes --gemini=no
 bunx opencode-supermemory install --no-tui
 
 # Copy OpenCode configuration files
