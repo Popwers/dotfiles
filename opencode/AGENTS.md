@@ -73,7 +73,11 @@ project/
 
 ```typescript
 // 1. Interfaces over types - NO "I" prefix, simple names
-interface User {
+// Rule: do NOT define interfaces inside implementation files.
+// Put them in dedicated type modules (e.g. src/interfaces/*) and import.
+
+// src/interfaces/user.ts
+export interface User {
   id: number;
   documentId: string;
   email: string;
@@ -86,11 +90,14 @@ interface User {
   };
 }
 
-interface ApiResponse<T> {
+export interface ApiResponse<T> {
   data: T;
   status: number;
   message?: string;
 }
+
+// src/lib/api.ts
+import type { User } from '@interfaces/user';
 
 // 2. Let TypeScript infer types - don't over-annotate
 const fetchUser = async (id: string) => {
@@ -104,7 +111,7 @@ const fetchUser = async (id: string) => {
 
 // 3. Type only when necessary (params, exports, complex returns)
 const users = await fetchApi<User[]>({ endpoint: 'users' });
-const filteredUsers = users.filter(u => u.isActive);  // inferred
+const filteredUsers = users.filter(u => u.isActive); // inferred
 
 // 4. Maps over enums
 const Status = {
@@ -117,10 +124,11 @@ type Status = (typeof Status)[keyof typeof Status];
 // 5. Functional patterns - no classes
 const createService = (baseUrl: string) => ({
   get: (id: string) => fetch(`${baseUrl}/${id}`),
-  create: (data: User) => fetch(baseUrl, {
-    method: 'POST',
-    body: JSON.stringify(data),
-  }),
+  create: (data: User) =>
+    fetch(baseUrl, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
 });
 
 // 6. Guard clauses - early returns
@@ -158,7 +166,8 @@ bunx biome check --write .
 **Default:** use Legend State instead of `useState`.
 
 - **Local component state:** `useObservable` + `observer`
-- **Shared/global state:** put an `observable(...)` store in `src/stores/` and consume it via `use$` / `useSelector` / `observer`
+- **Shared/global state:** put an `observable(...)` store in `src/stores/` and consume it via `useSelector` / `observer`
+- **Naming:** do not use the `$` suffix for observables/selectors (prefer `*State`, `*Obs`, or clear names like `isLoadingState`)
 - Avoid React Context for app state when a store fits better
 - Store callbacks outside observables (Legend State doesn't handle function references well)
 
@@ -303,26 +312,21 @@ import { observer, useObservable } from '@legendapp/state/react';
 import { useCallback } from 'react';
 import { Button } from '@/components/ui/Button';
 import type { User } from '@interfaces/user';
-
-interface UserCardProps {
-  user: User;
-  onEdit?: (user: User) => Promise<void> | void;
-  isEditable?: boolean;
-}
+import type { UserCardProps } from '@interfaces/user-card';
 
 const UserCard = observer(({ user, onEdit, isEditable = false }: UserCardProps) => {
-  const isLoading$ = useObservable(false);
+  const isSavingState = useObservable(false);
 
   const handleEdit = useCallback(async () => {
     if (!onEdit) return;
 
-    isLoading$.set(true);
+    isSavingState.set(true);
     try {
       await onEdit(user);
     } finally {
-      isLoading$.set(false);
+      isSavingState.set(false);
     }
-  }, [user, onEdit, isLoading$]);
+  }, [user, onEdit, isSavingState]);
 
   return (
     <div className="p-4 rounded-lg border bg-card">
@@ -330,8 +334,8 @@ const UserCard = observer(({ user, onEdit, isEditable = false }: UserCardProps) 
       <p className="text-muted-foreground">{user.email}</p>
 
       {isEditable && (
-        <Button onClick={handleEdit} disabled={isLoading$.get()} variant="outline" size="sm">
-          {isLoading$.get() ? 'Saving...' : 'Edit'}
+        <Button onClick={handleEdit} disabled={isSavingState.get()} variant="outline" size="sm">
+          {isSavingState.get() ? 'Saving...' : 'Edit'}
         </Button>
       )}
     </div>
@@ -398,16 +402,16 @@ const Modal = ({ isOpen, onClose, children }) => (
 
 // Layout animations
 const ExpandableCard = observer(() => {
-  const isExpanded$ = useObservable(false);
+  const isExpandedState = useObservable(false);
 
   return (
     <motion.div
       layout
-      onClick={() => isExpanded$.set(!isExpanded$.get())}
+      onClick={() => isExpandedState.set(!isExpandedState.get())}
       className="p-4 rounded-lg bg-card cursor-pointer"
     >
       <motion.h3 layout="position">Title</motion.h3>
-      {isExpanded$.get() && (
+      {isExpandedState.get() && (
         <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
           Expanded content here
         </motion.p>
@@ -627,6 +631,7 @@ gh pr create --title "feat: description" --body "Description"
 - Prefer Legend State for state management (`useObservable` for local state; `src/stores/` for shared/global)
 - Use JSDoc/TSDoc on exported/public functions when behavior isn't obvious (don't write comments that restate the code)
 - Use interfaces over types in TypeScript (without `I` prefix)
+- Define interfaces in dedicated type modules (e.g. `src/interfaces/*`) and import them (no inline interfaces in implementation files)
 - Let TypeScript infer types when possible
 - Use `const` over `let`, never `var`
 - Use early returns over nested conditionals
