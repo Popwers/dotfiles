@@ -140,6 +140,15 @@ const processOrder = (order: Order) => {
   return submitOrder(order);
 };
 
+// 6b. Prefer inline guards when it's a single statement
+const ensureEnabled = (isEnabled: boolean) => {
+  if (isEnabled === true) return;
+  throw new Error('Feature must be enabled');
+};
+
+// 6c. Prefer returning boolean expressions directly (avoid if/else)
+const isUnderLimit = (count: number) => count < 7;
+
 // 7. Descriptive names with auxiliary verbs
 const isLoading = true;
 const hasPermission = false;
@@ -635,6 +644,8 @@ gh pr create --title "feat: description" --body "Description"
 - Let TypeScript infer types when possible
 - Use `const` over `let`, never `var`
 - Use early returns over nested conditionals
+- Prefer inline guard clauses when there's a single statement (`if (isEnabled === true) return;`)
+- Prefer returning boolean expressions directly (avoid `if (...) { return true } else { return false }`)
 - Use descriptive names with auxiliary verbs (`isLoading`, `hasError`)
 - Handle errors explicitly, fail fast
 - Prefer path aliases over relative imports when available (e.g. `@lib/*`, `@components/*`)
