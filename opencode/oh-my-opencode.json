@@ -9,7 +9,7 @@
 			"model": "opencode/glm-4.7-free"
 		},
 		"explore": {
-			"model": "opencode/glm-4.7-free"
+			"model": "opencode/grok-code"
 		},
 		"oracle": {
 			"model": "openai/gpt-5.2-codex"
@@ -18,10 +18,10 @@
 			"model": "opencode/glm-4.7-free"
 		},
 		"document-writer": {
-			"model": "openai/gpt-5.2-codex"
+			"model": "opencode/glm-4.7-free"
 		},
 		"multimodal-looker": {
-			"model": "openai/gpt-5.2-codex"
+			"model": "opencode/glm-4.7-free"
 		}
 	}
 }
