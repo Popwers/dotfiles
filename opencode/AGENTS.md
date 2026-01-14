@@ -12,9 +12,11 @@ fd -e ts -e tsx                           # Find by extensions
 # Development
 bun run dev                               # Start dev server
 bun run build                             # Production build
-bun run test                              # Run Bun tests
-bun run lint                              # Biome lint
-bun run format                            # Biome format
+
+# Quality
+bun test                                  # Run Bun tests
+bunx biome check --write .                # Lint + format (recommended)
+bunx biome check .                        # CI check (no writes)
 
 # Git
 git status && git diff --staged           # Review before commit
@@ -27,9 +29,10 @@ git commit -m "type: description"         # Commit format
 | Layer | Technologies |
 |-------|-------------|
 | **Frontend** | Astro, React, TypeScript |
+| **Backend** | Strapi (TypeScript) |
 | **UI** | Tailwind CSS, shadcn/ui, Base UI |
 | **Animation** | Motion (motion.dev) |
-| **Runtime** | Node.js, Bun |
+| **Runtime** | Bun, Node.js |
 | **Build** | Vite |
 | **Test** | Bun test |
 | **Format** | Biome |
@@ -136,6 +139,76 @@ const canEdit = true;
 const shouldRefetch = false;
 ```
 
+### Formatting (Biome)
+
+These projects are typically formatted by **Biome** (replacing ESLint + Prettier).
+
+- **Indentation:** tabs (width: 4)
+- **Quotes:** single quotes (JS/TS/JSX)
+- **Semicolons:** always
+- **Line width:** 110
+
+Prefer running:
+```bash
+bunx biome check --write .
+```
+
+### State Management (Legend State)
+
+**Default:** use Legend State instead of `useState`.
+
+- **Local component state:** `useObservable` + `observer`
+- **Shared/global state:** put an `observable(...)` store in `src/stores/` and consume it via `use$` / `useSelector` / `observer`
+- Avoid React Context for app state when a store fits better
+- Store callbacks outside observables (Legend State doesn't handle function references well)
+
+```tsx
+import { observable } from '@legendapp/state';
+
+export const userStore = observable({
+  currentUserId: null as string | null,
+  isLoading: false,
+});
+```
+
+```ts
+import { observable } from '@legendapp/state';
+
+const callbacks = {
+  onConfirm: null as null | (() => void),
+};
+
+export const modalStore = observable({
+  getCallbacks: () => callbacks,
+});
+```
+
+### Comments & Documentation (JSDoc/TSDoc)
+
+Comments are allowed when they add information that types and code don't capture.
+
+**Write doc comments for:**
+- exported functions/hooks/components
+- public APIs (used outside the module)
+- non-obvious behavior, invariants, or performance constraints
+- side effects (I/O, cache, analytics) and error cases (`throw`)
+
+**Avoid:**
+- comments that restate the code
+- commented-out code
+- TODOs without an issue/link
+
+```ts
+/**
+ * Parses a human-entered amount (e.g. "12.50") into cents.
+ *
+ * @throws Error if the input is not a valid decimal number.
+ */
+export const parseAmountToCents = (value: string) => {
+  // ...
+};
+```
+
 ### Astro
 
 ```astro
@@ -199,32 +272,57 @@ const description = 'User dashboard';
 - `client:visible` - Hydrate when visible (below fold)
 - No directive - Static HTML (preferred)
 
+### Strapi (Backend)
+
+```ts
+import { factories } from '@strapi/strapi';
+
+export default factories.createCoreController('api::dossier.dossier', ({ strapi }) => ({
+	async findMine(ctx) {
+		const user = ctx.state.user;
+		if (!user) return ctx.unauthorized();
+
+		return await strapi.documents('api::dossier.dossier').findMany({
+			filters: {
+				repartition: { user: { documentId: user.documentId } },
+			},
+		});
+	},
+}));
+```
+
+**Strapi 5 patterns:**
+- Prefer `strapi.documents()` for document operations.
+- Use `documentId` (not `id`) for lookups.
+- Always gate protected endpoints with `ctx.state.user` and admin checks.
+
 ### React Components
 
 ```tsx
-import { useState, useCallback } from 'react';
+import { observer, useObservable } from '@legendapp/state/react';
+import { useCallback } from 'react';
 import { Button } from '@/components/ui/Button';
 import type { User } from '@interfaces/user';
 
 interface UserCardProps {
   user: User;
-  onEdit?: (user: User) => void;
+  onEdit?: (user: User) => Promise<void> | void;
   isEditable?: boolean;
 }
 
-const UserCard = ({ user, onEdit, isEditable = false }: UserCardProps) => {
-  const [isLoading, setIsLoading] = useState(false);
+const UserCard = observer(({ user, onEdit, isEditable = false }: UserCardProps) => {
+  const isLoading$ = useObservable(false);
 
   const handleEdit = useCallback(async () => {
     if (!onEdit) return;
 
-    setIsLoading(true);
+    isLoading$.set(true);
     try {
       await onEdit(user);
     } finally {
-      setIsLoading(false);
+      isLoading$.set(false);
     }
-  }, [user, onEdit]);
+  }, [user, onEdit, isLoading$]);
 
   return (
     <div className="p-4 rounded-lg border bg-card">
@@ -232,13 +330,13 @@ const UserCard = ({ user, onEdit, isEditable = false }: UserCardProps) => {
       <p className="text-muted-foreground">{user.email}</p>
 
       {isEditable && (
-        <Button onClick={handleEdit} disabled={isLoading} variant="outline" size="sm">
-          {isLoading ? 'Saving...' : 'Edit'}
+        <Button onClick={handleEdit} disabled={isLoading$.get()} variant="outline" size="sm">
+          {isLoading$.get() ? 'Saving...' : 'Edit'}
         </Button>
       )}
     </div>
   );
-};
+});
 
 export default UserCard;
 ```
@@ -246,8 +344,8 @@ export default UserCard;
 ### Motion (Animation)
 
 ```tsx
+import { observer, useObservable } from '@legendapp/state/react';
 import { motion, AnimatePresence } from 'motion/react';
-import { useState } from 'react';
 
 // Basic animation with motion component
 const FadeIn = ({ children }) => (
@@ -299,28 +397,24 @@ const Modal = ({ isOpen, onClose, children }) => (
 );
 
 // Layout animations
-const ExpandableCard = () => {
-  const [isExpanded, setIsExpanded] = useState(false);
+const ExpandableCard = observer(() => {
+  const isExpanded$ = useObservable(false);
 
   return (
     <motion.div
       layout
-      onClick={() => setIsExpanded(!isExpanded)}
+      onClick={() => isExpanded$.set(!isExpanded$.get())}
       className="p-4 rounded-lg bg-card cursor-pointer"
     >
       <motion.h3 layout="position">Title</motion.h3>
-      {isExpanded && (
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-        >
+      {isExpanded$.get() && (
+        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
           Expanded content here
         </motion.p>
       )}
     </motion.div>
   );
-};
+});
 
 // Gesture animations
 const DraggableItem = () => (
@@ -452,9 +546,9 @@ describe('User API', () => {
 
 **Test Commands:**
 ```bash
-bun run test                              # All tests
-bun run test --watch                      # Watch mode
-bun run test user.test.ts                 # Single file
+bun test                              # All tests
+bun test --watch                      # Watch mode
+bun test user.test.ts                 # Single file
 ```
 
 ## Git Workflow
@@ -491,8 +585,8 @@ git push -u origin feature/my-feature
 # Before PR
 git fetch origin main
 git rebase origin/main
-bun run lint
-bun run test
+bunx biome check .
+bun test
 bun run build
 
 # Create PR
@@ -519,6 +613,7 @@ gh pr create --title "feat: description" --body "Description"
 - Write obvious comments that repeat the code
 - Over-abstract or over-engineer solutions
 - Leave dead code or unused imports
+- Manually bump versions when semantic-release is configured (release automation owns versions)
 
 **Testing:**
 - Skip tests for critical business logic
@@ -529,12 +624,15 @@ gh pr create --title "feat: description" --body "Description"
 
 **Code Standards:**
 - Write all code, comments, and commits in English
+- Prefer Legend State for state management (`useObservable` for local state; `src/stores/` for shared/global)
+- Use JSDoc/TSDoc on exported/public functions when behavior isn't obvious (don't write comments that restate the code)
 - Use interfaces over types in TypeScript (without `I` prefix)
 - Let TypeScript infer types when possible
 - Use `const` over `let`, never `var`
 - Use early returns over nested conditionals
 - Use descriptive names with auxiliary verbs (`isLoading`, `hasError`)
 - Handle errors explicitly, fail fast
+- Prefer path aliases over relative imports when available (e.g. `@lib/*`, `@components/*`)
 
 **Architecture:**
 - Follow mobile-first responsive design
@@ -543,8 +641,8 @@ gh pr create --title "feat: description" --body "Description"
 - Extract reusable logic into custom hooks/utilities
 
 **Before Committing:**
-- Run `bun run lint` and fix all issues
-- Run `bun run test` and ensure all pass
+- Run `bunx biome check .` and fix all issues
+- Run `bun test` and ensure all pass
 - Run `bun run build` to verify production build
 - Review diff with `git diff --staged`
 
