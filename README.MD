@@ -62,8 +62,10 @@ The setup includes various tools and utilities to enhance the development experi
 
 OpenCode is an AI coding agent for the terminal. Installed with the following plugins:
 
-- `oh-my-opencode` - Battery-included plugin with async subagents, curated agents (Oracle, Librarian, Explore), and LSP/AST tools
 - `opencode-supermemory` - Persistent memory system that remembers context across sessions and projects
+- `@tarquinen/opencode-dcp@latest` - Automatically reduces token usage in OpenCode by removing obsolete tool outputs from conversation history.
+- `@franlol/opencode-md-table-formatter@latest` - Markdown table formatter plugin for Opencode with concealment mode support.
+- MCPs: context7, gh_grep, exa
 
 ## Fonts
 

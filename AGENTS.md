@@ -18,7 +18,6 @@ dotfiles/
 ├── .czrc               # Commitizen config
 ├── opencode/           # OpenCode AI agent config
 │   ├── opencode.json   # Plugin list
-│   ├── oh-my-opencode.json  # Agent settings
 │   ├── AGENTS.md       # Global coding guidelines
 │   └── command/        # Custom slash commands
 └── .cursor/rules/      # Editor AI rules (Snyk)
@@ -156,7 +155,8 @@ if ! grep -q $(which fish) /etc/shells; then  # Check before modifying
 
 **Via Bun (global):** eslint, prettier, ngrok, npm-check-updates, pm2, typescript, commitizen, cz-conventional-changelog, nx
 
-**OpenCode plugins:** oh-my-opencode, opencode-supermemory
+**OpenCode plugins:** opencode-supermemory, @tarquinen/opencode-dcp@latest, @franlol/opencode-md-table-formatter@0.0.3
+**OpenCode MCPs:** context7, gh_grep, exa
 
 **Fonts:** JetBrains Mono Nerd Font, Symbols Only Nerd Font
 

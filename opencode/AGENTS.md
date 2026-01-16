@@ -606,6 +606,12 @@ bun run build
 gh pr create --title "feat: description" --body "Description"
 ```
 
+## Tooling Rules
+
+- When you need to search documentation, use the Context7 MCP.
+- If you are unsure how to do something, use the gh_grep MCP to search real-world GitHub code examples or Context7 to search documentation.
+- For general web research and source discovery, use the Exa MCP.
+
 ## Boundaries
 
 ### NEVER
@@ -619,7 +625,6 @@ gh pr create --title "feat: description" --body "Description"
 **Code Quality:**
 - Use `var` in JavaScript (use `const`, minimal `let`)
 - Use `@apply` directive in Tailwind
-- Use `grep` or `find` commands (use `rg` and `fd`)
 - Use classes in JavaScript (functional patterns only)
 - Over-type when TypeScript can infer
 - Use `I` prefix for interfaces (use `User` not `IUser`)
@@ -666,3 +671,4 @@ gh pr create --title "feat: description" --body "Description"
 - Prefer static generation over client-side rendering
 - Use proper Astro hydration directives (`server:defer`, `client:visible`)
 - Lazy load images and non-critical components
+- use `ripgrep` and `fd` instead of `grep` and `find`

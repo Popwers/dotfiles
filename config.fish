@@ -4,6 +4,7 @@ end
 
 set fish_greeting ""
 set -gx TERM xterm-256color
+set -gx OPENCODE_EXPERIMENTAL true
 
 # Setup brew
 eval "$(/opt/homebrew/bin/brew shellenv)"

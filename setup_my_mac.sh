@@ -94,13 +94,11 @@ cp "$SCRIPT_DIR/init.vim" ~/.config/nvim/init.vim
 curl -fsSL https://opencode.ai/install | bash
 
 # Install OpenCode plugins
-bunx oh-my-opencode install --no-tui --claude=no --chatgpt=yes --gemini=no
-bunx opencode-supermemory install --no-tui
+bunx opencode-supermemory@latest install --no-tui
 
 # Copy OpenCode configuration files
 mkdir -p ~/.config/opencode/command
 cp "$SCRIPT_DIR/opencode/opencode.json" ~/.config/opencode/
-cp "$SCRIPT_DIR/opencode/oh-my-opencode.json" ~/.config/opencode/
 cp "$SCRIPT_DIR/opencode/AGENTS.md" ~/.config/opencode/
 cp "$SCRIPT_DIR/opencode/command/supermemory-init.md" ~/.config/opencode/command/
 
