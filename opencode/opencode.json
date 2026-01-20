@@ -9,7 +9,7 @@
 	"provider": {
 		"openai": {
 			"options": {
-				"reasoningEffort": "xhigh"
+				"reasoningEffort": "high"
 			}
 		}
 	},
