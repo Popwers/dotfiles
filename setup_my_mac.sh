@@ -67,7 +67,7 @@ nvm install lts
 nvm use lts
 
 # Install global packages
-bun install -g eslint prettier ngrok npm-check-updates pm2 typescript commitizen cz-conventional-changelog nx@latest
+bun install -g eslint prettier ngrok npm-check-updates pm2 typescript commitizen cz-conventional-changelog agent-browser @openai/codex
 
 # Add bun to path
 fish_add_path ~/.bun/bin
@@ -96,14 +96,20 @@ curl -fsSL https://opencode.ai/install | bash
 # Install OpenCode plugins
 bunx opencode-supermemory@latest install --no-tui
 
-# Copy OpenCode configuration files
-mkdir -p ~/.config/opencode/command
-cp "$SCRIPT_DIR/opencode/opencode.json" ~/.config/opencode/
-cp "$SCRIPT_DIR/opencode/AGENTS.md" ~/.config/opencode/
-cp "$SCRIPT_DIR/opencode/command/supermemory-init.md" ~/.config/opencode/command/
+# Copy OpenCode configuration directory (clean sync)
+mkdir -p ~/.config/opencode
+rsync -a --delete "$SCRIPT_DIR/opencode/" ~/.config/opencode/
 
 # Setup brew
 eval "$(/opt/homebrew/bin/brew shellenv)"
+
+# Install skills
+bunx skills add https://github.com/vercel-labs/agent-browser --skill agent-browser -g --all
+bunx skills add https://github.com/vercel-labs/agent-skills --skill web-design-guidelines -g --all
+bunx skills add https://github.com/anthropics/skills --skill frontend-design -g --all
+bunx add-skill coreyhaines31/marketingskills -g --all
+
+agent-browser install  # Download Chromium
 
 echo "Mac setup is complete!"
 echo "Don't forget to set your terminal font to JetBrains Mono Nerd Font and Symbols Only"

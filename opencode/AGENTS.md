@@ -611,6 +611,8 @@ gh pr create --title "feat: description" --body "Description"
 - When you need to search documentation, use the Context7 MCP.
 - If you are unsure how to do something, use the gh_grep MCP to search real-world GitHub code examples or Context7 to search documentation.
 - For general web research and source discovery, use the Exa MCP.
+- Use agent-browser for tasks that require live browser interaction or UI verification.
+- If agent-browser is unavailable, provide a clear fallback summary of what was done and what could not be verified.
 
 ## Boundaries
 
