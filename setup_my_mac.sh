@@ -5,8 +5,8 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 # Install Homebrew
 if test ! $(which brew); then
-  echo "Installing Homebrew for you."
-  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    echo "Installing Homebrew for you."
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 else
     echo "Homebrew is already installed."
 fi
@@ -15,7 +15,17 @@ fi
 brew update && brew upgrade
 
 # Install packages
-brew install curl wget bash git vim neovim oven-sh/bun/bun fish jandedobbeleer/oh-my-posh/oh-my-posh bat eza fd ripgrep ffmpeg scrcpy tw93/tap/mole
+brew install curl wget bash git vim neovim oven-sh/bun/bun fish jandedobbeleer/oh-my-posh/oh-my-posh bat eza fd ripgrep ffmpeg scrcpy tw93/tap/mole ollama
+
+# Start Ollama and pull default embeddings model
+if command -v ollama >/dev/null 2>&1; then
+    ollama serve >/tmp/ollama.log 2>&1 &
+    ollama_pid=$!
+    sleep 2
+    ollama pull nomic-embed-text
+    kill $ollama_pid
+    wait $ollama_pid 2>/dev/null
+fi
 
 # Install casks
 brew install --cask android-platform-tools
@@ -93,6 +103,9 @@ cp "$SCRIPT_DIR/init.vim" ~/.config/nvim/init.vim
 # Install OpenCode via official installer (not brew - avoids node dependency conflict with nvm.fish)
 curl -fsSL https://opencode.ai/install | bash
 
+# Install grepai
+curl -sSL https://raw.githubusercontent.com/yoanbernabeu/grepai/main/install.sh | sh
+
 # Install OpenCode plugins
 bunx opencode-supermemory@latest install --no-tui
 
@@ -113,6 +126,4 @@ agent-browser install  # Download Chromium
 
 echo "Mac setup is complete!"
 echo "Don't forget to set your terminal font to JetBrains Mono Nerd Font and Symbols Only"
-echo "To configure Supermemory, create ~/.config/opencode/supermemory.jsonc with your API key:"
-echo '  { "apiKey": "your_supermemory_api_key" }'
 echo "Restart your terminal to apply changes"

@@ -26,6 +26,28 @@ alias cz "git cz"
 alias ga "git add . && git cz"
 alias upsys "brew update && brew upgrade && brew cleanup && brew doctor && bun upgrade && bun -g update"
 
+function opencode
+    set -l ollama_pid ""
+
+    if command -v ollama >/dev/null 2>&1
+        ollama serve >/tmp/ollama.log 2>&1 &
+        set ollama_pid $last_pid
+        sleep 2
+    end
+
+    grepai init
+    grepai watch --background
+
+    command opencode $argv
+
+    grepai watch --stop
+
+    if test -n "$ollama_pid"
+        kill $ollama_pid
+        wait $ollama_pid 2>/dev/null
+    end
+end
+
 # Path
 fish_add_path /opt/homebrew/bin
 fish_add_path /opt/homebrew/sbin
