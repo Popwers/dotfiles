@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-
 log() {
 	echo "[setup_linux] $*"
 }
+
+export BUN_INSTALL="${BUN_INSTALL:-$HOME/.bun}"
+export PATH="$HOME/.opencode/bin:$BUN_INSTALL/bin:$HOME/.local/bin:$HOME/.node_modules/bin:$PATH"
 
 is_root=false
 if [ "$(id -u)" -eq 0 ]; then

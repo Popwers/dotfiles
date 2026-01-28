@@ -1,7 +1,3 @@
-if status is-interactive
-    printf '\eP$f{"hook": "SourcedRcFileForWarp", "value": { "shell": "fish"}}\x9c'
-end
-
 set fish_greeting ""
 set -gx TERM xterm-256color
 set -gx OPENCODE_EXPERIMENTAL true
@@ -143,9 +139,11 @@ set --universal nvm_default_version lts
 
 # VSCODE AND CURSOR
 if test "$TERM_PROGRAM" = "vscode" -o "$TERM_PROGRAM" = "cursor"
-    . (code --locate-shell-integration-path fish)
+    if type -q code
+        . (code --locate-shell-integration-path fish)
+    end
 end
 
-if test -f ~/.config/oh-my-posh/jandedobbeleer.omp.json
+if test -f ~/.config/oh-my-posh/jandedobbeleer.omp.json; and type -q oh-my-posh
     oh-my-posh init fish --config ~/.config/oh-my-posh/jandedobbeleer.omp.json | source
 end
