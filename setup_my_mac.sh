@@ -15,7 +15,7 @@ fi
 brew update && brew upgrade
 
 # Install packages
-brew install curl wget bash git vim neovim oven-sh/bun/bun fish jandedobbeleer/oh-my-posh/oh-my-posh bat eza fd ripgrep ffmpeg scrcpy tw93/tap/mole ollama
+brew install --formula curl wget bash git vim neovim oven-sh/bun/bun fish jandedobbeleer/oh-my-posh/oh-my-posh bat eza fd ripgrep ffmpeg scrcpy tw93/tap/mole ollama
 
 # Start Ollama and pull default embeddings model
 if command -v ollama >/dev/null 2>&1; then
@@ -23,8 +23,10 @@ if command -v ollama >/dev/null 2>&1; then
     ollama_pid=$!
     sleep 2
     ollama pull nomic-embed-text
-    kill $ollama_pid
-    wait $ollama_pid 2>/dev/null
+    if kill -0 "$ollama_pid" 2>/dev/null; then
+        kill "$ollama_pid"
+        wait "$ollama_pid" 2>/dev/null
+    fi
 fi
 
 # Install casks
@@ -117,10 +119,11 @@ rsync -a --delete "$SCRIPT_DIR/opencode/" ~/.config/opencode/
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
 # Install skills
-bunx skills add https://github.com/vercel-labs/agent-browser --skill agent-browser -g --all
-bunx skills add https://github.com/vercel-labs/agent-skills --skill web-design-guidelines -g --all
-bunx skills add https://github.com/anthropics/skills --skill frontend-design -g --all
-bunx add-skill coreyhaines31/marketingskills -g --all
+bunx skills add https://github.com/vercel-labs/agent-browser --skill agent-browser -g --all -y
+bunx skills add https://github.com/vercel-labs/agent-skills --skill web-design-guidelines -g --all -y
+bunx skills add https://github.com/anthropics/skills --skill frontend-design -g --all -y
+bunx skills add https://github.com/vercel-labs/skills --skill find-skills -g --all -y
+bunx skills add coreyhaines31/marketingskills -g --all -y
 
 agent-browser install  # Download Chromium
 
