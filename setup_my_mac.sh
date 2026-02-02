@@ -15,7 +15,7 @@ fi
 brew update && brew upgrade
 
 # Install packages
-brew install --formula curl wget bash git vim neovim oven-sh/bun/bun fish jandedobbeleer/oh-my-posh/oh-my-posh bat eza fd ripgrep ffmpeg scrcpy tw93/tap/mole ollama
+brew install --formula curl wget bash git gh vim neovim oven-sh/bun/bun fish jandedobbeleer/oh-my-posh/oh-my-posh bat eza fd ripgrep ffmpeg scrcpy tw93/tap/mole ollama
 
 # Start Ollama and pull default embeddings model
 if command -v ollama >/dev/null 2>&1; then
@@ -51,9 +51,10 @@ install_font "JetBrains Mono" "JetBrainsMono-Regular.ttf" "font-jetbrains-mono-n
 install_font "Symbols Only" "SymbolsNerdFont-Regular.ttf" "font-symbols-only-nerd-font"
 
 # Init fish shell as default shell
-if ! grep -q $(which fish) /etc/shells; then
-    echo $(which fish) | sudo tee -a /etc/shells
-    chsh -s $(which fish)
+fish_path="$(command -v fish)"
+if [ -n "$fish_path" ] && ! grep -q "$fish_path" /etc/shells; then
+    echo "$fish_path" | sudo tee -a /etc/shells
+    chsh -s "$fish_path"
     echo "Fish shell is now the default shell."
 else
     echo "Fish shell is already the default shell."
@@ -61,7 +62,9 @@ fi
 
 # Switch to fish shell and execute commands
 fish <<EOF
-source ~/.config/fish/config.fish
+if test -f "$SCRIPT_DIR/config.fish"
+    source "$SCRIPT_DIR/config.fish"
+end
 
 fish_add_path /opt/homebrew/bin
 fish_add_path /opt/homebrew/sbin
@@ -119,11 +122,13 @@ rsync -a --delete "$SCRIPT_DIR/opencode/" ~/.config/opencode/
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
 # Install skills
-bunx skills add https://github.com/vercel-labs/agent-browser --skill agent-browser -g --all -y
-bunx skills add https://github.com/vercel-labs/agent-skills --skill web-design-guidelines -g --all -y
-bunx skills add https://github.com/anthropics/skills --skill frontend-design -g --all -y
-bunx skills add https://github.com/vercel-labs/skills --skill find-skills -g --all -y
-bunx skills add coreyhaines31/marketingskills -g --all -y
+bunx skills add https://github.com/vercel-labs/agent-browser --skill agent-browser -g -a opencode -y
+npx skills add https://github.com/vercel-labs/agent-skills --skill vercel-react-native-skills -g -a opencode -y
+npx skills add https://github.com/vercel-labs/agent-skills --skill vercel-react-best-practices -g -a opencode -y
+bunx skills add https://github.com/vercel-labs/agent-skills --skill web-design-guidelines -g -a opencode -y
+bunx skills add https://github.com/vercel-labs/skills --skill find-skills -g -a opencode -y
+bunx skills add https://github.com/anthropics/skills --skill frontend-design -g -a opencode -y
+bunx skills add coreyhaines31/marketingskills -g -a opencode -y
 
 agent-browser install  # Download Chromium
 

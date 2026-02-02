@@ -3,9 +3,10 @@
 ## Commands
 
 ```bash
-# Search/Find (REQUIRED - never use grep/find)
-rg "pattern" --type ts                    # Search file contents
-rg "function.*fetch" -g "*.ts"            # Search with glob filter
+# Search/Find (REQUIRED)
+grepai search "user authentication flow" --json --compact # Semantic search (primary)
+rg "pattern" --type ts                    # Exact text search
+rg "function.*fetch" -g "*.ts"            # Exact regex search
 fd "*.tsx" src/                           # Find files by pattern
 fd -e ts -e tsx                           # Find by extensions
 
@@ -26,6 +27,8 @@ git commit -m "type: description"         # Commit format
 
 ## Stack
 
+Here is the stack used by Lionel, but you can make recommendations if you think you have better choices.
+
 | Layer | Technologies |
 |-------|-------------|
 | **Frontend** | Astro, React, TypeScript |
@@ -36,7 +39,6 @@ git commit -m "type: description"         # Commit format
 | **Build** | Vite |
 | **Test** | Bun test |
 | **Format** | Biome |
-| **Database** | SQL |
 
 ## Project Structure
 
@@ -229,7 +231,7 @@ export const parseAmountToCents = (value: string) => {
 
 ### Astro
 
-```astro
+```ts
 ---
 import DashboardLayout from '@layouts/dashboard.astro';
 import UserCard from '@components/UserCard';
@@ -471,6 +473,7 @@ const StaggerList = ({ items }) => (
 - `layout` prop enables automatic layout animations
 - `transition` with `type: 'spring'` for natural physics
 - `variants` + `staggerChildren` for orchestrated animations
+- Use motion skill if available
 
 ### Tailwind CSS
 
@@ -503,6 +506,7 @@ const StaggerList = ({ items }) => (
 - Use shadcn/ui semantic colors (`bg-card`, `text-muted-foreground`)
 - Mobile-first: base styles first, then `sm:`, `md:`, `lg:`
 - Use CSS variables for theming (`rounded-(--radius-md)`)
+- Use Front-end skill if available
 
 ## Testing
 
@@ -596,8 +600,8 @@ git checkout -b feature/my-feature
 git push -u origin feature/my-feature
 
 # Before PR
-git fetch origin main
-git rebase origin/main
+git fetch origin master
+git rebase origin/master
 bunx biome check .
 bun test
 bun run build
@@ -673,7 +677,7 @@ gh pr create --title "feat: description" --body "Description"
 - Prefer static generation over client-side rendering
 - Use proper Astro hydration directives (`server:defer`, `client:visible`)
 - Lazy load images and non-critical components
-- use `ripgrep` and `fd` instead of `grep` and `find`
+- Use grepai for semantic search; use `rg`/`fd` for exact text or path patterns (never `grep`/`find`)
 
 ## grepai - Semantic Code Search
 
@@ -681,7 +685,7 @@ gh pr create --title "feat: description" --body "Description"
 
 ### When to Use grepai (REQUIRED)
 
-Use `grepai search` INSTEAD OF Grep/Glob/find for:
+Use `grepai search` INSTEAD OF rg/fd or grep/find for:
 - Understanding what code does or where functionality lives
 - Finding implementations by intent (e.g., "authentication logic", "error handling")
 - Exploring unfamiliar parts of the codebase
@@ -689,7 +693,7 @@ Use `grepai search` INSTEAD OF Grep/Glob/find for:
 
 ### When to Use Standard Tools
 
-Only use Grep/Glob when you need:
+Only use rg/fd (or Grep/Glob tools) when you need:
 - Exact text matching (variable names, imports, specific strings)
 - File path patterns (e.g., `**/*.go`)
 

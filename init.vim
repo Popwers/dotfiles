@@ -46,7 +46,7 @@ set laststatus=2 statusline=%F
 
 " Use system clipboard
 " for macOS
-set clipboard=unnamed
+set clipboard=unnamedplus
 
 " Folding
 " https://vim.fandom.com/wiki/Folding
