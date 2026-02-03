@@ -69,6 +69,7 @@ OpenCode is an AI coding agent for the terminal. Installed with the following pl
 - `@tarquinen/opencode-dcp@latest` - Automatically reduces token usage in OpenCode by removing obsolete tool outputs from conversation history.
 - `@franlol/opencode-md-table-formatter@latest` - Markdown table formatter plugin for Opencode with concealment mode support.
 - MCPs: context7, gh_grep, exa
+- The OpenCode `AGENTS.md` is also synced to Codex (`~/.codex/AGENTS.md`)
 
 ## Fonts
 

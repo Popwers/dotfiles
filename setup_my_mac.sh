@@ -118,6 +118,10 @@ bunx opencode-supermemory@latest install --no-tui
 mkdir -p ~/.config/opencode
 rsync -a --delete "$SCRIPT_DIR/opencode/" ~/.config/opencode/
 
+# Copy OpenCode agent to Codex
+mkdir -p ~/.codex
+cp "$SCRIPT_DIR/opencode/AGENTS.md" ~/.codex/AGENTS.md
+
 # Setup brew
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
