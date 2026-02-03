@@ -82,7 +82,7 @@ nvm install lts
 nvm use lts
 
 # Install global packages
-bun install -g eslint prettier ngrok npm-check-updates pm2 typescript commitizen cz-conventional-changelog agent-browser @openai/codex
+bun install -g ngrok npm-check-updates typescript commitizen cz-conventional-changelog agent-browser @openai/codex @playwright/test
 
 # Add bun to path
 fish_add_path ~/.bun/bin
@@ -122,13 +122,14 @@ rsync -a --delete "$SCRIPT_DIR/opencode/" ~/.config/opencode/
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
 # Install skills
-bunx skills add https://github.com/vercel-labs/agent-browser --skill agent-browser -g -a opencode -y
-npx skills add https://github.com/vercel-labs/agent-skills --skill vercel-react-native-skills -g -a opencode -y
-npx skills add https://github.com/vercel-labs/agent-skills --skill vercel-react-best-practices -g -a opencode -y
-bunx skills add https://github.com/vercel-labs/agent-skills --skill web-design-guidelines -g -a opencode -y
-bunx skills add https://github.com/vercel-labs/skills --skill find-skills -g -a opencode -y
-bunx skills add https://github.com/anthropics/skills --skill frontend-design -g -a opencode -y
-bunx skills add coreyhaines31/marketingskills -g -a opencode -y
+bunx skills add https://github.com/vercel-labs/agent-browser --skill agent-browser -g -a opencode codex -y
+npx skills add https://github.com/vercel-labs/agent-skills --skill vercel-react-native-skills -g -a opencode codex -y
+npx skills add https://github.com/vercel-labs/agent-skills --skill vercel-react-best-practices -g -a opencode codex -y
+bunx skills add https://github.com/vercel-labs/agent-skills --skill web-design-guidelines -g -a opencode codex -y
+bunx skills add https://github.com/vercel-labs/skills --skill find-skills -g -a opencode codex -y
+bunx skills add https://github.com/anthropics/skills --skill frontend-design -g -a opencode codex -y
+bunx skills add coreyhaines31/marketingskills -g -a opencode codex -y
+bunx skills add yoanbernabeu/grepai-skills -g -a opencode codex -y
 
 agent-browser install  # Download Chromium
 

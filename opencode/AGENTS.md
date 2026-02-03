@@ -700,6 +700,8 @@ Only use rg/fd (or Grep/Glob tools) when you need:
 ### Fallback
 
 If grepai fails (not running, index unavailable, or errors), fall back to standard Grep/Glob tools.
+But first try to init and run it. use skills to understand how to use it.
+If you need setup or troubleshooting help, use the `grepai-*` skills (e.g., `grepai-init`, `grepai-quickstart`, `grepai-troubleshooting`) before proceeding.
 
 ### Usage
 

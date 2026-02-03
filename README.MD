@@ -13,7 +13,8 @@ The `setup_my_mac.sh` script automates the installation and configuration of var
 5. Installs Fisher (plugin manager for Fish)
 6. Sets up Node Version Manager (NVM) and installs the latest LTS version of Node.js
 7. Installs global npm packages using Bun
-8. Creates and configures `.profile`, `config.fish`, `.czrc`, and `init.vim` files
+8. Installs GrepAI and sets up Ollama embeddings (`nomic-embed-text`)
+9. Creates and configures `.profile`, `config.fish`, `.czrc`, and `init.vim` files
 
 To run the setup script:
 
@@ -54,9 +55,11 @@ The setup includes various tools and utilities to enhance the development experi
 - Scrcpy (Android screen mirroring)
 - Mole (SSH tunnel manager)
 - OpenCode (AI coding agent for terminal)
+- GrepAI (semantic code search)
+- Ollama (local embeddings for GrepAI)
 - Android Platform Tools (ADB, fastboot)
 - Node.js (via NVM)
-- Global npm packages: eslint, prettier, ngrok, npm-check-updates, pm2, typescript, commitizen, cz-conventional-changelog, nx
+- Global npm packages: ngrok, npm-check-updates, typescript, commitizen, cz-conventional-changelog, agent-browser, @openai/codex, @playwright/test
 
 ## OpenCode
 
