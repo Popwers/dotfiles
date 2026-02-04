@@ -912,16 +912,17 @@ As an autonomous agent, you MUST create and manage tests for the code you write 
    - Includes mocking, assertions, and async support
    - Command: `bun test`
 
-2. **Browser Agent** - For UI testing, E2E flows, and visual validation
+2. **agent-browser** - For UI testing, E2E flows, and visual validation
    - Autonomous browser testing tool
+   - Official documentation: https://agent-browser.dev/
    - Handles interactive components, user flows, visual regression
    - Perfect for testing the complete user experience
    - Used for: login flows, forms, modals, animations, accessibility
 
 **These two tools are sufficient for all testing needs. Do not use:**
 - Jest, Vitest, or other test runners
-- Playwright, Puppeteer, Selenium, or other browser automation tools
-- Cypress or other E2E frameworks
+- Playwright, Puppeteer, Selenium, or other browser automation tools (use agent-browser instead)
+- Cypress or other E2E frameworks (use agent-browser instead)
 - Additional testing libraries beyond `@testing-library/react` for component testing
 
 
@@ -1174,9 +1175,9 @@ describe('UserCard Component', () => {
 });
 ```
 
-### UI Testing with Browser Agent
+### UI Testing with agent-browser
 
-#### When to Use Browser Agent
+#### When to Use agent-browser
 
 Use `agent-browser` for:
 - **Visual regression testing**: ensuring UI looks correct
@@ -1186,7 +1187,7 @@ Use `agent-browser` for:
 - **Accessibility validation**: screen reader compatibility, keyboard navigation
 - **Dynamic content**: content loaded via JavaScript, AJAX
 
-#### Browser Agent Testing Pattern
+#### agent-browser Testing Pattern
 
 ```typescript
 import { describe, it, expect } from 'bun:test';
@@ -1433,7 +1434,7 @@ Before marking a task complete, verify:
 - [ ] Tests run successfully (`bun test`)
 - [ ] Code is formatted and linted (`bunx biome check --write .`)
 - [ ] Production build succeeds (`bun run build`)
-- [ ] If UI changes: consider browser agent testing for key flows
+- [ ] If UI changes: consider agent-browser testing for key flows
 - [ ] Test names clearly describe expected behavior
 - [ ] No commented-out or skipped tests without explanation
 
