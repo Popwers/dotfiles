@@ -610,6 +610,151 @@ bun run build
 gh pr create --title "feat: description" --body "Description"
 ```
 
+
+## Documentation Practices
+
+### Keep Documentation Minimal and Purposeful
+
+**Core Philosophy: Code should be self-documenting. Only create separate documentation when truly necessary.**
+
+### When Documentation Files Are NOT Needed
+
+- **Self-explanatory code**: Well-named functions, clear logic, typed parameters
+- **Standard patterns**: Following established conventions in the codebase
+- **Small utilities**: Simple helper functions with obvious purposes
+- **Internal implementation**: Details that don't affect external usage
+- **Temporary/experimental code**: Features still in development
+
+### When Documentation Files ARE Appropriate
+
+Create dedicated documentation files ONLY when:
+
+1. **Complex Architecture**: System-wide patterns that affect multiple modules
+   - Example: `ARCHITECTURE.md` for microservice communication patterns
+
+2. **Public APIs**: External-facing interfaces that other teams/users consume
+   - Example: `API.md` for REST endpoint documentation
+
+3. **Setup/Onboarding**: Critical information needed to get started
+   - Example: `SETUP.md` for environment configuration
+
+4. **Project Guidelines**: Team conventions and standards (like this file)
+   - Example: `AGENTS.md`, `CONTRIBUTING.md`
+
+5. **Runbooks**: Operational procedures for deployment, debugging, incidents
+   - Example: `DEPLOYMENT.md`, `TROUBLESHOOTING.md`
+
+### Preferred Documentation Methods
+
+**1. Inline Comments (JSDoc/TSDoc)**
+```typescript
+/**
+ * Formats currency amount with proper localization.
+ * @param amount - Amount in cents
+ * @param currency - ISO currency code (default: USD)
+ * @returns Formatted currency string
+ * @throws TypeError if amount is not a valid number
+ */
+export const formatCurrency = (amount: number, currency = 'USD'): string => {
+  // Implementation
+};
+```
+
+**2. Pull Request Descriptions**
+- Explain the "why" behind changes
+- Document decisions and trade-offs
+- Include examples of new functionality
+- Link to relevant issues or discussions
+
+**3. Code Examples in Comments**
+```typescript
+// Example usage:
+// const price = formatCurrency(1999, 'USD'); // "$19.99"
+// const euro = formatCurrency(2499, 'EUR');  // "€24.99"
+```
+
+**4. Type Definitions**
+```typescript
+// Self-documenting through types
+interface PaymentRequest {
+  amount: number;        // Amount in cents
+  currency: string;      // ISO 4217 currency code
+  customerId: string;    // Unique customer identifier
+  metadata?: Record<string, string>;
+}
+```
+
+### Documentation Anti-Patterns
+
+**DON'T:**
+- Create `README.md` in every directory
+- Write documentation that duplicates code comments
+- Document implementation details that may change
+- Create docs that restate what the code already says
+- Write tutorial-style docs for internal utilities
+- Maintain separate "dev docs" that get outdated
+
+**DO:**
+- Trust that good code explains itself
+- Use types to document interfaces
+- Write comments for non-obvious decisions
+- Keep PR descriptions detailed and clear
+- Update existing docs when making changes
+- Delete docs when they're no longer relevant
+
+### Documentation Maintenance
+
+**Before Creating a New Doc File:**
+1. Can this be explained in code comments?
+2. Does this belong in an existing doc?
+3. Will this need frequent updates?
+4. Is this information discoverable where developers look?
+5. Will this provide value 6 months from now?
+
+If you answered "no" to most questions, **don't create the doc file**.
+
+**Regular Cleanup:**
+- Delete outdated documentation files
+- Merge redundant docs into single sources
+- Move inline comments if they're long explanations
+- Archive docs for deprecated features
+
+### Examples
+
+**❌ Unnecessary Documentation:**
+```typescript
+// DON'T create utils/README.md that says:
+// "This directory contains utility functions"
+
+// DON'T create formatCurrency.md that explains:
+// "This function formats currency values"
+```
+
+**✅ Good Documentation:**
+```typescript
+// DO use inline JSDoc:
+/**
+ * Formats currency with international support.
+ * 
+ * Uses Intl.NumberFormat for proper localization.
+ * Handles edge cases: negative values, zero, large numbers.
+ * 
+ * @example
+ * formatCurrency(1999, 'USD') // "$19.99"
+ * formatCurrency(-500, 'EUR') // "-€5.00"
+ */
+```
+
+### Summary
+
+- **Default**: No separate documentation files
+- **Inline comments**: For non-obvious logic
+- **PR descriptions**: For context and decisions
+- **Types**: For interface documentation
+- **Dedicated docs**: Only for architecture, public APIs, setup, guidelines, runbooks
+
+**Remember**: The best documentation is code that doesn't need documentation. Write clear, self-explanatory code first. Document intentionally and minimally.
+
 ## Tooling Rules
 
 - When you need to search documentation, use the Context7 MCP.
@@ -755,6 +900,31 @@ grepai trace graph "ValidateToken" --depth 3 --json
 
 As an autonomous agent, you MUST create and manage tests for the code you write or modify. Testing is not optional—it's a critical part of ensuring code quality, preventing regressions, and building maintainable systems.
 
+### Testing Tools (REQUIRED)
+
+**IMPORTANT: This project uses ONLY two testing tools. Do not introduce or suggest additional testing frameworks.**
+
+#### Official Testing Stack
+
+1. **Bun Test** - For all unit tests, integration tests, and component tests
+   - Built-in test runner with Bun
+   - Fast, TypeScript-native
+   - Includes mocking, assertions, and async support
+   - Command: `bun test`
+
+2. **Browser Agent** - For UI testing, E2E flows, and visual validation
+   - Autonomous browser testing tool
+   - Handles interactive components, user flows, visual regression
+   - Perfect for testing the complete user experience
+   - Used for: login flows, forms, modals, animations, accessibility
+
+**These two tools are sufficient for all testing needs. Do not use:**
+- Jest, Vitest, or other test runners
+- Playwright, Puppeteer, Selenium, or other browser automation tools
+- Cypress or other E2E frameworks
+- Additional testing libraries beyond `@testing-library/react` for component testing
+
+
 ### Core Testing Principles
 
 **1. Test What You Touch**
@@ -807,6 +977,49 @@ As an autonomous agent, you MUST create and manage tests for the code you write 
 src/lib/api.ts          → src/lib/api.test.ts
 src/utils/format.ts     → src/utils/__tests__/format.test.ts
 ```
+
+#### Test Organization (REQUIRED)
+
+**CRITICAL: All tests MUST be placed in a root-level `test/` directory.**
+
+```bash
+# Project structure
+project/
+├── src/
+│   ├── lib/
+│   │   └── api.ts
+│   ├── utils/
+│   │   └── format.ts
+│   └── components/
+│       └── UserCard.tsx
+├── test/                          # Root-level test directory
+│   ├── unit/
+│   │   ├── lib/
+│   │   │   └── api.test.ts       # Tests for src/lib/api.ts
+│   │   ├── utils/
+│   │   │   └── format.test.ts    # Tests for src/utils/format.ts
+│   │   └── components/
+│   │       └── UserCard.test.tsx # Tests for src/components/UserCard.tsx
+│   ├── integration/
+│   │   └── api-integration.test.ts
+│   └── e2e/
+│       └── user-flow.test.ts     # Browser agent tests
+└── package.json
+
+# Naming convention
+src/lib/api.ts              → test/unit/lib/api.test.ts
+src/utils/format.ts         → test/unit/utils/format.test.ts
+src/components/UserCard.tsx → test/unit/components/UserCard.test.tsx
+```
+
+**Rules:**
+- ✅ All tests in `test/` directory at project root
+- ✅ Mirror the `src/` directory structure inside `test/unit/`
+- ✅ Use `.test.ts` or `.test.tsx` suffix for test files
+- ✅ Organize by test type: `test/unit/`, `test/integration/`, `test/e2e/`
+- ❌ Never place tests alongside source files (no `*.test.ts` in `src/`)
+- ❌ Never use `__tests__` directories within `src/`
+
 
 #### Test Structure Template
 
