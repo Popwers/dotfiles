@@ -970,29 +970,6 @@ As an autonomous agent, you MUST create and manage tests for the code you write 
 
 ### Unit Testing with Bun
 
-**TESTING TOOLS: Use ONLY Bun Test and Browser-Agent**
-
-This project uses exactly TWO testing tools:
-1. **Bun test** (`bun:test`) - For all unit and integration tests
-2. **browser-agent** - For UI/E2E testing and visual verification
-
-**DO NOT introduce or suggest other testing tools** such as:
-- ❌ Jest
-- ❌ Vitest  
-- ❌ Mocha
-- ❌ Playwright (use browser-agent instead)
-- ❌ Puppeteer (use browser-agent instead)
-- ❌ Cypress (use browser-agent instead)
-- ❌ Any other testing framework or library
-
-Bun test and browser-agent are sufficient for all testing needs in this project. They provide:
-- Fast execution
-- Built-in TypeScript support
-- Modern API
-- Full browser automation capabilities
-- Everything needed for comprehensive testing
-
-If you encounter a testing scenario you think requires another tool, first explore how to accomplish it with Bun test or browser-agent.
 
 #### Test Organization (REQUIRED)
 
