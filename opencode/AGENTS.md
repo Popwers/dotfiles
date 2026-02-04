@@ -330,6 +330,10 @@ const FadeIn = ({ children }) => (
 
 ## Testing
 
+### Overview
+
+Testing is required for code you change. You must create and maintain tests for new or modified behavior. This is non-optional and protects against regressions.
+
 ### Tools (REQUIRED)
 
 **Only two tools:**
@@ -338,11 +342,22 @@ const FadeIn = ({ children }) => (
 
 **Do not use:** Jest, Vitest, Playwright, Puppeteer, Selenium, Cypress. Only allow `@testing-library/react` for component testing.
 
+**Notes:**
+- **Bun Test:** fast, TS-native, includes mocking and async helpers.
+- **agent-browser:** CLI for UI/E2E; use `snapshot -i` then target refs like `@e1`.
+
+**Official Testing Stack:**
+- Bun Test for unit, integration, and component tests.
+- agent-browser for UI flows, visual checks, and accessibility checks.
+
 ### Core Principles
 
 - Test what you touch
 - Test behavior, not implementation
 - Fail fast with meaningful names and assertions
+- Bug fixes require a regression test
+- Update tests when behavior changes
+- Remove tests for deleted behavior
 
 ### When to Test
 
@@ -386,6 +401,13 @@ describe('feature', () => {
   });
 });
 ```
+
+### Test Structure
+
+- Keep a clear Arrange → Act → Assert flow
+- One behavior per test; group related cases under `describe`
+- Prefer deterministic tests; mock external I/O
+- Use descriptive test names that state expected behavior
 
 ### Mocking External Dependencies
 
@@ -434,6 +456,7 @@ expect(screen.getByText(user.username)).toBeInTheDocument();
 ### UI Testing with agent-browser
 
 **Use for:** visual regression, E2E flows, interactive UI, accessibility, dynamic content.
+Use agent-browser for: login flows, forms, modals, animations, responsive checks, and key accessibility paths.
 Use refs from `agent-browser snapshot -i` output (e.g. `@e1`, `@e2`) for reliable targeting.
 
 ```bash
@@ -476,14 +499,17 @@ describe('Regression: large number handling', () => {
 
 **Do:** keep tests isolated, name intent clearly, mock external deps, keep tests fast, focus on public behavior, refactor tests with code, delete obsolete tests.
 
-### Checklist
+### Agent Testing Checklist
 
-- New/changed behavior has tests
-- `bun test` passes
-- `bunx biome check .` passes
-- `bun run build` passes (when applicable)
-- UI changes validated with agent-browser when relevant
-- No skipped/commented-out tests without reason
+- [ ] New/changed behavior has tests
+- [ ] Bug fixes include regression tests
+- [ ] Critical logic and error paths are covered
+- [ ] Edge cases are covered where applicable
+- [ ] `bun test` passes
+- [ ] `bunx biome check .` passes
+- [ ] `bun run build` passes (when applicable)
+- [ ] UI changes validated with agent-browser when relevant
+- [ ] No skipped/commented-out tests without reason
 
 ### Commands
 
@@ -506,6 +532,16 @@ bun run build
 ### Testing Philosophy
 
 Focus on confidence, clarity, speed, and maintainability. If a test does not help catch bugs or clarify behavior, it is not pulling its weight.
+
+### Test Before Committing
+
+```bash
+git status
+git diff --staged
+bunx biome check --write .
+bun test
+bun run build
+```
 
 ## Git Workflow
 
