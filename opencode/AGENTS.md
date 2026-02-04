@@ -970,17 +970,33 @@ As an autonomous agent, you MUST create and manage tests for the code you write 
 
 ### Unit Testing with Bun
 
-#### File Naming Convention
+**TESTING TOOLS: Use ONLY Bun Test and Browser-Agent**
 
-```bash
-# Place tests alongside source files or in __tests__ directory
-src/lib/api.ts          → src/lib/api.test.ts
-src/utils/format.ts     → src/utils/__tests__/format.test.ts
-```
+This project uses exactly TWO testing tools:
+1. **Bun test** (`bun:test`) - For all unit and integration tests
+2. **browser-agent** - For UI/E2E testing and visual verification
+
+**DO NOT introduce or suggest other testing tools** such as:
+- ❌ Jest
+- ❌ Vitest  
+- ❌ Mocha
+- ❌ Playwright (use browser-agent instead)
+- ❌ Puppeteer (use browser-agent instead)
+- ❌ Cypress (use browser-agent instead)
+- ❌ Any other testing framework or library
+
+Bun test and browser-agent are sufficient for all testing needs in this project. They provide:
+- Fast execution
+- Built-in TypeScript support
+- Modern API
+- Full browser automation capabilities
+- Everything needed for comprehensive testing
+
+If you encounter a testing scenario you think requires another tool, first explore how to accomplish it with Bun test or browser-agent.
 
 #### Test Organization (REQUIRED)
 
-**CRITICAL: All tests MUST be placed in a root-level `test/` directory.**
+**CRITICAL: All tests MUST be placed in a root-level `test/` directory (singular, not `tests/`).**
 
 ```bash
 # Project structure
@@ -988,38 +1004,27 @@ project/
 ├── src/
 │   ├── lib/
 │   │   └── api.ts
-│   ├── utils/
-│   │   └── format.ts
 │   └── components/
 │       └── UserCard.tsx
-├── test/                          # Root-level test directory
-│   ├── unit/
-│   │   ├── lib/
-│   │   │   └── api.test.ts       # Tests for src/lib/api.ts
-│   │   ├── utils/
-│   │   │   └── format.test.ts    # Tests for src/utils/format.ts
-│   │   └── components/
-│   │       └── UserCard.test.tsx # Tests for src/components/UserCard.tsx
-│   ├── integration/
-│   │   └── api-integration.test.ts
-│   └── e2e/
-│       └── user-flow.test.ts     # Browser agent tests
-└── package.json
+└── test/                          # Root-level test directory
+    ├── lib/
+    │   └── api.test.ts
+    └── components/
+        └── UserCard.test.tsx
 
-# Naming convention
-src/lib/api.ts              → test/unit/lib/api.test.ts
-src/utils/format.ts         → test/unit/utils/format.test.ts
-src/components/UserCard.tsx → test/unit/components/UserCard.test.tsx
+# File mapping examples
+src/lib/api.ts              → test/lib/api.test.ts
+src/components/UserCard.tsx → test/components/UserCard.test.tsx
+src/utils/format.ts         → test/utils/format.test.ts
 ```
 
 **Rules:**
-- ✅ All tests in `test/` directory at project root
-- ✅ Mirror the `src/` directory structure inside `test/unit/`
+- ✅ All tests in `test/` directory at project root (NOT `tests/` plural)
+- ✅ Mirror the `src/` directory structure inside `test/`
 - ✅ Use `.test.ts` or `.test.tsx` suffix for test files
-- ✅ Organize by test type: `test/unit/`, `test/integration/`, `test/e2e/`
 - ❌ Never place tests alongside source files (no `*.test.ts` in `src/`)
 - ❌ Never use `__tests__` directories within `src/`
-
+- ❌ Never use `tests/` (plural) - always `test/` (singular)
 
 #### Test Structure Template
 
