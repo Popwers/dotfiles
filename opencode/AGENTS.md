@@ -510,11 +510,52 @@ const StaggerList = ({ items }) => (
 
 ## Testing
 
-### Bun Test
+### Testing Philosophy for Agents
+
+**As an autonomous agent, you are responsible for ensuring code quality through strategic testing.** Testing is not optional—it's a core part of your development workflow. Follow these principles:
+
+#### When to Create Tests (Decision Matrix)
+
+**ALWAYS write tests for:**
+- Public APIs and exported functions (utilities, services, hooks)
+- Business logic and data transformations
+- Authentication/authorization flows
+- Payment processing or financial calculations
+- Critical user workflows (signup, checkout, data submission)
+- Bug fixes (write a failing test first, then fix)
+- Complex conditional logic or algorithms
+
+**CONSIDER writing tests for:**
+- UI components with significant logic or state management
+- API endpoints (when not covered by E2E tests)
+- Edge cases and error handling paths
+- Performance-critical code sections
+
+**SKIP tests for:**
+- Simple pass-through functions with no logic
+- Trivial getters/setters
+- Configuration files
+- Pure type definitions
+- Code that's temporary or experimental
+
+#### Test Creation Workflow
+
+When you create or modify code, follow this autonomous workflow:
+
+1. **Analyze Impact:** Identify what functionality your changes affect
+2. **Check Existing Tests:** Run `bun test` to see if tests already cover the area
+3. **Identify Gaps:** Determine what new behavior needs testing
+4. **Create Tests:** Write tests following the patterns below
+5. **Verify:** Ensure all tests pass before committing
+6. **Document:** Add JSDoc comments explaining test purpose if not obvious
+
+### Unit Testing with Bun Test
+
+#### Basic Structure
 
 ```typescript
-import { describe, it, expect, mock, beforeEach } from 'bun:test';
-import { fetchUser, createUser } from '@/lib/api';
+import { describe, it, expect, mock, beforeEach, afterEach } from 'bun:test';
+import { fetchUser, createUser, updateUserStatus } from '@/lib/api';
 import type { User } from '@interfaces/user';
 
 describe('User API', () => {
@@ -524,11 +565,16 @@ describe('User API', () => {
     email: 'test@example.com',
     username: 'Test User',
     isActive: true,
-    createdAt: new Date(),
+    createdAt: new Date('2024-01-01'),
   };
 
   beforeEach(() => {
+    // Reset mocks before each test
     mock.restore();
+  });
+
+  afterEach(() => {
+    // Clean up any side effects
   });
 
   describe('fetchUser', () => {
@@ -557,16 +603,398 @@ describe('User API', () => {
 
       expect(fetchUser('123')).rejects.toThrow('Failed');
     });
+
+    it('handles malformed response data', async () => {
+      global.fetch = mock(() =>
+        Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve(null),
+        })
+      );
+
+      const user = await fetchUser('123');
+      expect(user).toBeNull();
+    });
+  });
+
+  describe('updateUserStatus', () => {
+    it('activates user successfully', async () => {
+      global.fetch = mock(() =>
+        Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ ...mockUser, isActive: true }),
+        })
+      );
+
+      const result = await updateUserStatus('123', true);
+
+      expect(result.isActive).toBe(true);
+      expect(global.fetch).toHaveBeenCalledTimes(1);
+    });
   });
 });
 ```
 
-**Test Commands:**
-```bash
-bun test                              # All tests
-bun test --watch                      # Watch mode
-bun test user.test.ts                 # Single file
+#### Testing React Components
+
+```typescript
+import { describe, it, expect } from 'bun:test';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import UserCard from '@/components/UserCard';
+import type { User } from '@interfaces/user';
+
+describe('UserCard', () => {
+  const mockUser: User = {
+    id: 1,
+    documentId: 'doc1',
+    email: 'test@example.com',
+    username: 'Test User',
+    isActive: true,
+    createdAt: new Date(),
+  };
+
+  it('renders user information correctly', () => {
+    render(<UserCard user={mockUser} />);
+
+    expect(screen.getByText('Test User')).toBeInTheDocument();
+    expect(screen.getByText('test@example.com')).toBeInTheDocument();
+  });
+
+  it('calls onEdit when edit button is clicked', async () => {
+    const onEdit = mock(() => Promise.resolve());
+    render(<UserCard user={mockUser} onEdit={onEdit} isEditable />);
+
+    const editButton = screen.getByRole('button', { name: /edit/i });
+    await userEvent.click(editButton);
+
+    expect(onEdit).toHaveBeenCalledWith(mockUser);
+  });
+
+  it('disables edit button while saving', async () => {
+    const onEdit = mock(() => new Promise(resolve => setTimeout(resolve, 100)));
+    render(<UserCard user={mockUser} onEdit={onEdit} isEditable />);
+
+    const editButton = screen.getByRole('button', { name: /edit/i });
+    await userEvent.click(editButton);
+
+    expect(editButton).toBeDisabled();
+    expect(screen.getByText('Saving...')).toBeInTheDocument();
+  });
+
+  it('does not render edit button when not editable', () => {
+    render(<UserCard user={mockUser} isEditable={false} />);
+
+    expect(screen.queryByRole('button', { name: /edit/i })).not.toBeInTheDocument();
+  });
+});
 ```
+
+#### Testing Legend State Observables
+
+```typescript
+import { describe, it, expect, beforeEach } from 'bun:test';
+import { observable } from '@legendapp/state';
+import { userStore } from '@/stores/user';
+
+describe('userStore', () => {
+  beforeEach(() => {
+    // Reset store state before each test
+    userStore.currentUserId.set(null);
+    userStore.isLoading.set(false);
+  });
+
+  it('initializes with default values', () => {
+    expect(userStore.currentUserId.get()).toBeNull();
+    expect(userStore.isLoading.get()).toBe(false);
+  });
+
+  it('updates currentUserId', () => {
+    userStore.currentUserId.set('user123');
+    expect(userStore.currentUserId.get()).toBe('user123');
+  });
+
+  it('toggles loading state', () => {
+    userStore.isLoading.set(true);
+    expect(userStore.isLoading.get()).toBe(true);
+
+    userStore.isLoading.set(false);
+    expect(userStore.isLoading.get()).toBe(false);
+  });
+});
+```
+
+#### Testing Utilities and Business Logic
+
+```typescript
+import { describe, it, expect } from 'bun:test';
+import { parseAmountToCents, formatCurrency, calculateDiscount } from '@/lib/utils';
+
+describe('Currency Utilities', () => {
+  describe('parseAmountToCents', () => {
+    it('converts decimal string to cents', () => {
+      expect(parseAmountToCents('12.50')).toBe(1250);
+      expect(parseAmountToCents('0.99')).toBe(99);
+      expect(parseAmountToCents('100')).toBe(10000);
+    });
+
+    it('throws on invalid input', () => {
+      expect(() => parseAmountToCents('abc')).toThrow();
+      expect(() => parseAmountToCents('')).toThrow();
+      expect(() => parseAmountToCents('12.5.5')).toThrow();
+    });
+
+    it('handles edge cases', () => {
+      expect(parseAmountToCents('0')).toBe(0);
+      expect(parseAmountToCents('0.00')).toBe(0);
+      expect(parseAmountToCents('999999.99')).toBe(99999999);
+    });
+  });
+
+  describe('calculateDiscount', () => {
+    it('applies percentage discount correctly', () => {
+      expect(calculateDiscount(100, 10)).toBe(90);
+      expect(calculateDiscount(50, 25)).toBe(37.5);
+    });
+
+    it('does not apply negative discounts', () => {
+      expect(calculateDiscount(100, -10)).toBe(100);
+    });
+
+    it('caps discount at 100%', () => {
+      expect(calculateDiscount(100, 150)).toBe(0);
+    });
+  });
+});
+```
+
+### UI Testing with Browser-Agent
+
+**When to use browser-agent:**
+- Testing complete user workflows (E2E scenarios)
+- Verifying UI rendering across different viewport sizes
+- Testing interactions that involve multiple components
+- Validating accessibility features (focus management, keyboard navigation)
+- Testing animations and transitions
+- Verifying responsive design breakpoints
+- Testing forms with complex validation
+
+**When NOT to use browser-agent:**
+- Simple component logic (use unit tests)
+- API testing (use unit tests with mocks)
+- Utility function testing (use unit tests)
+
+#### Browser-Agent Testing Pattern
+
+```typescript
+import { describe, it, expect } from 'bun:test';
+
+describe('User Registration Flow (E2E)', () => {
+  it('completes user registration successfully', async () => {
+    // Agent: Use browser-agent skill to:
+    // 1. Navigate to registration page
+    // 2. Fill in registration form
+    // 3. Submit form
+    // 4. Verify success message appears
+    // 5. Verify user is redirected to dashboard
+
+    // Example pseudo-code (actual implementation depends on browser-agent API):
+    await browser.navigate('/register');
+    await browser.fill('#email', 'newuser@example.com');
+    await browser.fill('#password', 'SecurePassword123!');
+    await browser.fill('#confirmPassword', 'SecurePassword123!');
+    await browser.click('button[type="submit"]');
+
+    await browser.waitForSelector('.success-message');
+    expect(await browser.url()).toContain('/dashboard');
+  });
+
+  it('shows validation errors for invalid input', async () => {
+    await browser.navigate('/register');
+    await browser.fill('#email', 'invalid-email');
+    await browser.fill('#password', '123');
+    await browser.click('button[type="submit"]');
+
+    expect(await browser.textContent('.error-email')).toContain('valid email');
+    expect(await browser.textContent('.error-password')).toContain('at least 8 characters');
+  });
+
+  it('handles responsive navigation on mobile', async () => {
+    await browser.setViewport({ width: 375, height: 667 }); // iPhone size
+    await browser.navigate('/');
+
+    // Verify mobile menu is visible
+    const menuButton = await browser.selector('[aria-label="Open menu"]');
+    expect(menuButton).toBeVisible();
+
+    await browser.click('[aria-label="Open menu"]');
+    expect(await browser.selector('nav[role="navigation"]')).toBeVisible();
+  });
+});
+```
+
+#### Browser-Agent Guidelines for Agents
+
+**Before running browser tests:**
+1. Ensure the development server is running (`bun run dev`)
+2. Check that browser-agent skill/tool is available
+3. If unavailable, document what should be tested and create issue
+
+**When writing browser tests:**
+- Use semantic selectors (ARIA labels, roles) over class names or IDs
+- Test user workflows, not implementation details
+- Include accessibility checks (focus, keyboard navigation)
+- Test responsive behavior at key breakpoints (mobile: 375px, tablet: 768px, desktop: 1024px)
+- Wait for network requests to complete before assertions
+- Capture screenshots on failure for debugging
+
+**Fallback when browser-agent unavailable:**
+- Document the E2E test scenarios that should be created
+- Create unit tests for the logic that can be isolated
+- Add TODO comments with test descriptions
+- Create a GitHub issue tracking the missing E2E tests
+
+### Regression Prevention Strategy
+
+**As an agent, you must actively prevent regressions:**
+
+1. **Before Fixing a Bug:**
+   - Write a failing test that reproduces the bug
+   - Verify the test fails
+   - Fix the bug
+   - Verify the test now passes
+   - Commit both test and fix together
+
+2. **Before Refactoring:**
+   - Ensure existing tests cover the code being refactored
+   - If coverage is insufficient, add tests first
+   - Refactor
+   - Verify all tests still pass
+   - Run `bun test` and `bun run build` to confirm
+
+3. **When Adding Features:**
+   - Write tests for the new functionality
+   - Consider edge cases and error scenarios
+   - Test integration with existing features
+   - Document expected behavior in test descriptions
+
+4. **When Modifying Existing Code:**
+   - Run existing tests to understand current behavior
+   - Add new tests for changed behavior
+   - Update or remove obsolete tests
+   - Verify no unintended side effects
+
+### Test Organization
+
+```
+tests/
+├── unit/                        # Unit tests (fast, isolated)
+│   ├── lib/
+│   │   ├── api.test.ts
+│   │   └── utils.test.ts
+│   ├── components/
+│   │   └── UserCard.test.tsx
+│   └── stores/
+│       └── user.test.ts
+├── integration/                 # Integration tests (slower, multiple units)
+│   ├── auth-flow.test.ts
+│   └── payment-processing.test.ts
+└── e2e/                         # End-to-end tests (browser-agent)
+    ├── user-registration.test.ts
+    ├── checkout-flow.test.ts
+    └── admin-dashboard.test.ts
+```
+
+### Test Naming Conventions
+
+**Test files:**
+- Unit tests: `[module-name].test.ts`
+- Component tests: `[ComponentName].test.tsx`
+- E2E tests: `[workflow-name].test.ts`
+
+**Test descriptions:**
+- Use descriptive, behavior-focused names
+- Format: "should [expected behavior] when [condition]"
+- Examples:
+  - ✅ "returns null when user ID is empty"
+  - ✅ "throws error when network request fails"
+  - ✅ "disables submit button while form is submitting"
+  - ❌ "test fetchUser"
+  - ❌ "it works"
+
+### Test Commands
+
+```bash
+# Run all tests
+bun test
+
+# Run tests in watch mode (during development)
+bun test --watch
+
+# Run specific test file
+bun test tests/unit/lib/api.test.ts
+
+# Run tests matching pattern
+bun test --test-name-pattern "fetchUser"
+
+# Run with coverage
+bun test --coverage
+
+# Run only E2E tests
+bun test tests/e2e/
+```
+
+### Coverage Guidelines
+
+Aim for these coverage targets (but prioritize meaningful tests over arbitrary coverage):
+
+- **Critical business logic:** 90%+ coverage
+- **Utilities and helpers:** 80%+ coverage
+- **UI components:** 70%+ coverage (focus on logic, not markup)
+- **API endpoints:** 80%+ coverage
+- **Configuration files:** Not necessary
+
+### Agent Testing Checklist
+
+Before committing code, verify:
+
+- [ ] All new code has appropriate tests (unit, integration, or E2E)
+- [ ] All tests pass (`bun test`)
+- [ ] No console errors or warnings
+- [ ] Code builds successfully (`bun run build`)
+- [ ] Biome checks pass (`bunx biome check .`)
+- [ ] Tests cover edge cases and error scenarios
+- [ ] Test descriptions are clear and behavior-focused
+- [ ] Mock data is realistic and comprehensive
+- [ ] No commented-out test code
+- [ ] Browser tests (if applicable) include accessibility checks
+
+### Smart Testing Decisions
+
+**Optimize your testing effort:**
+
+1. **Risk-Based Testing:** Prioritize testing based on:
+   - Criticality to business (payment, auth > UI polish)
+   - Frequency of change (stable code needs less testing)
+   - Complexity (complex logic needs more tests)
+   - User impact (high-traffic features need more coverage)
+
+2. **Test Pyramid Balance:**
+   - Many unit tests (fast, cheap, specific)
+   - Fewer integration tests (slower, broader scope)
+   - Few E2E tests (slowest, most expensive, highest confidence)
+
+3. **When to Skip Tests:**
+   - Prototypes or throwaway code
+   - Code that will be replaced soon
+   - Simple type definitions or interfaces
+   - Generated code or third-party integrations (test the wrapper, not the library)
+
+4. **When to Add More Tests:**
+   - After production bugs (prevent recurrence)
+   - Before major refactoring (safety net)
+   - For complex algorithms or business rules
+   - When user feedback indicates reliability issues
 
 ## Git Workflow
 
@@ -643,6 +1071,9 @@ gh pr create --title "feat: description" --body "Description"
 - Skip tests for critical business logic
 - Test implementation details instead of behavior
 - Leave `console.log` in production code
+- Commit code without running tests
+- Write tests that depend on external services without mocks
+- Create brittle tests that break with minor UI changes
 
 ### ALWAYS
 
@@ -672,12 +1103,23 @@ gh pr create --title "feat: description" --body "Description"
 - Run `bun test` and ensure all pass
 - Run `bun run build` to verify production build
 - Review diff with `git diff --staged`
+- Verify test coverage for new code
+- Ensure test descriptions are clear and behavior-focused
 
 **Performance:**
 - Prefer static generation over client-side rendering
 - Use proper Astro hydration directives (`server:defer`, `client:visible`)
 - Lazy load images and non-critical components
 - Use grepai for semantic search; use `rg`/`fd` for exact text or path patterns (never `grep`/`find`)
+
+**Testing:**
+- Write tests for all new features and bug fixes
+- Follow the test decision matrix to determine test type and coverage
+- Use meaningful test descriptions that explain expected behavior
+- Mock external dependencies in unit tests
+- Include edge cases and error scenarios
+- Run tests before committing code
+- Create regression tests when fixing bugs
 
 ## grepai - Semantic Code Search
 
