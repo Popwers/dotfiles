@@ -434,14 +434,16 @@ expect(screen.getByText(user.username)).toBeInTheDocument();
 ### UI Testing with agent-browser
 
 **Use for:** visual regression, E2E flows, interactive UI, accessibility, dynamic content.
+Use refs from `agent-browser snapshot -i` output (e.g. `@e1`, `@e2`) for reliable targeting.
 
-```ts
-const browser = await launchBrowser();
-const page = await navigateTo(browser, 'http://localhost:3000/login');
-await fillInput(page, '#email', 'test@example.com');
-await clickElement(page, 'button[type="submit"]');
-await assertVisible(page, '.dashboard-header');
-await browser.close();
+```bash
+agent-browser open http://localhost:3000/login
+agent-browser snapshot -i
+agent-browser fill @e3 "test@example.com"
+agent-browser click @e2
+agent-browser get text @e1
+agent-browser screenshot page.png
+agent-browser close
 ```
 
 ### Workflow
@@ -490,8 +492,13 @@ bun test
 bun test --watch
 bun test file.test.ts
 bun test --coverage
-agent-browser launch
-agent-browser test e2e.test.ts
+agent-browser open http://localhost:3000
+agent-browser snapshot -i
+agent-browser click @e2
+agent-browser fill @e3 "test@example.com"
+agent-browser get text @e1
+agent-browser screenshot page.png
+agent-browser close
 bunx biome check --write .
 bun run build
 ```
