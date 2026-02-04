@@ -748,3 +748,531 @@ grepai trace graph "ValidateToken" --depth 3 --json
 2. Use `grepai trace` to understand function relationships
 3. Use `Read` tool to examine files from results
 4. Only use Grep for exact string searches if needed
+
+## Testing Guidelines for Agents
+
+### Overview
+
+As an autonomous agent, you MUST create and manage tests for the code you write or modify. Testing is not optional—it's a critical part of ensuring code quality, preventing regressions, and building maintainable systems.
+
+### Core Testing Principles
+
+**1. Test What You Touch**
+- Create tests for every new feature, function, or component you implement
+- Add regression tests when fixing bugs to prevent recurrence
+- Update existing tests when modifying behavior
+- Remove tests for deleted functionality
+
+**2. Test Behavior, Not Implementation**
+- Focus on what the code does (outputs, side effects, user experience)
+- Avoid testing internal implementation details
+- Write tests that remain valid when refactoring
+
+**3. Fail Fast with Meaningful Messages**
+- Write descriptive test names that explain the expected behavior
+- Use clear assertion messages that help diagnose failures quickly
+- Group related tests with `describe` blocks for better organization
+
+### When to Test (Decision Criteria)
+
+#### ALWAYS Test
+
+- **Critical business logic**: authentication, payment processing, data validation
+- **Public APIs and exported functions**: anything consumed by other modules
+- **Bug fixes**: add a regression test that fails without the fix, passes with it
+- **Data transformations**: parsing, formatting, mapping, filtering
+- **Error handling**: ensure errors are thrown/caught correctly
+- **Conditional logic**: test all branches (if/else, switch, ternary)
+
+#### CONSIDER Testing
+
+- **Complex calculations or algorithms**: when logic is non-trivial
+- **Integration points**: API calls, database operations (use mocks)
+- **State management**: stores, observables, shared state
+- **Edge cases**: null/undefined, empty arrays, boundary values
+
+#### SKIP Testing
+
+- **Trivial code**: simple getters/setters, one-line utilities
+- **Third-party library internals**: trust maintained libraries
+- **Configuration files**: JSON, env files (unless you're validating them)
+- **Styling-only components**: pure presentational components with no logic
+
+### Unit Testing with Bun
+
+#### File Naming Convention
+
+```bash
+# Place tests alongside source files or in __tests__ directory
+src/lib/api.ts          → src/lib/api.test.ts
+src/utils/format.ts     → src/utils/__tests__/format.test.ts
+```
+
+#### Test Structure Template
+
+```typescript
+import { describe, it, expect, mock, beforeEach, afterEach } from 'bun:test';
+import type { User } from '@interfaces/user';
+import { functionToTest } from './module';
+
+describe('Module: functionToTest', () => {
+  // Setup: run before each test
+  beforeEach(() => {
+    // Reset mocks, initialize test data
+    mock.restore();
+  });
+
+  // Teardown: run after each test (if needed)
+  afterEach(() => {
+    // Clean up resources, reset state
+  });
+
+  describe('Happy Path', () => {
+    it('should return expected result for valid input', () => {
+      const result = functionToTest('valid input');
+      expect(result).toBe('expected output');
+    });
+
+    it('should handle multiple valid scenarios', () => {
+      expect(functionToTest('case1')).toBe('output1');
+      expect(functionToTest('case2')).toBe('output2');
+    });
+  });
+
+  describe('Edge Cases', () => {
+    it('should return default value for empty input', () => {
+      const result = functionToTest('');
+      expect(result).toBeNull();
+    });
+
+    it('should handle undefined gracefully', () => {
+      const result = functionToTest(undefined);
+      expect(result).toBe(null);
+    });
+  });
+
+  describe('Error Handling', () => {
+    it('should throw error for invalid input', () => {
+      expect(() => functionToTest('invalid')).toThrow('Invalid input');
+    });
+
+    it('should throw specific error type', () => {
+      expect(() => functionToTest(null)).toThrow(TypeError);
+    });
+  });
+});
+```
+
+#### Mocking External Dependencies
+
+```typescript
+import { describe, it, expect, mock } from 'bun:test';
+
+describe('API calls', () => {
+  it('should fetch user data successfully', async () => {
+    // Mock fetch globally
+    global.fetch = mock(() =>
+      Promise.resolve({
+        ok: true,
+        status: 200,
+        json: () => Promise.resolve({ id: 1, name: 'Test User' }),
+      })
+    );
+
+    const user = await fetchUser('123');
+
+    expect(fetch).toHaveBeenCalledWith('/api/users/123');
+    expect(user).toEqual({ id: 1, name: 'Test User' });
+  });
+
+  it('should handle fetch errors', async () => {
+    global.fetch = mock(() =>
+      Promise.resolve({
+        ok: false,
+        status: 404,
+      })
+    );
+
+    await expect(fetchUser('invalid')).rejects.toThrow('User not found');
+  });
+});
+```
+
+#### Testing Async Code
+
+```typescript
+describe('Async operations', () => {
+  it('should resolve with correct data', async () => {
+    const result = await asyncFunction();
+    expect(result).toBeDefined();
+  });
+
+  it('should reject with error', async () => {
+    await expect(failingAsyncFunction()).rejects.toThrow('Error message');
+  });
+
+  it('should timeout after delay', async () => {
+    const promise = longRunningFunction();
+    const timeout = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Timeout')), 1000)
+    );
+
+    await expect(Promise.race([promise, timeout])).rejects.toThrow('Timeout');
+  });
+});
+```
+
+### Testing React Components
+
+#### Component Test Template
+
+```typescript
+import { describe, it, expect } from 'bun:test';
+import { render, screen } from '@testing-library/react';
+import { userEvent } from '@testing-library/user-event';
+import UserCard from './UserCard';
+import type { User } from '@interfaces/user';
+
+describe('UserCard Component', () => {
+  const mockUser: User = {
+    id: 1,
+    documentId: 'abc123',
+    email: 'test@example.com',
+    username: 'Test User',
+    isActive: true,
+    createdAt: new Date(),
+  };
+
+  it('should render user information', () => {
+    render(<UserCard user={mockUser} />);
+
+    expect(screen.getByText('Test User')).toBeInTheDocument();
+    expect(screen.getByText('test@example.com')).toBeInTheDocument();
+  });
+
+  it('should call onEdit when edit button is clicked', async () => {
+    const handleEdit = mock(() => Promise.resolve());
+    render(<UserCard user={mockUser} onEdit={handleEdit} isEditable={true} />);
+
+    const editButton = screen.getByRole('button', { name: /edit/i });
+    await userEvent.click(editButton);
+
+    expect(handleEdit).toHaveBeenCalledWith(mockUser);
+  });
+
+  it('should disable button while saving', async () => {
+    const slowEdit = mock(() => new Promise(resolve => setTimeout(resolve, 100)));
+    render(<UserCard user={mockUser} onEdit={slowEdit} isEditable={true} />);
+
+    const editButton = screen.getByRole('button', { name: /edit/i });
+    await userEvent.click(editButton);
+
+    expect(editButton).toBeDisabled();
+    expect(screen.getByText('Saving...')).toBeInTheDocument();
+  });
+
+  it('should not render edit button when not editable', () => {
+    render(<UserCard user={mockUser} isEditable={false} />);
+
+    expect(screen.queryByRole('button', { name: /edit/i })).not.toBeInTheDocument();
+  });
+});
+```
+
+### UI Testing with Browser Agent
+
+#### When to Use Browser Agent
+
+Use `agent-browser` for:
+- **Visual regression testing**: ensuring UI looks correct
+- **End-to-end user flows**: login, checkout, form submission
+- **Interactive components**: modals, dropdowns, tooltips, animations
+- **Cross-browser compatibility**: testing in different browsers
+- **Accessibility validation**: screen reader compatibility, keyboard navigation
+- **Dynamic content**: content loaded via JavaScript, AJAX
+
+#### Browser Agent Testing Pattern
+
+```typescript
+import { describe, it, expect } from 'bun:test';
+import { launchBrowser, navigateTo, clickElement, fillInput, assertVisible } from 'agent-browser';
+
+describe('User Authentication Flow (Browser)', () => {
+  it('should complete login flow successfully', async () => {
+    const browser = await launchBrowser();
+    const page = await navigateTo(browser, 'http://localhost:3000/login');
+
+    // Fill login form
+    await fillInput(page, '#email', 'test@example.com');
+    await fillInput(page, '#password', 'password123');
+
+    // Submit form
+    await clickElement(page, 'button[type="submit"]');
+
+    // Verify redirect to dashboard
+    await page.waitForNavigation();
+    await assertVisible(page, '.dashboard-header');
+
+    // Verify user info displayed
+    const username = await page.textContent('.user-name');
+    expect(username).toBe('Test User');
+
+    await browser.close();
+  });
+
+  it('should show error for invalid credentials', async () => {
+    const browser = await launchBrowser();
+    const page = await navigateTo(browser, 'http://localhost:3000/login');
+
+    await fillInput(page, '#email', 'invalid@example.com');
+    await fillInput(page, '#password', 'wrongpassword');
+    await clickElement(page, 'button[type="submit"]');
+
+    // Verify error message appears
+    await assertVisible(page, '.error-message');
+    const errorText = await page.textContent('.error-message');
+    expect(errorText).toContain('Invalid credentials');
+
+    await browser.close();
+  });
+});
+```
+
+#### Visual Regression Testing
+
+```typescript
+describe('Visual Regression Tests', () => {
+  it('should match modal appearance snapshot', async () => {
+    const browser = await launchBrowser();
+    const page = await navigateTo(browser, 'http://localhost:3000/components/modal');
+
+    await clickElement(page, '#open-modal-btn');
+    await assertVisible(page, '.modal');
+
+    // Take screenshot and compare with baseline
+    const screenshot = await page.screenshot();
+    expect(screenshot).toMatchSnapshot('modal-open.png');
+
+    await browser.close();
+  });
+
+  it('should verify responsive layout on mobile', async () => {
+    const browser = await launchBrowser({ viewport: { width: 375, height: 667 } });
+    const page = await navigateTo(browser, 'http://localhost:3000');
+
+    // Verify mobile menu is visible
+    await assertVisible(page, '.mobile-menu-toggle');
+
+    // Verify desktop menu is hidden
+    const desktopMenu = await page.isVisible('.desktop-menu');
+    expect(desktopMenu).toBe(false);
+
+    await browser.close();
+  });
+});
+```
+
+### Smart Testing Workflow
+
+#### Step 1: Analyze Changes
+
+Before writing tests, ask yourself:
+- What functionality did I add or modify?
+- What are the possible inputs and outputs?
+- What edge cases exist?
+- What could break in the future?
+- What behavior is critical for users?
+
+#### Step 2: Determine Test Coverage
+
+```typescript
+// Example: You added a new formatCurrency function
+const formatCurrency = (amount: number, currency: string = 'USD'): string => {
+  if (typeof amount !== 'number' || isNaN(amount)) {
+    throw new TypeError('Amount must be a valid number');
+  }
+
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency,
+  }).format(amount);
+};
+
+// Required tests (identified by analysis):
+// 1. Happy path: valid number formats correctly
+// 2. Default currency: USD is used when not specified
+// 3. Different currencies: EUR, GBP work correctly
+// 4. Edge cases: zero, negative numbers, decimals
+// 5. Error handling: invalid input throws TypeError
+```
+
+#### Step 3: Write Tests
+
+```typescript
+import { describe, it, expect } from 'bun:test';
+import { formatCurrency } from './format';
+
+describe('formatCurrency', () => {
+  describe('Valid inputs', () => {
+    it('should format positive numbers with USD by default', () => {
+      expect(formatCurrency(1234.56)).toBe('$1,234.56');
+    });
+
+    it('should format with specified currency', () => {
+      expect(formatCurrency(1234.56, 'EUR')).toBe('€1,234.56');
+      expect(formatCurrency(1234.56, 'GBP')).toBe('£1,234.56');
+    });
+
+    it('should handle zero', () => {
+      expect(formatCurrency(0)).toBe('$0.00');
+    });
+
+    it('should handle negative numbers', () => {
+      expect(formatCurrency(-100.50)).toBe('-$100.50');
+    });
+
+    it('should round to 2 decimal places', () => {
+      expect(formatCurrency(10.999)).toBe('$11.00');
+    });
+  });
+
+  describe('Invalid inputs', () => {
+    it('should throw TypeError for non-number input', () => {
+      expect(() => formatCurrency('123' as any)).toThrow(TypeError);
+      expect(() => formatCurrency(null as any)).toThrow(TypeError);
+      expect(() => formatCurrency(undefined as any)).toThrow(TypeError);
+    });
+
+    it('should throw TypeError for NaN', () => {
+      expect(() => formatCurrency(NaN)).toThrow(TypeError);
+    });
+  });
+});
+```
+
+#### Step 4: Run Tests and Verify
+
+```bash
+# Run all tests
+bun test
+
+# Run specific test file
+bun test src/utils/format.test.ts
+
+# Run in watch mode during development
+bun test --watch
+
+# Generate coverage report (if configured)
+bun test --coverage
+```
+
+#### Step 5: Test Before Committing
+
+```bash
+# Pre-commit checklist
+git status                          # Review changed files
+git diff --staged                   # Review changes
+bunx biome check --write .          # Format and lint
+bun test                            # Run all tests
+bun run build                       # Verify production build
+git commit -m "feat: add currency formatting utility"
+```
+
+### Preventing Regressions
+
+#### Regression Test Pattern
+
+When fixing a bug:
+1. Write a test that reproduces the bug (test should fail)
+2. Fix the bug
+3. Verify the test now passes
+4. Commit both the fix and the test together
+
+```typescript
+// Bug Report: formatCurrency crashes with very large numbers
+describe('Regression: Large number handling', () => {
+  it('should handle numbers larger than safe integer', () => {
+    // This test would have failed before the fix
+    const largeAmount = 9007199254740991; // Number.MAX_SAFE_INTEGER
+    expect(() => formatCurrency(largeAmount)).not.toThrow();
+  });
+});
+```
+
+#### Continuous Validation
+
+- Run tests in CI/CD pipeline on every commit
+- Block merges if tests fail
+- Monitor test execution time (keep tests fast)
+- Review test coverage trends (aim for 80%+ on critical code)
+
+### Testing Anti-Patterns to Avoid
+
+**DON'T:**
+- Write tests that depend on execution order
+- Test multiple unrelated things in one test
+- Use real external services (use mocks instead)
+- Ignore flaky tests (fix or remove them)
+- Test framework internals (trust React, Astro, etc.)
+- Copy-paste tests without understanding them
+- Leave failing tests commented out
+
+**DO:**
+- Keep tests independent and isolated
+- Use descriptive test names that explain intent
+- Mock external dependencies consistently
+- Write tests that are fast and deterministic
+- Focus on public interfaces and behavior
+- Refactor tests along with production code
+- Delete obsolete tests
+
+### Agent Testing Checklist
+
+Before marking a task complete, verify:
+
+- [ ] All new functions have unit tests
+- [ ] All modified functions have updated tests
+- [ ] Bug fixes include regression tests
+- [ ] Critical business logic has comprehensive coverage
+- [ ] Edge cases and error handling are tested
+- [ ] Tests run successfully (`bun test`)
+- [ ] Code is formatted and linted (`bunx biome check --write .`)
+- [ ] Production build succeeds (`bun run build`)
+- [ ] If UI changes: consider browser agent testing for key flows
+- [ ] Test names clearly describe expected behavior
+- [ ] No commented-out or skipped tests without explanation
+
+### Resources and Commands
+
+```bash
+# Unit testing
+bun test                              # Run all tests
+bun test --watch                      # Watch mode
+bun test file.test.ts                 # Single file
+bun test --coverage                   # Coverage report
+
+# Browser testing (if agent-browser available)
+agent-browser launch                  # Start browser instance
+agent-browser test e2e.test.ts        # Run browser tests
+
+# Quality checks
+bunx biome check --write .            # Format + lint
+bun run build                         # Verify build
+
+# Git workflow
+git diff --staged                     # Review before commit
+git commit -m "test: add tests for X" # Commit tests
+```
+
+### Testing Philosophy
+
+> "Write tests that give you confidence. If a test doesn't help you catch bugs or understand behavior, it's not pulling its weight."
+
+Focus on:
+- **Confidence**: Tests should catch real bugs
+- **Clarity**: Tests should document expected behavior
+- **Speed**: Tests should run quickly
+- **Maintainability**: Tests should evolve with the code
+
+Remember: **You are responsible for the quality of the code you write. Tests are your primary tool for ensuring quality and preventing regressions. Treat them as first-class citizens alongside your production code.**
+
