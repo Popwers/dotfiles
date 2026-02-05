@@ -1,0 +1,51 @@
+personality = "friendly"
+model = "gpt-5.2-codex"
+model_reasoning_effort = "high"
+tool_output_token_limit = 25000
+# Leave room for native compaction near the 272–273k context window.
+# Formula: 273000 - (tool_output_token_limit + 15000)
+# With tool_output_token_limit=25000 ⇒ 273000 - (25000 + 15000) = 233000
+model_auto_compact_token_limit = 233000
+web_search = "live"
+
+[features]
+ghost_commit = false
+unified_exec = true
+apply_patch_freeform = true
+skills = true
+shell_snapshot = true
+shell_tool = true
+
+[projects."/Users/lionel"]
+trust_level = "untrusted"
+
+[mcp_servers.playwright]
+args = ["@playwright/mcp@latest"]
+command = "bunx"
+
+[mcp_servers.linear]
+url = "https://mcp.linear.app/mcp"
+
+[mcp_servers.notion]
+url = "https://mcp.notion.com/mcp"
+
+[mcp_servers.figma]
+url = "https://mcp.figma.com/mcp"
+
+[mcp_servers.context7]
+enabled = true
+url = "https://mcp.context7.com/mcp"
+
+[mcp_servers.context7.http_headers]
+CONTEXT7_API_KEY = "ctx7sk-1c3efdc8-aec6-417e-9cca-e36ed9696664"
+
+[mcp_servers.gh_grep]
+enabled = true
+url = "https://mcp.grep.app"
+
+[mcp_servers.exa]
+enabled = true
+url = "https://mcp.exa.ai"
+
+[mcp_servers.exa.http_headers]
+x-api-key = "469853ea-7c4e-499e-8113-621615e8ebd2"

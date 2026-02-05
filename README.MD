@@ -71,6 +71,10 @@ OpenCode is an AI coding agent for the terminal. Installed with the following pl
 - MCPs: context7, gh_grep, exa
 - The OpenCode `AGENTS.md` is also synced to Codex (`~/.codex/AGENTS.md`)
 
+## Codex
+
+Codex configuration is stored in `codex/config.toml` and copied to `~/.codex/config.toml` during setup.
+
 ## Fonts
 
 The setup installs JetBrains Mono Nerd Font and Symbols Only Nerd Font, which are optimized for development environments and terminal use.

@@ -122,6 +122,9 @@ rsync -a --delete "$SCRIPT_DIR/opencode/" ~/.config/opencode/
 mkdir -p ~/.codex
 cp "$SCRIPT_DIR/opencode/AGENTS.md" ~/.codex/AGENTS.md
 
+# Copy Codex configuration
+cp "$SCRIPT_DIR/codex/config.toml" ~/.codex/config.tomli
+
 # Setup brew
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
