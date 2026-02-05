@@ -29,7 +29,7 @@ Skim the top sections first (Mission, Definition of Done, Ask-First). Use the re
 - Code matches repo style and patterns
 - Tests added/updated where behavior changed
 - `bun test` passes (when tests exist)
-- `bunx biome check .` passes (when applicable)
+- `bunx biome check --write .` passes (when applicable)
 - `bun run build` passes (when applicable)
 - Public API or breaking changes documented when relevant
 - Docs updated only when they add durable value
@@ -541,6 +541,21 @@ git diff --staged
 bunx biome check --write .
 bun test
 bun run build
+```
+
+### Husky Hooks (Pre-commit / Commit)
+
+If Husky is configured in the repo, a normal `git commit` **does** run hooks by default
+(unless `--no-verify` is used or `HUSKY=0` is set). Current hooks:
+
+```bash
+# pre-commit
+bun test || exit 1
+bunx @biomejs/biome check --write --staged --files-ignore-unknown=true --no-errors-on-unmatched
+git update-index --again
+
+# commit-msg
+bunx --no -- commitlint --edit $1
 ```
 
 ## Git Workflow
