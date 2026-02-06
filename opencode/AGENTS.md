@@ -23,13 +23,42 @@ Be a calm, helpful teammate. Keep responses short, direct, and friendly. Explain
 
 Skim the top sections first (Mission, Definition of Done, Ask-First). Use the rest as a reference when you need specific conventions or examples.
 
+## Quickstart (30s)
+
+- Follow repo-level rules first; this file is fallback guidance
+- Prioritize correctness over speed; avoid speculative refactors
+- Match existing patterns before introducing new ones
+- Test new and changed behavior
+- Report changed files, validation run, and residual risks
+
+## Priority Levels
+
+- `MUST`: non-negotiable rules
+- `SHOULD`: default behavior unless a repo constraint blocks it
+- `MAY`: optional improvements when cost is low
+
+## Repo Detection Policy
+
+- Detect and follow the repository's actual toolchain first (`package.json`, config files, existing scripts, CI)
+- If Bun/Biome commands are unavailable, use the repo's equivalent commands and state what was used
+- Do not introduce new tools/frameworks only to complete a task
+
+## Execution Protocol (MUST)
+
+1. Understand scope and non-goals before editing
+2. Discover relevant code with semantic search first (`grepai search`), then exact search as needed
+3. Make the smallest safe change that solves the task
+4. Update or add tests for changed behavior
+5. Run relevant validations (tests, lint, build) based on change type
+6. Deliver a concise report with changed files, validations, assumptions, and residual risks
+
 ## Definition of Done
 
 - Requirements satisfied and edge cases considered
 - Code matches repo style and patterns
 - Tests added/updated where behavior changed
 - `bun test` passes (when tests exist)
-- `bunx biome check --write .` passes (when applicable)
+- `bunx biome check .` passes (when applicable)
 - `bun run build` passes (when applicable)
 - Public API or breaking changes documented when relevant
 - Docs updated only when they add durable value
@@ -46,10 +75,13 @@ Skim the top sections first (Mission, Definition of Done, Ask-First). Use the re
 
 - Validate external inputs at boundaries and fail fast with explicit errors
 - Follow existing test style and patterns in the repo first
+- Prefer minimal, reversible changes over broad rewrites
 
 ## Clarifications
 
 - If requirements are ambiguous, ask 1–2 targeted questions before proceeding
+- If there are multiple valid paths with non-obvious tradeoffs, present short options and recommend one
+- If blocked after reasonable attempts, report attempts made, concrete errors, and the next best action
 
 ## Ask-First Boundaries
 
@@ -59,6 +91,14 @@ Skim the top sections first (Mission, Definition of Done, Ask-First). Use the re
 - Changing CI/CD, release, or deployment configurations
 - Rewriting git history (amend, rebase, force push)
 - Running commands that interact with external accounts or credentials
+
+## Validation Matrix (MUST)
+
+- Docs-only changes: validate links/snippets and formatting consistency
+- Source code changes: run targeted tests first, then broader tests when risk is medium/high
+- Build/config/tooling changes: run lint + tests + build
+- UI behavior changes: run unit/component tests and validate key flow with `agent-browser`
+- Security-sensitive changes: add/adjust tests for auth, permissions, and failure paths
 
 
 ## Commands
@@ -458,6 +498,7 @@ expect(screen.getByText(user.username)).toBeInTheDocument();
 **Use for:** visual regression, E2E flows, interactive UI, accessibility, dynamic content.
 Use agent-browser for: login flows, forms, modals, animations, responsive checks, and key accessibility paths.
 Use refs from `agent-browser snapshot -i` output (e.g. `@e1`, `@e2`) for reliable targeting.
+`@e1`/`@e2` are placeholders in docs and will change per run; always refresh refs before actions.
 
 ```bash
 agent-browser open http://localhost:3000/login
@@ -526,6 +567,7 @@ agent-browser get text @e1
 agent-browser screenshot page.png
 agent-browser close
 bunx biome check --write .
+bunx biome check .
 bun run build
 ```
 
@@ -623,6 +665,19 @@ export const formatCurrency = (amount: number, currency = 'USD') => {
   // ...
 };
 ```
+
+## Response Contract
+
+When delivering results, include:
+- Changed files
+- Validation performed (`test`, `lint`, `build`) and outcome
+- Assumptions made
+- Remaining risks or follow-ups (if any)
+
+If blocked, include:
+- What was attempted
+- Exact error or constraint
+- Proposed next step
 
 ## Tooling Rules
 
