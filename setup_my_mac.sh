@@ -4,7 +4,7 @@
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 # Install Homebrew
-if test ! $(which brew); then
+if ! command -v brew >/dev/null 2>&1; then
     echo "Installing Homebrew for you."
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 else
@@ -82,7 +82,7 @@ nvm install lts
 nvm use lts
 
 # Install global packages
-bun install -g ngrok npm-check-updates typescript commitizen cz-conventional-changelog agent-browser @openai/codex @playwright/test
+bun install -g ngrok npm-check-updates typescript commitizen cz-conventional-changelog agent-browser @openai/codex
 
 # Add bun to path
 fish_add_path ~/.bun/bin
@@ -123,7 +123,7 @@ mkdir -p ~/.codex
 cp "$SCRIPT_DIR/opencode/AGENTS.md" ~/.codex/AGENTS.md
 
 # Copy Codex configuration
-cp "$SCRIPT_DIR/codex/config.toml" ~/.codex/config.tomli
+cp "$SCRIPT_DIR/codex/config.toml" ~/.codex/config.toml
 
 # Setup brew
 eval "$(/opt/homebrew/bin/brew shellenv)"
@@ -138,7 +138,13 @@ bunx skills add https://github.com/anthropics/skills --skill frontend-design -g 
 bunx skills add coreyhaines31/marketingskills -g -a opencode codex -y
 bunx skills add yoanbernabeu/grepai-skills -g -a opencode codex -y
 
-agent-browser install  # Download Chromium
+# Configure agent-browser right after install (downloads Chromium)
+if [ -x "$HOME/.bun/bin/agent-browser" ]; then
+    "$HOME/.bun/bin/agent-browser" install
+    "$HOME/.bun/bin/agent-browser" --version
+else
+    echo "agent-browser binary not found in ~/.bun/bin"
+fi
 
 echo "Mac setup is complete!"
 echo "Don't forget to set your terminal font to JetBrains Mono Nerd Font and Symbols Only"
