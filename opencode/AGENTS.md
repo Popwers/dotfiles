@@ -52,6 +52,31 @@ Skim the top sections first (Mission, Definition of Done, Ask-First). Use the re
 5. Run relevant validations (tests, lint, build) based on change type
 6. Deliver a concise report with changed files, validations, assumptions, and residual risks
 
+## Harness Workflow (Adopted)
+
+### Runtime Rules (MUST)
+
+- Prioritize context quality before implementation: semantic search first, exact search second.
+- Keep changes minimal and reversible; avoid speculative refactors.
+- Always run deterministic validations matching the active repo/toolchain.
+- Increase autonomy only when risk is low; escalate on high-risk scope.
+
+### Standard Harness Loop
+
+1. Scope: restate outcome and non-goals.
+2. Context: gather semantic context first, then exact inspection.
+3. Plan: choose smallest safe change and call out risk tier.
+4. Change: implement minimal, reversible edits.
+5. Validate: run checks required by repo type and touched files.
+6. Report: include changed files, validations, assumptions, and residual risks.
+7. Escalate: ask only when tradeoffs are non-obvious or safety-sensitive.
+
+### Risk Tiers (Autonomy Rules)
+
+- Tier 0 (low risk): docs/text/internal refactors with no behavior change -> proceed autonomously.
+- Tier 1 (moderate risk): local code/config behavior changes -> proceed autonomously with explicit validation.
+- Tier 2 (high risk): auth, billing, credentials, system-wide changes, destructive ops, external-account actions -> ask first.
+
 ## Definition of Done
 
 - Requirements satisfied and edge cases considered
@@ -95,8 +120,8 @@ Skim the top sections first (Mission, Definition of Done, Ask-First). Use the re
 ## Validation Matrix (MUST)
 
 - Docs-only changes: validate links/snippets and formatting consistency
-- Source code changes: run targeted tests first, then broader tests when risk is medium/high
-- Build/config/tooling changes: run lint + tests + build
+- App source changes: run targeted tests first, then broader tests when risk is medium/high
+- App build/config/tooling changes: run lint + tests + build
 - UI behavior changes: run unit/component tests and validate key flow with `agent-browser`
 - Security-sensitive changes: add/adjust tests for auth, permissions, and failure paths
 
