@@ -9,14 +9,13 @@ model_auto_compact_token_limit = 233000
 web_search = "live"
 
 [features]
+multi_agent = true
 ghost_commit = false
 unified_exec = true
 apply_patch_freeform = true
 skills = true
 shell_snapshot = true
 shell_tool = true
-collab = true
-responses_websockets_v2 = true
 
 [projects."/Users/lionel"]
 trust_level = "untrusted"

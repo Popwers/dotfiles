@@ -2,7 +2,7 @@
 	"$schema": "https://raw.githubusercontent.com/code-yeongyu/oh-my-opencode/master/assets/oh-my-opencode.schema.json",
 	"agents": {
 		"Sisyphus": {
-			"model": "openai/gpt-5.2-codex",
+			"model": "openai/gpt-5.3-codex",
 			"prompt_append": "\n\n<persistence>\n- Do not ask the human to confirm or clarify assumptions, as you can always adjust later\n- Decide what the most reasonable assumption is, proceed with it, and document it for the user's reference after you finish acting\n</persistence>"
 		},
 		"librarian": {
@@ -12,7 +12,7 @@
 			"model": "opencode/grok-code"
 		},
 		"oracle": {
-			"model": "openai/gpt-5.2-codex"
+			"model": "openai/gpt-5.3-codex"
 		},
 		"frontend-ui-ux-engineer": {
 			"model": "opencode/glm-4.7-free"
