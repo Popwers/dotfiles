@@ -135,6 +135,7 @@ bunx skills add https://github.com/vercel-labs/agent-skills --skill vercel-react
 bunx skills add https://github.com/vercel-labs/agent-skills --skill web-design-guidelines -g -a opencode codex -y
 bunx skills add https://github.com/vercel-labs/skills --skill find-skills -g -a opencode codex -y
 bunx skills add https://github.com/anthropics/skills --skill frontend-design -g -a opencode codex -y
+bunx skills add better-auth/skills -g -a opencode codex -y
 bunx skills add coreyhaines31/marketingskills -g -a opencode codex -y
 bunx skills add yoanbernabeu/grepai-skills -g -a opencode codex -y
 
