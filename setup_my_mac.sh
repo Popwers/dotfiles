@@ -129,20 +129,21 @@ cp "$SCRIPT_DIR/codex/config.toml" ~/.codex/config.toml
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
 # Install skills
-bunx skills add https://github.com/vercel-labs/agent-browser --skill agent-browser -g -a opencode codex -y
-bunx skills add https://github.com/vercel-labs/agent-skills --skill vercel-react-native-skills -g -a opencode codex -y
-bunx skills add https://github.com/vercel-labs/agent-skills --skill vercel-react-best-practices -g -a opencode codex -y
-bunx skills add https://github.com/vercel-labs/agent-skills --skill vercel-composition-patterns -g -a opencode codex -y
-bunx skills add https://github.com/vercel-labs/agent-skills --skill web-design-guidelines -g -a opencode codex -y
-bunx skills add https://github.com/vercel-labs/skills --skill find-skills -g -a opencode codex -y
-bunx skills add https://github.com/anthropics/skills --skill frontend-design -g -a opencode codex -y
-bunx skills add https://github.com/anthropics/skills --skill doc-coauthoring -g -a opencode codex -y
-bunx skills add https://github.com/anthropics/skills --skill webapp-testing -g -a opencode codex -y
-bunx skills add https://github.com/openai/skills --skill playwright -g -a opencode codex -y
-bunx skills add https://github.com/openai/skills --skill yeet -g -a opencode codex -y
-bunx skills add better-auth/skills -g -a opencode codex -y
-bunx skills add coreyhaines31/marketingskills -g -a opencode codex -y
-bunx skills add yoanbernabeu/grepai-skills -g -a opencode codex -y
+bunx --bun skills add https://github.com/vercel-labs/agent-browser --skill agent-browser -g -a opencode codex -y
+bunx --bun skills add https://github.com/vercel-labs/agent-skills --skill vercel-react-native-skills -g -a opencode codex -y
+bunx --bun skills add https://github.com/vercel-labs/agent-skills --skill vercel-react-best-practices -g -a opencode codex -y
+bunx --bun skills add https://github.com/vercel-labs/agent-skills --skill vercel-composition-patterns -g -a opencode codex -y
+bunx --bun skills add https://github.com/vercel-labs/agent-skills --skill web-design-guidelines -g -a opencode codex -y
+bunx --bun skills add https://github.com/vercel-labs/skills --skill find-skills -g -a opencode codex -y
+bunx --bun skills add https://github.com/anthropics/skills --skill frontend-design -g -a opencode codex -y
+bunx --bun skills add https://github.com/anthropics/skills --skill doc-coauthoring -g -a opencode codex -y
+bunx --bun skills add https://github.com/anthropics/skills --skill webapp-testing -g -a opencode codex -y
+bunx --bun skills add https://github.com/openai/skills --skill playwright -g -a opencode codex -y
+bunx --bun skills add https://github.com/openai/skills --skill yeet -g -a opencode codex -y
+bunx --bun skills add better-auth/skills -g -a opencode codex -y
+bunx --bun skills add coreyhaines31/marketingskills -g -a opencode codex -y
+bunx --bun skills add yoanbernabeu/grepai-skills -g -a opencode codex -y
+bunx --bun skills add shadcn/ui -g -a opencode codex -y
 
 # Configure agent-browser right after install (downloads Chromium)
 if [ -x "$HOME/.bun/bin/agent-browser" ]; then

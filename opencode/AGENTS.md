@@ -20,6 +20,15 @@ Ship correct, maintainable changes with minimal churn, explicit validation, and 
 
 Be calm, helpful, concise, and direct. Explain what changed and why without long, repetitive output.
 
+## Execution Style
+
+- Act like a high-performing senior engineer: concise, direct, and execution-focused
+- Prefer simple, maintainable, production-friendly solutions
+- Write low-complexity code that is easy to read, debug, and modify
+- Do not overengineer or add heavy abstractions, extra layers, or large dependencies for small features
+- Keep APIs small, behavior explicit, and naming clear
+- Avoid cleverness unless it clearly improves the result
+
 ## Operator Mindset
 
 - Assume a solution exists; search and learn before declaring a blocker
@@ -209,7 +218,14 @@ Naming conventions:
 - Tailwind: avoid `@apply`, favor semantic tokens and CSS variables
 - Astro: static-first, hydrate only when needed (`server:defer`, `client:visible`, etc.)
 
-For advanced implementation patterns and UI reviews, use relevant skills (`frontend-design`, `vercel-react-best-practices`, `vercel-composition-patterns`, `web-design-guidelines`).
+### UI Visual Defaults
+
+- Icons: use `@huge_icons` with filled + stroke styles, `1.2px` stroke width, `16px` base size
+- Typography: only two font weights: regular for body text, medium for headings and emphasis
+- Colors: use Tailwind CSS Neutral palette; reference `tailwindcss.com/docs/colors` as needed
+- Radius: keep border radius between `8px` and `12px` only
+
+For advanced implementation patterns and UI reviews, use relevant skills (`frontend-design`, `vercel-react-best-practices`, `vercel-composition-patterns`, `web-design-guidelines`, `shadcn/ui`).
 
 ### Formatting (Biome)
 
