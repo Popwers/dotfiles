@@ -144,6 +144,7 @@ bunx --bun skills add better-auth/skills -g -a opencode codex -y
 bunx --bun skills add coreyhaines31/marketingskills -g -a opencode codex -y
 bunx --bun skills add yoanbernabeu/grepai-skills -g -a opencode codex -y
 bunx --bun skills add shadcn/ui -g -a opencode codex -y
+bunx --bun skills add https://github.com/Popwers/skills --skill interface-feel-polish -g -a opencode codex -y
 
 # Configure agent-browser right after install (downloads Chromium)
 if [ -x "$HOME/.bun/bin/agent-browser" ]; then
