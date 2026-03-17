@@ -118,9 +118,10 @@ bunx opencode-supermemory@latest install --no-tui
 mkdir -p ~/.config/opencode
 rsync -a --delete "$SCRIPT_DIR/opencode/" ~/.config/opencode/
 
-# Copy OpenCode agent to Codex
-mkdir -p ~/.codex
+# Copy OpenCode agent and Codex subagents
+mkdir -p ~/.codex ~/.codex/agents
 cp "$SCRIPT_DIR/opencode/AGENTS.md" ~/.codex/AGENTS.md
+rsync -a --delete "$SCRIPT_DIR/codex/agents/" ~/.codex/agents/
 
 # Copy Codex configuration
 cp "$SCRIPT_DIR/codex/config.toml" ~/.codex/config.toml

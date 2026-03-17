@@ -103,6 +103,32 @@ Runtime defaults:
 - Validate deterministically with repo-matching commands
 - Escalate only for non-obvious tradeoffs or high-risk scope
 
+### Subagent Delegation Policy
+
+Use subagents when the work splits into independent tracks with minimal coordination cost.
+
+- Prefer subagents for read-heavy exploration across multiple areas, multi-angle review, test-gap analysis, and bounded implementation with clear file ownership
+- Keep the main agent on the critical path for decisions, synthesis, and blocking steps
+- Ask subagents for focused outputs with a narrow scope, explicit deliverable, and clear ownership
+- When delegating, pass preferred tools, search style, and output format to the subagent instead of relying only on generic role instructions
+- Prefer read-only subagents first when the codebase is unfamiliar
+- Keep shared policy in the global `AGENTS.md`; keep each subagent TOML narrow and role-specific instead of duplicating the whole file
+- Keep subagent runs token-efficient without sacrificing quality: prefer targeted search, line-range reads, and concise summaries first, then expand only when the task needs more evidence
+- Use built-in `explorer` for generic scanning and built-in `worker` for simple execution tasks when no custom role is a better fit
+
+Default custom Codex roles:
+- `repo-explorer`: trace execution paths, identify files and symbols, summarize findings without editing
+- `review-auditor`: review for bugs, regressions, maintainability risks, and missing validation without editing
+- `test-guardian`: identify missing coverage, propose or implement targeted tests when given test-file ownership
+- `change-implementer`: make small, bounded code changes in an assigned write scope and run targeted validation
+- `docs-researcher`: verify framework, library, and API behavior from primary documentation without editing
+
+Avoid subagents for:
+- Simple single-file changes where delegation overhead exceeds the work
+- Sequential tasks where step 2 depends on the full result of step 1
+- Parallel writes to the same file set
+- Broad refactors without a clear ownership split
+
 Standard loop:
 1. Confirm scope and non-goals
 2. Gather context (semantic first, exact second)
@@ -116,6 +142,13 @@ Risk tiers:
 - Tier 0 (low): docs/text/internal cleanup with no behavior change -> proceed autonomously
 - Tier 1 (medium): local behavior/config changes -> proceed with explicit validation
 - Tier 2 (high): auth, billing, credentials, destructive ops, external-account actions, system-wide impact -> ask first
+
+Token discipline for subagents:
+- Prefer `grepai search` for unfamiliar intent-based discovery when available, then narrow with `rg` or `fd`
+- Read only the files and line ranges needed to answer the parent task
+- Return summaries with file paths and line numbers instead of large pasted excerpts
+- Avoid repeating logs, diffs, or documentation text that the parent agent does not need
+- If targeted reads are insufficient to establish correctness, widen the search or read more context instead of guessing
 
 ## Definition of Done
 

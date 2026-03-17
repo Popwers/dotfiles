@@ -74,6 +74,10 @@ OpenCode is an AI coding agent for the terminal. Installed with the following pl
 ## Codex
 
 Codex configuration is stored in `codex/config.toml` and copied to `~/.codex/config.toml` during setup.
+Custom subagents live in `codex/agents/` and are synced to `~/.codex/agents/` during setup.
+The curated set is intentionally small: `repo-explorer`, `review-auditor`, `test-guardian`, `change-implementer`, and `docs-researcher`.
+Keep shared behavior in `opencode/AGENTS.md`; each agent TOML should only add narrow role-specific instructions.
+Subagents should stay token-efficient: use targeted discovery (`grepai`, `rg`, `fd`), read narrow line ranges, and return concise summaries instead of large raw outputs.
 
 ## Fonts
 
