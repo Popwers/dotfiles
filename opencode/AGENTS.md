@@ -108,6 +108,7 @@ Runtime defaults:
 Use subagents when the work splits into independent tracks with minimal coordination cost.
 
 - Prefer subagents for read-heavy exploration across multiple areas, multi-angle review, test-gap analysis, and bounded implementation with clear file ownership
+- For coding work, prefer subagents for exploration, documentation verification, targeted review, and test planning; keep the main agent on direct implementation unless the write scope splits cleanly
 - Keep the main agent on the critical path for decisions, synthesis, and blocking steps
 - Ask subagents for focused outputs with a narrow scope, explicit deliverable, and clear ownership
 - When delegating, pass preferred tools, search style, and output format to the subagent instead of relying only on generic role instructions
@@ -238,6 +239,23 @@ Naming conventions:
 - Prefer guard clauses/early returns
 - Use descriptive names (`isLoading`, `hasError`)
 - Keep interfaces in dedicated interface files where repo pattern expects it
+
+### Code Shape Preferences
+
+- Write extremely simple code that is easy to skim
+- Minimize possible states by reducing arguments and narrowing state aggressively
+- Prefer discriminated unions when they reduce the number of valid states
+- Exhaustively handle multi-variant objects and fail on unknown variants
+- Do not write defensive code for impossible states; trust the types and assert at boundaries
+- Use assertions when loading data or when a required value must exist
+- Do not make arguments optional unless they are truly optional
+- Keep argument counts low; do not pass overrides unless they are strictly necessary
+- Remove changes that are not strictly required for the task
+- Bias toward fewer lines of code
+- Avoid complex or clever code
+- Do not split logic into many small functions when that hurts readability
+- Prefer early returns
+- Prefer assertions over `try`/`catch`, fallback defaults, or silent recovery when a required value is expected
 
 ### State and React
 

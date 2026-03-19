@@ -1,27 +1,23 @@
 personality = "pragmatic"
-model = "gpt-5.4"
+model = "gpt-5.3-codex"
 model_reasoning_effort = "high"
+review_model = "gpt-5.4-mini"
 suppress_unstable_features_warning = true
-tool_output_token_limit = 25000
-# Leave room for native compaction near the 272–273k context window.
-# Formula: 273000 - (tool_output_token_limit + 15000)
-# With tool_output_token_limit=25000 ⇒ 273000 - (25000 + 15000) = 233000
-model_auto_compact_token_limit = 233000
-web_search = "live"
+tool_output_token_limit = 12000
+# Compact early enough to protect long sessions, but not so early that Codex loses useful working context.
+model_auto_compact_token_limit = 220000
+web_search = "cached"
 
 [agents]
-# Four concurrent subagents is usually enough for explorer/reviewer/test/docs splits
-# without creating too much extra cost or noisy output.
-max_threads = 4
+# Three concurrent subagents is a better cost/perf tradeoff for routine coding sessions.
+max_threads = 3
 max_depth = 1
 job_max_runtime_seconds = 1200
 
 [features]
 multi_agent = true
-ghost_commit = false
 unified_exec = true
 apply_patch_freeform = true
-skills = true
 shell_snapshot = true
 shell_tool = true
 
@@ -29,16 +25,20 @@ shell_tool = true
 trust_level = "untrusted"
 
 [mcp_servers.playwright]
+enabled = false
 args = ["@playwright/mcp@latest"]
 command = "bunx"
 
 [mcp_servers.linear]
+enabled = false
 url = "https://mcp.linear.app/mcp"
 
 [mcp_servers.notion]
+enabled = false
 url = "https://mcp.notion.com/mcp"
 
 [mcp_servers.figma]
+enabled = false
 url = "https://mcp.figma.com/mcp"
 
 [mcp_servers.context7]

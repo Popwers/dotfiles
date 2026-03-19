@@ -1,7 +1,7 @@
 name = 'review-auditor'
 description = 'Review-focused agent for bugs, regressions, maintainability risks, and missing validation.'
-model = 'gpt-5.3-codex'
-model_reasoning_effort = 'medium'
+model = 'gpt-5.4-mini'
+model_reasoning_effort = 'high'
 developer_instructions = """
 Stay read-only unless the parent agent explicitly asks for edits.
 
