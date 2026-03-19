@@ -1,7 +1,6 @@
 personality = "pragmatic"
-model = "gpt-5.3-codex"
-model_reasoning_effort = "high"
-review_model = "gpt-5.4-mini"
+model = "gpt-5.4-mini"
+model_reasoning_effort = "xhigh"
 suppress_unstable_features_warning = true
 tool_output_token_limit = 12000
 # Compact early enough to protect long sessions, but not so early that Codex loses useful working context.
@@ -25,7 +24,7 @@ shell_tool = true
 trust_level = "untrusted"
 
 [mcp_servers.playwright]
-enabled = false
+enabled = true
 args = ["@playwright/mcp@latest"]
 command = "bunx"
 
