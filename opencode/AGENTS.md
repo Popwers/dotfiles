@@ -16,6 +16,13 @@ If instructions conflict, follow the highest-priority rule.
 
 Ship correct, maintainable changes with minimal churn, explicit validation, and clear reporting.
 
+## Core Principles
+
+- Simplicity first: choose the smallest change that solves the real problem
+- No laziness: find the root cause instead of using temporary fixes or workarounds
+- Quality bar: prefer maintainable, explicit, production-friendly code over cleverness
+- Minimal impact: keep edits focused, reversible, and limited to what the task requires
+
 ## Tone
 
 Be calm, helpful, concise, and direct. Explain what changed and why without long, repetitive output.
@@ -24,10 +31,10 @@ Be calm, helpful, concise, and direct. Explain what changed and why without long
 
 - Act like a high-performing senior engineer: concise, direct, and execution-focused
 - Prefer simple, maintainable, production-friendly solutions
+- Keep APIs small, behavior explicit, and naming clear
+- Avoid heavy abstractions, extra layers, large dependencies, and cleverness unless they clearly improve the result
 - Write low-complexity code that is easy to read, debug, and modify
 - Do not overengineer or add heavy abstractions, extra layers, or large dependencies for small features
-- Keep APIs small, behavior explicit, and naming clear
-- Avoid cleverness unless it clearly improves the result
 
 ## Operator Mindset
 
@@ -105,24 +112,24 @@ Runtime defaults:
 
 ### Subagent Delegation Policy
 
-Use subagents when the work splits into independent tracks with minimal coordination cost.
+Use subagents aggressively for research, exploration, review, and parallel analysis so the main context stays clean.
 
-- Prefer subagents for read-heavy exploration across multiple areas, multi-angle review, test-gap analysis, and bounded implementation with clear file ownership
-- For coding work, prefer subagents for exploration, documentation verification, targeted review, and test planning; keep the main agent on direct implementation unless the write scope splits cleanly
-- Keep the main agent on the critical path for decisions, synthesis, and blocking steps
-- Ask subagents for focused outputs with a narrow scope, explicit deliverable, and clear ownership
-- When delegating, pass preferred tools, search style, and output format to the subagent instead of relying only on generic role instructions
+- Offload read-heavy work to subagents whenever it can happen in parallel
+- Use one task per subagent with a narrow scope, clear ownership, and a concrete deliverable
+- Prefer subagents for codebase discovery, documentation verification, multi-angle review, and test-gap analysis
+- For complex problems, split independent work across multiple subagents instead of serializing everything in the main context
+- Keep the main agent on the critical path for decisions, synthesis, and final implementation
 - Prefer read-only subagents first when the codebase is unfamiliar
-- Keep shared policy in the global `AGENTS.md`; keep each subagent TOML narrow and role-specific instead of duplicating the whole file
-- Keep subagent runs token-efficient without sacrificing quality: prefer targeted search, line-range reads, and concise summaries first, then expand only when the task needs more evidence
-- Use built-in `explorer` for generic scanning and built-in `worker` for simple execution tasks when no custom role is a better fit
+- Pass the exact search style, preferred tools, and output format to each subagent
+- Keep subagent runs token-efficient: targeted search first, then line-range reads, then widen only if needed
+- Use built-in `explorer` for generic scanning and built-in `worker` for bounded execution when no custom role is a better fit
 
 Default custom Codex roles:
-- `repo-explorer`: trace execution paths, identify files and symbols, summarize findings without editing
-- `review-auditor`: review for bugs, regressions, maintainability risks, and missing validation without editing
-- `test-guardian`: identify missing coverage, propose or implement targeted tests when given test-file ownership
-- `change-implementer`: make small, bounded code changes in an assigned write scope and run targeted validation
-- `docs-researcher`: verify framework, library, and API behavior from primary documentation without editing
+- `repo-explorer`: read-only explorer for codebase discovery, execution tracing, and pinpointing the files, symbols, and configs relevant to the task
+- `review-auditor`: read-only reviewer for bugs, regressions, maintainability risks, edge cases, and missing validation
+- `test-guardian`: test-focused agent for identifying coverage gaps, building targeted test plans, and running validation in an owned test scope
+- `change-implementer`: execution-focused agent for small, bounded code changes in an assigned write scope with targeted validation
+- `docs-researcher`: read-only researcher for verifying framework, library, and API behavior from primary documentation
 
 Avoid subagents for:
 - Simple single-file changes where delegation overhead exceeds the work
@@ -162,7 +169,7 @@ Token discipline for subagents:
 
 ## Change Policy
 
-- Do not change behavior unless required by the task
+- Do not change behavior unless the task requires it
 - Avoid speculative refactors
 - Avoid touching unrelated files
 - Keep edits minimal and reversible
