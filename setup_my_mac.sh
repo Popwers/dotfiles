@@ -3,6 +3,28 @@
 # Get the directory where this script is located
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
+# Copy a file with visible status messages.
+copy_file_with_status() {
+    local source_file=$1
+    local destination_file=$2
+
+    echo "Copying file: $source_file -> $destination_file"
+    mkdir -p "$(dirname "$destination_file")"
+    cp "$source_file" "$destination_file"
+    echo "Copied file: $destination_file"
+}
+
+# Sync a directory with visible status messages.
+sync_dir_with_status() {
+    local source_dir=$1
+    local destination_dir=$2
+
+    echo "Syncing directory: $source_dir -> $destination_dir"
+    mkdir -p "$destination_dir"
+    rsync -a --delete "$source_dir/" "$destination_dir/"
+    echo "Synced directory: $destination_dir"
+}
+
 # Install Homebrew
 if ! command -v brew >/dev/null 2>&1; then
     echo "Installing Homebrew for you."
@@ -147,15 +169,11 @@ EOF
 brew cleanup
 
 # Copy configuration files from repo
-cp "$SCRIPT_DIR/.profile" ~/.profile
-cp "$SCRIPT_DIR/.czrc" ~/.czrc
-cp "$SCRIPT_DIR/.gitconfig" ~/.gitconfig
-
-mkdir -p ~/.config/fish
-cp "$SCRIPT_DIR/config.fish" ~/.config/fish/config.fish
-
-mkdir -p ~/.config/nvim
-cp "$SCRIPT_DIR/init.vim" ~/.config/nvim/init.vim
+copy_file_with_status "$SCRIPT_DIR/.profile" "$HOME/.profile"
+copy_file_with_status "$SCRIPT_DIR/.czrc" "$HOME/.czrc"
+copy_file_with_status "$SCRIPT_DIR/.gitconfig" "$HOME/.gitconfig"
+copy_file_with_status "$SCRIPT_DIR/config.fish" "$HOME/.config/fish/config.fish"
+copy_file_with_status "$SCRIPT_DIR/init.vim" "$HOME/.config/nvim/init.vim"
 
 # Install OpenCode via official installer (not brew - avoids node dependency conflict with nvm.fish)
 if [ -x "$HOME/.opencode/bin/opencode" ] || command -v opencode >/dev/null 2>&1; then
@@ -179,16 +197,14 @@ else
 fi
 
 # Copy OpenCode configuration directory (clean sync)
-mkdir -p ~/.config/opencode
-rsync -a --delete "$SCRIPT_DIR/opencode/" ~/.config/opencode/
+sync_dir_with_status "$SCRIPT_DIR/opencode" "$HOME/.config/opencode"
 
 # Copy OpenCode agent and Codex subagents
-mkdir -p ~/.codex ~/.codex/agents
-cp "$SCRIPT_DIR/opencode/AGENTS.md" ~/.codex/AGENTS.md
-rsync -a --delete "$SCRIPT_DIR/codex/agents/" ~/.codex/agents/
+copy_file_with_status "$SCRIPT_DIR/opencode/AGENTS.md" "$HOME/.codex/AGENTS.md"
+sync_dir_with_status "$SCRIPT_DIR/codex/agents" "$HOME/.codex/agents"
 
 # Copy Codex configuration
-cp "$SCRIPT_DIR/codex/config.toml" ~/.codex/config.toml
+copy_file_with_status "$SCRIPT_DIR/codex/config.toml" "$HOME/.codex/config.toml"
 
 # Setup brew
 eval "$(/opt/homebrew/bin/brew shellenv)"
