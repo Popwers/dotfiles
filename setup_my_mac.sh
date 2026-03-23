@@ -276,6 +276,13 @@ install_skill_bundle_if_missing "yoanbernabeu/grepai-skills" "grepai-init" "grep
 install_skill_bundle_if_missing "shadcn/ui" "shadcn"
 install_skill_if_missing "interface-feel-polish" "https://github.com/Popwers/skills" --skill interface-feel-polish
 
+# Activate the design-engineering skill for frontend work.
+if is_skill_installed "emil-design-engineering"; then
+    echo "Skill 'emil-design-engineering' is already installed."
+else
+    curl -s "https://animations.dev/api/activate-design-engineering?email=lionel.bataille%40hotmail.com" | bash
+fi
+
 # Configure agent-browser right after install (downloads Chromium)
 if [ -x "$HOME/.bun/bin/agent-browser" ]; then
     if compgen -G "$HOME/Library/Caches/ms-playwright/chromium-*" >/dev/null || compgen -G "$HOME/.cache/ms-playwright/chromium-*" >/dev/null; then

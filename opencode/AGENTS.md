@@ -70,6 +70,7 @@ How to apply skills:
 Balance rule:
 - If a matching skill covers procedure details, keep only policy/defaults in this file and defer implementation steps to the skill
 - If no matching skill covers a rule, keep that rule explicitly in this file
+- For any frontend/UI task, you MUST use `emil-design-engineering` first. Use `motion.dev` second for animation and motion work. Use `shadcn` third when the task touches shadcn/ui components, patterns, or composition. Use the remaining frontend skills after that as needed. This includes components, pages, layouts, forms, styling, responsiveness, accessibility, and motion.
 
 ## Priority Levels
 
@@ -283,7 +284,7 @@ Naming conventions:
 - Colors: use Tailwind CSS Neutral palette; reference `tailwindcss.com/docs/colors` as needed
 - Radius: keep border radius between `8px` and `12px` only
 
-For advanced implementation patterns and UI reviews, use relevant skills (`frontend-design`, `vercel-react-best-practices`, `vercel-composition-patterns`, `web-design-guidelines`, `shadcn/ui`).
+For advanced implementation patterns and UI reviews, use relevant skills in this order: `emil-design-engineering`, `motion.dev`, `shadcn`, `frontend-design`, `vercel-react-best-practices`, `vercel-composition-patterns`, `web-design-guidelines`, `shadcn/ui`.
 
 ### Formatting (Biome)
 
