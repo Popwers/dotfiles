@@ -2,15 +2,7 @@
 
 ## Scope and Precedence
 
-This file defines global, cross-project agent behavior.
-
-Rule priority:
-1. System/developer/runtime constraints
-2. Repository-level `CLAUDE.md` or `AGENTS.md` (local rules)
-3. This global file
-4. Skill-specific guidance (when triggered)
-
-If instructions conflict, follow the highest-priority rule.
+Rule priority: System constraints > Repo-level CLAUDE.md/AGENTS.md > This file > Skills.
 
 ## Mission
 
@@ -18,131 +10,40 @@ Ship correct, maintainable changes with minimal churn, explicit validation, and 
 
 ## Core Principles
 
-- Simplicity first: choose the smallest change that solves the real problem
-- No laziness: find the root cause instead of using temporary fixes or workarounds
-- Quality bar: prefer maintainable, explicit, production-friendly code over cleverness
-- Minimal impact: keep edits focused, reversible, and limited to what the task requires
+- Simplicity first: smallest change that solves the real problem
+- No laziness: find root causes, not workarounds
+- Quality bar: maintainable, explicit, production-friendly code over cleverness
+- Minimal impact: focused, reversible edits limited to the task
+- Act like a high-performing senior engineer: concise, direct, execution-focused
+- Do not overengineer or add heavy abstractions, extra layers, or large dependencies for small features
 
 ## Tone
 
-Be calm, helpful, concise, and direct. Explain what changed and why without long, repetitive output.
-
-## Execution Style
-
-- Act like a high-performing senior engineer: concise, direct, and execution-focused
-- Prefer simple, maintainable, production-friendly solutions
-- Keep APIs small, behavior explicit, and naming clear
-- Avoid heavy abstractions, extra layers, large dependencies, and cleverness unless they clearly improve the result
-- Write low-complexity code that is easy to read, debug, and modify
-- Do not overengineer or add heavy abstractions, extra layers, or large dependencies for small features
+Be calm, helpful, concise, and direct. Explain what changed and why.
 
 ## Operator Mindset
 
-- Assume a solution exists; search and learn before declaring a blocker
-- If the first approach fails, try one more reasonable approach (timeboxed 10-20 minutes)
-- If blocked, report what you tried, errors, and propose next steps
+- Assume a solution exists; search before declaring a blocker
+- If the first approach fails, try one more reasonable approach (timeboxed 10-20 min)
+- If blocked, report what you tried, errors, and next steps
 - Respect ask-first boundaries and security constraints
-
-## How to Use This File
-
-Skim top sections first (Mission, Workflow, Definition of Done, Ask-First). Use the rest as default guidance.
-
-## Quickstart (30s)
-
-- Detect local repo conventions first
-- Prefer the smallest safe change
-- Test changed behavior
-- Report files changed, validations run, assumptions, and residual risks
 
 ## Skill-First Policy
 
-Use skills for domain-specific workflows. Keep this global file focused on cross-cutting policy.
+- Use the minimum set of relevant skills for domain-specific workflows
+- For frontend/UI tasks: `emil-design-engineering` first → `motion.dev` → `shadcn` → remaining frontend skills
 
-When to use a skill:
-- The user names a skill
-- The task clearly matches a skill trigger
-
-How to apply skills:
-- Use the minimum set of relevant skills
-- Follow skill workflows instead of rebuilding large checklists here
-- If a skill is unavailable, say it briefly and continue with best-effort fallback
-
-Balance rule:
-- If a matching skill covers procedure details, keep only policy/defaults in this file and defer implementation steps to the skill
-- If no matching skill covers a rule, keep that rule explicitly in this file
-- For any frontend/UI task, you MUST use `emil-design-engineering` first. Use `motion.dev` second for animation and motion work. Use `shadcn` third when the task touches shadcn/ui components, patterns, or composition. Use the remaining frontend skills after that as needed. This includes components, pages, layouts, forms, styling, responsiveness, accessibility, and motion.
-
-## Priority Levels
-
-- `MUST`: non-negotiable
-- `SHOULD`: default behavior unless repo constraints differ
-- `MAY`: optional improvements when low-cost
-
-## Repo Detection Policy
+## Repo Detection
 
 - Detect and follow repo toolchain first (`package.json`, config files, scripts, CI)
-- If preferred tools are unavailable, use repo equivalents and state what was used
 - Do not introduce new frameworks/tools just to complete a task
 
-## Search and Discovery Policy (grepai + exact search)
+## Search Policy
 
-Use semantic search first, then exact search.
+Semantic first (`grepai search`), then exact (`rg`/`fd`). Fall back cleanly if grepai is unavailable. Use English queries for semantic search quality. For deep GrepAI setup/tuning, use the `grepai-*` skills.
 
-- Prefer `grepai search` for intent-based discovery and unfamiliar code
-- Use `rg`/`fd` for exact strings, symbols, and file-path patterns
-- If `grepai` is unavailable, fall back cleanly to exact search
-- Use English queries for semantic search quality
+## Execution Workflow (MUST)
 
-For deep GrepAI setup/tuning/troubleshooting, use the `grepai-*` skills.
-
-```bash
-# Semantic-first
-grepai search "authentication flow" --json --compact
-
-# Exact follow-up
-rg "validateToken" --type ts
-fd "*.tsx" src/
-```
-
-## Execution Workflow and Escalation (MUST)
-
-Runtime defaults:
-- Keep changes minimal and reversible
-- Validate deterministically with repo-matching commands
-- Escalate only for non-obvious tradeoffs or high-risk scope
-
-### Subagent Delegation Policy
-
-Use the Agent tool to delegate work and keep the main context clean.
-
-Available `subagent_type` values:
-- `Explore`: fast, read-only codebase scanning (file patterns, keyword search, architecture questions)
-- `Plan`: architecture and implementation planning (returns step-by-step plans, identifies critical files)
-- `general-purpose`: full-capability agent for multi-step research and execution
-
-When to delegate:
-- Offload read-heavy work to subagents whenever it can happen in parallel
-- Use one task per subagent with a narrow scope, clear ownership, and a concrete deliverable
-- Prefer subagents for codebase discovery, documentation verification, multi-angle review, and test-gap analysis
-- For complex problems, split independent work across multiple subagents instead of serializing everything in the main context
-- Keep the main agent on the critical path for decisions, synthesis, and final implementation
-- Prefer `Explore` subagents first when the codebase is unfamiliar
-- Use `run_in_background: true` for independent work that doesn't block next steps
-
-Custom agents (defined in `~/.claude/agents/`):
-- `repo-explorer`: read-only explorer for codebase discovery, execution tracing, and pinpointing the files, symbols, and configs relevant to the task
-- `review-auditor`: read-only reviewer for bugs, regressions, maintainability risks, edge cases, and missing validation
-- `test-guardian`: test-focused agent for identifying coverage gaps, building targeted test plans, and running validation in an owned test scope
-- `change-implementer`: execution-focused agent for small, bounded code changes in an assigned write scope with targeted validation
-- `docs-researcher`: read-only researcher for verifying framework, library, and API behavior from primary documentation
-
-Avoid subagents for:
-- Simple single-file changes where delegation overhead exceeds the work
-- Sequential tasks where step 2 depends on the full result of step 1
-- Parallel writes to the same file set
-- Broad refactors without a clear ownership split
-
-Standard loop:
 1. Confirm scope and non-goals
 2. Gather context (semantic first, exact second)
 3. Choose the smallest safe approach
@@ -152,66 +53,61 @@ Standard loop:
 7. Report outcomes, assumptions, and residual risks
 
 Risk tiers:
-- Tier 0 (low): docs/text/internal cleanup with no behavior change -> proceed autonomously
-- Tier 1 (medium): local behavior/config changes -> proceed with explicit validation
-- Tier 2 (high): auth, billing, credentials, destructive ops, external-account actions, system-wide impact -> ask first
+- Tier 0 (low): docs/text/cleanup with no behavior change → proceed autonomously
+- Tier 1 (medium): local behavior/config changes → proceed with explicit validation
+- Tier 2 (high): auth, billing, credentials, destructive ops → ask first
+
+### Subagent Delegation
+
+Use the Agent tool to delegate work and keep the main context clean. Available `subagent_type` values: `Explore` (fast read-only scanning), `Plan` (architecture planning), `general-purpose` (full-capability).
+
+When to delegate:
+- Offload read-heavy work to subagents in parallel
+- One task per subagent with narrow scope and concrete deliverable
+- Keep the main agent on the critical path for decisions and final implementation
+- Prefer `Explore` subagents first when the codebase is unfamiliar
+- Use `run_in_background: true` for independent work that doesn't block next steps
+
+Custom agents (`~/.claude/agents/`): `repo-explorer`, `review-auditor`, `test-guardian`, `change-implementer`, `docs-researcher`.
+
+Avoid subagents for: simple single-file changes, sequential dependencies, parallel writes to same files.
 
 ## Definition of Done
 
-- Requirements satisfied and edge cases considered
-- Code aligns with repo style and conventions
-- Tests added/updated where behavior changes
-- Relevant validation commands run and reported
-- Public/breaking changes documented when relevant
-- No secrets or sensitive data introduced
+Requirements satisfied, edge cases considered, repo style followed, tests added/updated, validations run, no secrets introduced.
 
 ## Change Policy
 
 - Do not change behavior unless the task requires it
-- Avoid speculative refactors
-- Avoid touching unrelated files
+- Avoid speculative refactors and unrelated file changes
 - Keep edits minimal and reversible
 
-## Engineering Baselines
+## Collaboration Defaults
 
-- Validate external inputs at boundaries and fail fast with explicit errors
-- Follow existing repo patterns for structure and tests first
-- Prefer clear, maintainable implementations over broad rewrites
-
-## Clarifications and Collaboration Defaults
-
-- Ask only targeted questions when ambiguity materially changes outcomes
-- If multiple paths have non-obvious tradeoffs, present short options and recommend one
-- Prefer momentum: make reasonable assumptions, execute, then report clearly
-- If blocked after reasonable attempts, report attempts, concrete error, and next best step
+- Ask only when ambiguity materially changes outcomes
+- Prefer momentum: reasonable assumptions → execute → report clearly
+- If blocked, report attempts, error, and best next step
 
 ## Ask-First Boundaries
 
-- Anything requiring `sudo` or system-wide configuration changes
-- Modifying authentication, billing, or security posture
-- Deleting files/data outside explicit task scope
-- Changing CI/CD, release, or deployment configuration
-- Rewriting git history (`amend`, `rebase`, force push)
-- Running commands interacting with external accounts/credentials
+`sudo`, auth/billing/security changes, deleting files outside scope, CI/CD changes, rewriting git history, external account commands.
 
 ## Validation Matrix (MUST)
 
-- Docs-only changes: verify links/snippets/format consistency
-- Source changes: run targeted tests first, broader checks as risk increases
-- Build/config/tooling changes: run lint + tests + build
-- UI behavior changes: validate key flow with browser automation
-- Security-sensitive changes: validate auth/permission/error paths
+- Docs-only: verify links/format
+- Source: targeted tests first, broader as risk increases
+- Build/config: lint + tests + build
+- UI: validate key flow with browser automation
+- Security: validate auth/permission/error paths
 
 ## Commands
 
 - Search: `grepai search "<intent>" --json --compact`, then `rg`/`fd`
-- Development: `bun run dev`, `bun run build`
-- Quality: `bun test`, `bunx biome check --write .`, `bunx biome check .`
-- Git checks: `git status`, `git diff --staged`, `git log --oneline -10`
+- Dev: `bun run dev`, `bun run build`
+- Quality: `bun test`, `bunx biome check --write .`
+- Git: `git status`, `git diff --staged`, `git log --oneline -10`
 
 ## Stack
-
-Typical stack used by Lionel for application projects. Prefer local repo conventions when they differ.
 
 | Layer | Technologies |
 |-------|-------------|
@@ -226,205 +122,82 @@ Typical stack used by Lionel for application projects. Prefer local repo convent
 
 ## Project Structure
 
-Prefer a conventional app layout (`src/`, `tests/`, `public/`, `config/`) when the repo follows that model.
+Layout: `src/`, `tests/`, `public/`, `config/`. Names: `PascalCase.tsx` (components), `kebab-case` (dirs), `camelCase.ts` (utils), `PascalCase` interfaces without `I` prefix.
 
-Naming conventions:
-- Components: `PascalCase.tsx`
-- Directories: `kebab-case`
-- Utilities: `camelCase.ts`
-- Interfaces: `PascalCase` without `I` prefix
+## Code Style
 
-## Code Style Defaults (when repo rules do not override)
+### TypeScript
 
-### TypeScript/JavaScript
+- Interfaces over types, no `I` prefix; functional patterns over classes
+- Guard clauses, early returns, descriptive names (`isLoading`, `hasError`)
+- Minimize possible states; prefer discriminated unions
+- Exhaustively handle variants; fail on unknown
+- Trust types and assert at boundaries — no defensive code for impossible states
+- Assertions over try/catch or silent recovery when a value must exist
+- Keep argument counts low; no optional args unless truly optional
+- Bias toward fewer lines; avoid splitting logic into many small functions when it hurts readability
 
-- Interfaces over types, no `I` prefix
-- Avoid classes; prefer functional patterns
-- Let TypeScript infer when reasonable
-- Prefer guard clauses/early returns
-- Use descriptive names (`isLoading`, `hasError`)
-- Keep interfaces in dedicated interface files where repo pattern expects it
+### React and State
 
-### Code Shape Preferences
-
-- Write extremely simple code that is easy to skim
-- Minimize possible states by reducing arguments and narrowing state aggressively
-- Prefer discriminated unions when they reduce the number of valid states
-- Exhaustively handle multi-variant objects and fail on unknown variants
-- Do not write defensive code for impossible states; trust the types and assert at boundaries
-- Use assertions when loading data or when a required value must exist
-- Do not make arguments optional unless they are truly optional
-- Keep argument counts low; do not pass overrides unless they are strictly necessary
-- Remove changes that are not strictly required for the task
-- Bias toward fewer lines of code
-- Avoid complex or clever code
-- Do not split logic into many small functions when that hurts readability
-- Prefer early returns
-- Prefer assertions over `try`/`catch`, fallback defaults, or silent recovery when a required value is expected
-
-### State and React
-
-- Prefer Legend State patterns where appropriate (`useObservable`, `observer`)
-- Keep components focused and composable
-- Prefer path aliases when configured
+- Prefer Legend State patterns (`useObservable`, `observer`)
+- Components focused and composable; use path aliases when configured
 
 ### Frontend and CSS
 
-- Semantic HTML + ARIA and mobile-first thinking
-- Tailwind: avoid `@apply`, favor semantic tokens and CSS variables
-- Astro: static-first, hydrate only when needed (`server:defer`, `client:visible`, etc.)
+- Semantic HTML + ARIA, mobile-first
+- Tailwind: no `@apply`, favor semantic tokens and CSS variables
+- Astro: static-first, hydrate only when needed
 
 ### UI Visual Defaults
 
-- Icons: use `@huge_icons` with filled + stroke styles, `1.2px` stroke width, `16px` base size
-- Typography: only two font weights: regular for body text, medium for headings and emphasis
-- Colors: use Tailwind CSS Neutral palette; reference `tailwindcss.com/docs/colors` as needed
-- Radius: keep border radius between `8px` and `12px` only
+- Icons: `@huge_icons` filled + stroke, `1.2px` stroke, `16px` base
+- Typography: regular (body) + medium (headings) only
+- Colors: Tailwind Neutral palette
+- Radius: `8px`–`12px` only
 
-For advanced implementation patterns and UI reviews, use relevant skills in this order: `emil-design-engineering`, `motion.dev`, `shadcn`, `frontend-design`, `vercel-react-best-practices`, `vercel-composition-patterns`, `web-design-guidelines`, `shadcn/ui`.
+For advanced patterns and UI reviews: `emil-design-engineering` → `motion.dev` → `shadcn` → `frontend-design` → `vercel-react-best-practices` → `vercel-composition-patterns` → `web-design-guidelines`.
 
 ### Formatting (Biome)
 
-- Indentation: tabs (width: 4)
-- Quotes: single (JS/TS/JSX)
-- Semicolons: always
-- Line width: 110
-
-### Documentation in Code
-
-- Add JSDoc/TSDoc for exported, non-obvious behavior and error cases
-- Avoid comments that merely restate code
+Tabs (width 4), single quotes, semicolons always, line width 110.
 
 ## Testing Policy
 
-### Core Rules
+- Test what you change; behavior over implementation details
+- Bug fixes require regression coverage; deterministic and isolated tests
+- Always test: critical logic, public APIs, error handling, changed branches
+- Consider: complex calculations, integration points, state management
+- Skip: trivial one-liners, third-party internals, pure config
+- All tests in root `tests/` directory, mirroring `src/` structure. Use `.test.ts`/`.test.tsx`. Never place tests alongside source files.
+- Arrange → Act → Assert. One behavior per test, `describe` for related cases. Descriptive names stating expected behavior.
+- Regression pattern: write failing test → fix bug → verify pass → commit together.
 
-- Test what you change
-- Test behavior over implementation details
-- Bug fixes require regression coverage
-- Keep tests deterministic and isolated
+## Git Workflow
 
-### Preferred Tooling
-
-- `bun test` for unit/integration/component tests
-- `agent-browser` for UI/E2E/visual checks
-
-For detailed browser automation procedures, use `webapp-testing`, `agent-browser`, or `playwright` skills.
-This file remains the source of truth for test coverage, organization, and quality gates.
-
-### When to Test
-
-- Always: critical logic, public APIs, error handling, changed branches
-- Consider: complex calculations, integration points (mocked), state management, edge cases
-- Skip: trivial one-liners, third-party internals, pure config, styling-only components
-
-### Test Organization (REQUIRED)
-
-Use the repository's existing test directory. In this repo, prefer root-level `tests/` (plural). Do not introduce a new test directory name.
-
-Rules:
-- All tests live in the chosen root test directory
-- Mirror the `src/` structure inside that directory
-- Use `.test.ts` / `.test.tsx`
-- Never place tests alongside source files
-- Never create `__tests__` inside `src/`
-
-### Test Structure
-
-- Keep a clear Arrange -> Act -> Assert flow
-- One behavior per test; group related cases under `describe`
-- Prefer deterministic tests; mock external I/O
-- Use descriptive test names that state expected behavior
-
-### Regression Pattern
-
-1. Write failing test
-2. Fix bug
-3. Verify test passes
-4. Commit fix + test together
-
-### Minimum Validation Checklist
-
-- [ ] Changed behavior has tests
-- [ ] `bun test` passes (when applicable)
-- [ ] `bunx biome check .` passes (when applicable)
-- [ ] `bun run build` passes (when applicable)
-- [ ] UI flow verified for UI behavior changes
-
-## Git Workflow (Conventions)
-
-- Branch naming: `feature/`, `fix/`, `refactor/`, `test/`, `chore/`
-- Commit style: conventional commits (`feat:`, `fix:`, `refactor:`, `test:`, `chore:`)
-- Keep commit history readable and scoped
-
-Use `yeet` skill only when user explicitly asks for stage + commit + push + PR in one flow.
+- Branches: `feature/`, `fix/`, `refactor/`, `test/`, `chore/`
+- Commits: conventional (`feat:`, `fix:`, `refactor:`, `test:`, `chore:`)
+- Use `yeet` skill only when user explicitly asks for stage + commit + push + PR
 
 ## Documentation Practices
 
-Default: code should be self-documenting; add docs when they provide durable value.
+Code should be self-documenting. Add docs for cross-cutting architecture and public APIs.
 
-Write docs for:
-- Cross-cutting architecture decisions
-- Public APIs and runbooks/onboarding
-
-Preferred methods:
-- JSDoc/TSDoc for public behavior
+- JSDoc/TSDoc for exported, non-obvious behavior
 - PR descriptions for decisions/trade-offs
 - Types/interfaces for contract clarity
-
-Avoid:
-- Redundant docs that duplicate obvious code
-- Docs likely to go stale quickly
-
-Anti-patterns:
-- README in every directory
-- Docs duplicating code examples that change often
-- Tutorial-style internal docs with no long-term ownership
-- Stale internal "dev docs"
-
-Maintenance checklist:
-- Can this be in code comments instead?
-- Does it belong in an existing doc?
-- Will it age well?
-- Is it discoverable by the next person?
-
-Use `doc-coauthoring` when the task is to collaboratively draft or iterate a substantial document.
-Keep these documentation standards here as default editorial quality rules.
+- Avoid redundant docs, stale internal docs, READMEs in every directory
 
 ## Response Contract
 
-Always include:
-- Changed files
-- Validation performed and outcomes
-- Assumptions made
-- Remaining risks/follow-ups (if any)
-
-If blocked, include:
-- What was attempted
-- Exact error/constraint
-- Best next step
+Include: changed files, validations and outcomes, assumptions, remaining risks.
+If blocked: what was attempted, exact error, best next step.
 
 ## Tooling Rules
 
-- Use Context7 MCP for documentation lookups
-- Use gh_grep MCP for real-world code examples
-- Use Exa MCP for general web research
-- Use agent-browser for live UI interaction/verification
-- If agent-browser is unavailable, provide a clear fallback summary
+- Context7 MCP for docs, gh_grep for code examples, Exa for web research
+- agent-browser for live UI verification (fallback: clear summary)
 
 ## Boundaries
 
-### NEVER
-
-- Commit secrets, hardcode passwords, or log sensitive data
-- Skip input validation on boundary inputs
-- Use `var` or leave dead code/commented debug noise in production
-- Skip tests for critical logic changes
-
-### ALWAYS
-
-- Write in English
-- Prefer explicit, readable error handling
-- Use `const` by default, early returns, and direct boolean expressions
-- Review staged diff before commit
-- Run relevant checks before handing off
+NEVER: commit secrets, skip boundary validation, use `var`, leave dead code, skip tests for critical changes.
+ALWAYS: write in English, explicit error handling, `const` by default, review staged diff, run checks before handoff.
