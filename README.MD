@@ -55,6 +55,7 @@ The setup includes various tools and utilities to enhance the development experi
 - Scrcpy (Android screen mirroring)
 - Mole (SSH tunnel manager)
 - OpenCode (AI coding agent for terminal)
+- Claude Code (AI coding agent for terminal)
 - GrepAI (semantic code search)
 - Ollama (local embeddings for GrepAI)
 - Android Platform Tools (ADB, fastboot)
@@ -70,6 +71,10 @@ OpenCode is an AI coding agent for the terminal. Installed with the following pl
 - `@franlol/opencode-md-table-formatter@latest` - Markdown table formatter plugin for Opencode with concealment mode support.
 - MCPs: context7, gh_grep, exa
 - The OpenCode `AGENTS.md` is also synced to Codex (`~/.codex/AGENTS.md`)
+
+Claude Code is installed globally through Bun as `@anthropic-ai/claude-code`.
+The shared skills installer now links the same skills into Claude Code, OpenCode, and Codex.
+The shared `opencode/AGENTS.md` is also copied to Claude Code as `~/.claude/CLAUDE.md`.
 
 ## Codex
 

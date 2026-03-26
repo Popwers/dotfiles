@@ -16,6 +16,13 @@ dotfiles/
 ├── .gitconfig          # Git config (GPG signing)
 ├── .profile            # Bash/sh environment vars
 ├── .czrc               # Commitizen config
+├── claude/             # Claude Code config (synced to ~/.claude/)
+│   ├── CLAUDE.md       # Global agent instructions
+│   ├── settings.json   # Global settings
+│   └── agents/         # Custom subagents
+├── codex/              # Codex config (synced to ~/.codex/)
+│   ├── config.toml     # Central config
+│   └── agents/         # Custom subagents
 ├── opencode/           # OpenCode AI agent config
 │   ├── opencode.json   # Plugin list
 │   ├── AGENTS.md       # Global coding guidelines

@@ -1,0 +1,23 @@
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "bunx",
+      "args": ["@playwright/mcp@latest"]
+    },
+    "context7": {
+      "url": "https://mcp.context7.com/mcp",
+      "headers": {
+        "CONTEXT7_API_KEY": "ctx7sk-1c3efdc8-aec6-417e-9cca-e36ed9696664"
+      }
+    },
+    "gh_grep": {
+      "url": "https://mcp.grep.app"
+    },
+    "exa": {
+      "url": "https://mcp.exa.ai",
+      "headers": {
+        "x-api-key": "469853ea-7c4e-499e-8113-621615e8ebd2"
+      }
+    }
+  }
+}

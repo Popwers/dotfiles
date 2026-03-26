@@ -144,7 +144,7 @@ end
 # Install global packages
 set -l bun_global_listing (bun pm ls -g 2>/dev/null | string collect)
 set -l missing_bun_globals
-for pkg in ngrok npm-check-updates typescript commitizen cz-conventional-changelog agent-browser @openai/codex
+for pkg in ngrok npm-check-updates typescript commitizen cz-conventional-changelog agent-browser @openai/codex @anthropic-ai/claude-code
     if string match -rq "(^|\\s)$pkg@" -- $bun_global_listing
         echo "Bun global package '$pkg' is already installed."
     else
@@ -206,16 +206,55 @@ sync_dir_with_status "$SCRIPT_DIR/codex/agents" "$HOME/.codex/agents"
 # Copy Codex configuration
 copy_file_with_status "$SCRIPT_DIR/codex/config.toml" "$HOME/.codex/config.toml"
 
+# Copy Claude Code configuration
+copy_file_with_status "$SCRIPT_DIR/claude/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
+copy_file_with_status "$SCRIPT_DIR/claude/settings.json" "$HOME/.claude/settings.json"
+copy_file_with_status "$SCRIPT_DIR/claude/.mcp.json" "$HOME/.claude/.mcp.json"
+sync_dir_with_status "$SCRIPT_DIR/claude/agents" "$HOME/.claude/agents"
+
 # Setup brew
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
-# Check if a skill is already available for Codex/OpenCode.
-is_skill_installed() {
-    local skill_name=$1
+# Check if a skill is already available for OpenCode, Codex, and Claude Code.
+skill_agent_dir() {
+    local agent_name=$1
 
-    [ -d "$HOME/.agents/skills/$skill_name" ] ||
-        [ -e "$HOME/.codex/skills/$skill_name" ] ||
-        [ -e "$HOME/.config/opencode/skills/$skill_name" ]
+    case "$agent_name" in
+        opencode)
+            printf '%s\n' "$HOME/.config/opencode/skills"
+            ;;
+        codex)
+            printf '%s\n' "$HOME/.codex/skills"
+            ;;
+        claude-code)
+            printf '%s\n' "$HOME/.claude/skills"
+            ;;
+        *)
+            return 1
+            ;;
+    esac
+}
+
+is_skill_installed_for_agent() {
+    local skill_name=$1
+    local agent_name=$2
+    local agent_dir
+
+    agent_dir=$(skill_agent_dir "$agent_name") || return 1
+    [ -e "$agent_dir/$skill_name" ]
+}
+
+is_skill_installed_everywhere() {
+    local skill_name=$1
+    local agent_name
+
+    for agent_name in opencode codex claude-code; do
+        if ! is_skill_installed_for_agent "$skill_name" "$agent_name"; then
+            return 1
+        fi
+    done
+
+    return 0
 }
 
 # Install a skill only when missing.
@@ -223,20 +262,28 @@ install_skill_if_missing() {
     local skill_name=$1
     local skill_source=$2
     shift 2
+    local agent_name
+    local missing_agents=()
 
-    if is_skill_installed "$skill_name"; then
+    for agent_name in opencode codex claude-code; do
+        if ! is_skill_installed_for_agent "$skill_name" "$agent_name"; then
+            missing_agents+=("$agent_name")
+        fi
+    done
+
+    if [ "${#missing_agents[@]}" -eq 0 ]; then
         echo "Skill '$skill_name' is already installed."
         return 0
     fi
 
-    echo "Installing skill '$skill_name'..."
-    bunx --bun skills add "$skill_source" "$@" -g -a opencode codex -y
+    echo "Installing skill '$skill_name' for: ${missing_agents[*]}"
+    bunx --bun skills add "$skill_source" "$@" -g -a "${missing_agents[@]}" -y
 }
 
 are_all_skills_installed() {
     local skill_name
     for skill_name in "$@"; do
-        if ! is_skill_installed "$skill_name"; then
+        if ! is_skill_installed_everywhere "$skill_name"; then
             return 1
         fi
     done
@@ -248,14 +295,26 @@ install_skill_bundle_if_missing() {
     local skill_source=$1
     shift
     local required_skills=("$@")
+    local agent_name
+    local missing_agents=()
 
     if are_all_skills_installed "${required_skills[@]}"; then
         echo "Skill bundle '$skill_source' is already installed."
         return 0
     fi
 
-    echo "Installing skill bundle '$skill_source'..."
-    bunx --bun skills add "$skill_source" -g -a opencode codex -y
+    for agent_name in opencode codex claude-code; do
+        local skill_name
+        for skill_name in "${required_skills[@]}"; do
+            if ! is_skill_installed_for_agent "$skill_name" "$agent_name"; then
+                missing_agents+=("$agent_name")
+                break
+            fi
+        done
+    done
+
+    echo "Installing skill bundle '$skill_source' for: ${missing_agents[*]}..."
+    bunx --bun skills add "$skill_source" -g -a "${missing_agents[@]}" -y
 }
 
 # Install skills
@@ -277,7 +336,7 @@ install_skill_bundle_if_missing "shadcn/ui" "shadcn"
 install_skill_if_missing "interface-feel-polish" "https://github.com/Popwers/skills" --skill interface-feel-polish
 
 # Activate the design-engineering skill for frontend work.
-if is_skill_installed "emil-design-engineering"; then
+if is_skill_installed_everywhere "emil-design-engineering"; then
     echo "Skill 'emil-design-engineering' is already installed."
 else
     curl -s "https://animations.dev/api/activate-design-engineering?email=lionel.bataille%40hotmail.com" | bash
