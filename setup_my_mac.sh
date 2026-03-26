@@ -257,27 +257,36 @@ is_skill_installed_everywhere() {
     return 0
 }
 
+# Create missing symlinks in agent skill dirs pointing to ~/.agents/skills/<name>.
+ensure_skill_symlinks() {
+    local skill_name=$1
+    local global_dir="$HOME/.agents/skills/$skill_name"
+    [ -d "$global_dir" ] || return 0
+
+    local agent_name agent_dir
+    for agent_name in opencode codex claude-code; do
+        agent_dir=$(skill_agent_dir "$agent_name") || continue
+        if [ ! -e "$agent_dir/$skill_name" ]; then
+            mkdir -p "$agent_dir"
+            ln -s "$global_dir" "$agent_dir/$skill_name"
+        fi
+    done
+}
+
 # Install a skill only when missing.
 install_skill_if_missing() {
     local skill_name=$1
     local skill_source=$2
     shift 2
-    local agent_name
-    local missing_agents=()
 
-    for agent_name in opencode codex claude-code; do
-        if ! is_skill_installed_for_agent "$skill_name" "$agent_name"; then
-            missing_agents+=("$agent_name")
-        fi
-    done
-
-    if [ "${#missing_agents[@]}" -eq 0 ]; then
+    if is_skill_installed_everywhere "$skill_name"; then
         echo "Skill '$skill_name' is already installed."
         return 0
     fi
 
-    echo "Installing skill '$skill_name' for: ${missing_agents[*]}"
-    bunx --bun skills add "$skill_source" "$@" -g -a "${missing_agents[@]}" -y
+    echo "Installing skill '$skill_name'..."
+    bunx --bun skills add "$skill_source" "$@" -g -a claude-code codex opencode -y
+    ensure_skill_symlinks "$skill_name"
 }
 
 are_all_skills_installed() {
@@ -295,27 +304,29 @@ install_skill_bundle_if_missing() {
     local skill_source=$1
     shift
     local required_skills=("$@")
-    local agent_name
-    local missing_agents=()
 
     if are_all_skills_installed "${required_skills[@]}"; then
         echo "Skill bundle '$skill_source' is already installed."
         return 0
     fi
 
-    for agent_name in opencode codex claude-code; do
-        local skill_name
-        for skill_name in "${required_skills[@]}"; do
-            if ! is_skill_installed_for_agent "$skill_name" "$agent_name"; then
-                missing_agents+=("$agent_name")
-                break
-            fi
-        done
+    echo "Installing skill bundle '$skill_source'..."
+    bunx --bun skills add "$skill_source" -g -a claude-code codex opencode -y
+    local skill_name
+    for skill_name in "${required_skills[@]}"; do
+        ensure_skill_symlinks "$skill_name"
     done
-
-    echo "Installing skill bundle '$skill_source' for: ${missing_agents[*]}..."
-    bunx --bun skills add "$skill_source" -g -a "${missing_agents[@]}" -y
 }
+
+# Sync all existing skills as symlinks for every agent before checking.
+# The skills CLI only creates symlinks for claude-code; codex and opencode
+# need them too so the idempotency check passes.
+if [ -d "$HOME/.agents/skills" ]; then
+    for _skill_dir in "$HOME/.agents/skills"/*/; do
+        ensure_skill_symlinks "$(basename "$_skill_dir")"
+    done
+    unset _skill_dir
+fi
 
 # Install skills
 install_skill_if_missing "agent-browser" "https://github.com/vercel-labs/agent-browser" --skill agent-browser
@@ -340,6 +351,11 @@ if is_skill_installed_everywhere "emil-design-engineering"; then
     echo "Skill 'emil-design-engineering' is already installed."
 else
     curl -s "https://animations.dev/api/activate-design-engineering?email=lionel.bataille%40hotmail.com" | bash
+fi
+# The curl installer only targets claude-code and codex — symlink for opencode too.
+if [ -d "$HOME/.claude/skills/emil-design-engineering" ] && [ ! -e "$HOME/.config/opencode/skills/emil-design-engineering" ]; then
+    mkdir -p "$HOME/.config/opencode/skills"
+    ln -s "$HOME/.claude/skills/emil-design-engineering" "$HOME/.config/opencode/skills/emil-design-engineering"
 fi
 
 # Configure agent-browser right after install (downloads Chromium)
