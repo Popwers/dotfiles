@@ -25,6 +25,11 @@
     "pr": ""
   },
   "enableAllProjectMcpServers": true,
+  "statusLine": {
+    "type": "command",
+    "command": "ccline",
+    "padding": 0
+  },
   "model": "opus[1m]",
   "language": "Français",
   "fastMode": true,
@@ -41,9 +46,53 @@
           },
           {
             "type": "command",
-            "command": "grepai watch --background > /dev/null 2>&1 || true",
-            "timeout": 15,
-            "statusMessage": "Starting grepai watcher..."
+            "command": "command -v grepai >/dev/null 2>&1 && { grepai status >/dev/null 2>&1 || grepai init --default >/dev/null 2>&1; grepai watch --background >/dev/null 2>&1; }; exit 0",
+            "timeout": 20,
+            "statusMessage": "Starting grepai..."
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/block-no-verify.sh",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/strategic-compact.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/auto-format.sh",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/typecheck.sh",
+            "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/run-tests.sh",
+            "timeout": 30
           }
         ]
       }
@@ -53,7 +102,12 @@
         "hooks": [
           {
             "type": "command",
-            "command": "grepai watch --stop > /dev/null 2>&1 || true",
+            "command": "~/.claude/hooks/check-console-log.sh",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "command -v grepai >/dev/null 2>&1 && grepai watch --stop >/dev/null 2>&1; exit 0",
             "timeout": 10,
             "statusMessage": "Stopping grepai watcher..."
           }

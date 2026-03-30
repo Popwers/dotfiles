@@ -1,7 +1,12 @@
 ---
 name: docs-researcher
 description: Read-only agent for verifying framework, library, and API behavior from primary documentation. Use when checking unfamiliar APIs or version-specific behavior.
-tools: Read, Grep, Glob, WebFetch, WebSearch
+tools:
+  - Read
+  - Grep
+  - Glob
+  - WebFetch
+  - WebSearch
 model: haiku
 effort: medium
 ---

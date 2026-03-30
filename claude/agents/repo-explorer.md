@@ -1,7 +1,13 @@
 ---
 name: repo-explorer
 description: Read-only agent for codebase discovery, execution tracing, and pinpointing the files, symbols, and configs relevant to a task. Use proactively when exploring unfamiliar code.
-tools: Read, Grep, Glob, Bash, WebFetch, WebSearch
+tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash
+  - WebFetch
+  - WebSearch
 model: haiku
 effort: medium
 ---

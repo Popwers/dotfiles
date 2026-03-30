@@ -37,7 +37,7 @@ fi
 brew update && brew upgrade
 
 # Install packages
-brew install --formula curl wget bash git gh vim neovim oven-sh/bun/bun fish jandedobbeleer/oh-my-posh/oh-my-posh bat eza fd ripgrep ffmpeg scrcpy tw93/tap/mole
+brew install --formula curl wget bash git gh vim neovim oven-sh/bun/bun fish jandedobbeleer/oh-my-posh/oh-my-posh bat eza fd ripgrep ffmpeg scrcpy tw93/tap/mole rtk
 
 # Install Ollama only when missing
 if command -v ollama >/dev/null 2>&1 || brew list --formula ollama >/dev/null 2>&1; then
@@ -144,7 +144,7 @@ end
 # Install global packages
 set -l bun_global_listing (bun pm ls -g 2>/dev/null | string collect)
 set -l missing_bun_globals
-for pkg in ngrok npm-check-updates typescript commitizen cz-conventional-changelog agent-browser @openai/codex @anthropic-ai/claude-code
+for pkg in ngrok npm-check-updates typescript commitizen cz-conventional-changelog agent-browser @openai/codex @anthropic-ai/claude-code @cometix/ccline
     if string match -rq "(^|\\s)$pkg@" -- $bun_global_listing
         echo "Bun global package '$pkg' is already installed."
     else
@@ -157,6 +157,9 @@ if test (count $missing_bun_globals) -gt 0
 else
     echo "All Bun global packages are already installed."
 end
+
+# Trust ccline postinstall (downloads platform binary)
+bun pm -g trust @cometix/ccline 2>/dev/null
 
 # Add bun to path
 fish_add_path ~/.bun/bin
@@ -206,11 +209,21 @@ sync_dir_with_status "$SCRIPT_DIR/codex/agents" "$HOME/.codex/agents"
 # Copy Codex configuration
 copy_file_with_status "$SCRIPT_DIR/codex/config.toml" "$HOME/.codex/config.toml"
 
+# Apply CCometixLine patch to Claude Code (disable context warnings, enable verbose)
+CLAUDE_CLI_JS="$HOME/.bun/install/global/node_modules/@anthropic-ai/claude-code/cli.js"
+if [ -f "$CLAUDE_CLI_JS.backup" ]; then
+    echo "CCometixLine patch already applied."
+elif [ -f "$CLAUDE_CLI_JS" ] && command -v ccline >/dev/null 2>&1; then
+    ccline --patch "$CLAUDE_CLI_JS"
+fi
+
 # Copy Claude Code configuration
 copy_file_with_status "$SCRIPT_DIR/claude/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
 copy_file_with_status "$SCRIPT_DIR/claude/settings.json" "$HOME/.claude/settings.json"
 copy_file_with_status "$SCRIPT_DIR/claude/.mcp.json" "$HOME/.claude/.mcp.json"
 sync_dir_with_status "$SCRIPT_DIR/claude/agents" "$HOME/.claude/agents"
+sync_dir_with_status "$SCRIPT_DIR/claude/hooks" "$HOME/.claude/hooks"
+sync_dir_with_status "$SCRIPT_DIR/claude/rules" "$HOME/.claude/rules"
 
 # Setup brew
 eval "$(/opt/homebrew/bin/brew shellenv)"
@@ -368,6 +381,15 @@ if [ -x "$HOME/.bun/bin/agent-browser" ]; then
     "$HOME/.bun/bin/agent-browser" --version
 else
     echo "agent-browser binary not found in ~/.bun/bin"
+fi
+
+# Initialize RTK hooks for all agents (runs last so it can patch copied configs)
+if command -v rtk >/dev/null 2>&1; then
+    rtk init -g
+    rtk init -g --auto-patch
+    rtk init -g --codex
+    rtk init -g --agent cursor
+    rtk init -g --opencode
 fi
 
 echo "Mac setup is complete!"

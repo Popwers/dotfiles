@@ -156,11 +156,13 @@ if ! grep -q $(which fish) /etc/shells; then  # Check before modifying
 
 ## INSTALLED TOOLS
 
-**Via Homebrew:** curl, wget, bash, git, vim, neovim, bun, fish, oh-my-posh, bat, eza, fd, ripgrep, ffmpeg, scrcpy, mole
+**Via Homebrew:** curl, wget, bash, git, vim, neovim, bun, fish, oh-my-posh, bat, eza, fd, ripgrep, ffmpeg, scrcpy, mole, rtk
 
 **Via Cask:** android-platform-tools
 
 **Via Bun (global):** eslint, prettier, ngrok, npm-check-updates, pm2, typescript, commitizen, cz-conventional-changelog, nx
+
+**Via Bun (global, npm postinstall trusted):** @cometix/ccline (Claude Code statusline + patch)
 
 **OpenCode plugins:** opencode-supermemory, @tarquinen/opencode-dcp@latest, @franlol/opencode-md-table-formatter@0.0.3
 **OpenCode MCPs:** context7, gh_grep, exa

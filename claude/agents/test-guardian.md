@@ -1,7 +1,13 @@
 ---
 name: test-guardian
 description: Test-focused agent for identifying coverage gaps, building targeted test plans, and running validation.
-tools: Read, Grep, Glob, Bash, Write, Edit
+tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash
+  - Write
+  - Edit
 model: sonnet
 effort: medium
 ---

@@ -1,7 +1,11 @@
 ---
 name: review-auditor
 description: Review-focused agent for bugs, regressions, maintainability risks, edge cases, and missing validation. Use proactively after code changes.
-tools: Read, Grep, Glob, Bash
+tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash
 model: sonnet
 effort: high
 ---

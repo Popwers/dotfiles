@@ -10,12 +10,10 @@ Ship correct, maintainable changes with minimal churn, explicit validation, and 
 
 ## Core Principles
 
-- Simplicity first: smallest change that solves the real problem
-- No laziness: find root causes, not workarounds
-- Quality bar: maintainable, explicit, production-friendly code over cleverness
-- Minimal impact: focused, reversible edits limited to the task
-- Act like a high-performing senior engineer: concise, direct, execution-focused
-- Do not overengineer or add heavy abstractions, extra layers, or large dependencies for small features
+- Smallest change that solves the real problem; simple features use simple implementations
+- Find root causes instead of workarounds
+- Maintainable, explicit, production-friendly code over cleverness
+- Focused, reversible edits limited to the task
 
 ## Tone
 
@@ -24,53 +22,32 @@ Be calm, helpful, concise, and direct. Explain what changed and why.
 ## Operator Mindset
 
 - Assume a solution exists; search before declaring a blocker
-- If the first approach fails, try one more reasonable approach (timeboxed 10-20 min)
-- If blocked, report what you tried, errors, and next steps
-- Respect ask-first boundaries and security constraints
-
-## Skill-First Policy
-
-- Use the minimum set of relevant skills for domain-specific workflows
-- For frontend/UI tasks: `emil-design-engineering` first → `motion.dev` → `shadcn` → remaining frontend skills
-
-## Repo Detection
-
-- Detect and follow repo toolchain first (`package.json`, config files, scripts, CI)
-- Do not introduce new frameworks/tools just to complete a task
+- If blocked, try one more approach (10-20 min), then report what you tried and next steps
+- Use minimum relevant skills; for frontend: `emil-design-engineering` → `motion.dev` → `shadcn`
+- Prefer existing repo toolchain; introduce new dependencies only for genuine gaps
 
 ## Search Policy
 
-Semantic first (`grepai search`), then exact (`rg`/`fd`). Fall back cleanly if grepai is unavailable. Use English queries for semantic search quality. For deep GrepAI setup/tuning, use the `grepai-*` skills.
+Semantic first (`grepai search`), then exact (`rg`/`fd`). Fall back cleanly if grepai is unavailable. Use English queries for semantic search quality.
 
 ## Execution Workflow (MUST)
 
-1. Confirm scope and non-goals
-2. Gather context (semantic first, exact second)
-3. Choose the smallest safe approach
-4. Implement only required changes
-5. Add/update tests for behavior changes
-6. Run relevant validations
-7. Report outcomes, assumptions, and residual risks
+Confirm scope → gather context (semantic first) → smallest safe approach → implement → test behavior changes → validate → report outcomes.
 
-Risk tiers:
-- Tier 0 (low): docs/text/cleanup with no behavior change → proceed autonomously
-- Tier 1 (medium): local behavior/config changes → proceed with explicit validation
-- Tier 2 (high): auth, billing, credentials, destructive ops → ask first
+Risk tiers: Tier 0 (docs/text) → proceed | Tier 1 (behavior/config) → validate | Tier 2 (auth/billing/destructive) → ask first.
+
+### Model Selection
+
+Default: Sonnet for 90% of tasks. Upgrade to Opus when: first attempt failed, task spans 5+ files, architectural decisions, security-critical code. Use Haiku for: exploration/search, simple edits, documentation, worker subagents.
 
 ### Subagent Delegation
 
-Use the Agent tool to delegate work and keep the main context clean. Available `subagent_type` values: `Explore` (fast read-only scanning), `Plan` (architecture planning), `general-purpose` (full-capability).
+Delegate to subagents to keep the main context clean. Types: `Explore` (read-only scanning), `Plan` (architecture), `general-purpose` (full-capability).
 
-When to delegate:
-- Offload read-heavy work to subagents in parallel
-- One task per subagent with narrow scope and concrete deliverable
-- Keep the main agent on the critical path for decisions and final implementation
-- Prefer `Explore` subagents first when the codebase is unfamiliar
-- Use `run_in_background: true` for independent work that doesn't block next steps
+Delegate when: read-heavy parallel work, codebase discovery, multi-angle review. One task per subagent with narrow scope. Use `run_in_background: true` for independent work.
+Keep in main context: decisions, synthesis, final implementation, simple single-file changes.
 
-Custom agents (`~/.claude/agents/`): `repo-explorer`, `review-auditor`, `test-guardian`, `change-implementer`, `docs-researcher`.
-
-Avoid subagents for: simple single-file changes, sequential dependencies, parallel writes to same files.
+Sequential pattern for complex tasks: Research (Explore) → Plan → Implement (change-implementer) → Review (review-auditor) → Verify (test-guardian). Each phase produces one clear output as input for the next. Use `/compact` between phases to free context.
 
 ## Definition of Done
 
@@ -78,27 +55,19 @@ Requirements satisfied, edge cases considered, repo style followed, tests added/
 
 ## Change Policy
 
-- Do not change behavior unless the task requires it
-- Avoid speculative refactors and unrelated file changes
+- Change behavior only when the task requires it
+- Limit refactors and file changes to task scope
 - Keep edits minimal and reversible
 
-## Collaboration Defaults
+## Collaboration
 
-- Ask only when ambiguity materially changes outcomes
-- Prefer momentum: reasonable assumptions → execute → report clearly
-- If blocked, report attempts, error, and best next step
+Ask only when ambiguity materially changes outcomes. Prefer momentum: assume → execute → report. If blocked, report attempts, error, and best next step.
 
-## Ask-First Boundaries
+Ask first for: `sudo`, auth/billing/security changes, deleting files outside scope, CI/CD changes, rewriting git history, external account commands.
 
-`sudo`, auth/billing/security changes, deleting files outside scope, CI/CD changes, rewriting git history, external account commands.
+## Validation Matrix
 
-## Validation Matrix (MUST)
-
-- Docs-only: verify links/format
-- Source: targeted tests first, broader as risk increases
-- Build/config: lint + tests + build
-- UI: validate key flow with browser automation
-- Security: validate auth/permission/error paths
+Docs: links/format | Source: targeted tests, broader as risk grows | Build/config: lint + tests + build | UI: browser automation | Security: auth/permission paths.
 
 ## Commands
 
@@ -109,16 +78,7 @@ Requirements satisfied, edge cases considered, repo style followed, tests added/
 
 ## Stack
 
-| Layer | Technologies |
-|-------|-------------|
-| Frontend | Astro, React, TypeScript |
-| Backend | Strapi (TypeScript) |
-| UI | Tailwind CSS, shadcn/ui, Base UI |
-| Animation | Motion (motion.dev) |
-| Runtime | Bun, Node.js |
-| Build | Vite |
-| Test | Bun test |
-| Format | Biome |
+Frontend: Astro, React, TypeScript | Backend: Strapi | UI: Tailwind, shadcn/ui, Base UI | Animation: Motion | Runtime: Bun, Node.js | Build: Vite | Test: Bun test | Format: Biome
 
 ## Project Structure
 
@@ -132,8 +92,8 @@ Layout: `src/`, `tests/`, `public/`, `config/`. Names: `PascalCase.tsx` (compone
 - Guard clauses, early returns, descriptive names (`isLoading`, `hasError`)
 - Minimize possible states; prefer discriminated unions
 - Exhaustively handle variants; fail on unknown
-- Trust types and assert at boundaries — no defensive code for impossible states
-- Assertions over try/catch or silent recovery when a value must exist
+- Trust types and assert at boundaries; validate only at system boundaries
+- Prefer assertions over try/catch or silent recovery when a value must exist
 - Keep argument counts low; no optional args unless truly optional
 - Bias toward fewer lines; avoid splitting logic into many small functions when it hurts readability
 
@@ -145,7 +105,7 @@ Layout: `src/`, `tests/`, `public/`, `config/`. Names: `PascalCase.tsx` (compone
 ### Frontend and CSS
 
 - Semantic HTML + ARIA, mobile-first
-- Tailwind: no `@apply`, favor semantic tokens and CSS variables
+- Tailwind: prefer semantic tokens and CSS variables over `@apply`
 - Astro: static-first, hydrate only when needed
 
 ### UI Visual Defaults
@@ -155,49 +115,16 @@ Layout: `src/`, `tests/`, `public/`, `config/`. Names: `PascalCase.tsx` (compone
 - Colors: Tailwind Neutral palette
 - Radius: `8px`–`12px` only
 
-For advanced patterns and UI reviews: `emil-design-engineering` → `motion.dev` → `shadcn` → `frontend-design` → `vercel-react-best-practices` → `vercel-composition-patterns` → `web-design-guidelines`.
-
 ### Formatting (Biome)
 
 Tabs (width 4), single quotes, semicolons always, line width 110.
-
-## Testing Policy
-
-- Test what you change; behavior over implementation details
-- Bug fixes require regression coverage; deterministic and isolated tests
-- Always test: critical logic, public APIs, error handling, changed branches
-- Consider: complex calculations, integration points, state management
-- Skip: trivial one-liners, third-party internals, pure config
-- All tests in root `tests/` directory, mirroring `src/` structure. Use `.test.ts`/`.test.tsx`. Never place tests alongside source files.
-- Arrange → Act → Assert. One behavior per test, `describe` for related cases. Descriptive names stating expected behavior.
-- Regression pattern: write failing test → fix bug → verify pass → commit together.
-
-## Git Workflow
-
-- Branches: `feature/`, `fix/`, `refactor/`, `test/`, `chore/`
-- Commits: conventional (`feat:`, `fix:`, `refactor:`, `test:`, `chore:`)
-- Use `yeet` skill only when user explicitly asks for stage + commit + push + PR
-
-## Documentation Practices
-
-Code should be self-documenting. Add docs for cross-cutting architecture and public APIs.
-
-- JSDoc/TSDoc for exported, non-obvious behavior
-- PR descriptions for decisions/trade-offs
-- Types/interfaces for contract clarity
-- Avoid redundant docs, stale internal docs, READMEs in every directory
 
 ## Response Contract
 
 Include: changed files, validations and outcomes, assumptions, remaining risks.
 If blocked: what was attempted, exact error, best next step.
 
-## Tooling Rules
-
-- Context7 MCP for docs, gh_grep for code examples, Exa for web research
-- agent-browser for live UI verification (fallback: clear summary)
-
 ## Boundaries
 
-NEVER: commit secrets, skip boundary validation, use `var`, leave dead code, skip tests for critical changes.
-ALWAYS: write in English, explicit error handling, `const` by default, review staged diff, run checks before handoff.
+Prohibited: committing secrets, skipping boundary validation, using `var`, leaving dead code, skipping tests for critical changes.
+Required: write in English, explicit error handling, `const` by default, review staged diff, run checks before handoff.

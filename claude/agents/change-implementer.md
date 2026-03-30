@@ -1,7 +1,13 @@
 ---
 name: change-implementer
 description: Execution-focused agent for small, bounded code changes with explicit file ownership and targeted validation.
-tools: Read, Grep, Glob, Bash, Write, Edit
+tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash
+  - Write
+  - Edit
 model: sonnet
 effort: medium
 ---
