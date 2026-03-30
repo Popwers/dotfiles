@@ -46,7 +46,7 @@
           },
           {
             "type": "command",
-            "command": "command -v grepai >/dev/null 2>&1 && { grepai status >/dev/null 2>&1 || grepai init --default >/dev/null 2>&1; grepai watch --background >/dev/null 2>&1; }; exit 0",
+            "command": "command -v grepai >/dev/null 2>&1 && { grepai status >/dev/null 2>&1 || grepai init --yes >/dev/null 2>&1; grep -qsx '.grepai/' .gitignore 2>/dev/null || echo '.grepai/' >> .gitignore; grepai watch --background >/dev/null 2>&1; }; exit 0",
             "timeout": 20,
             "statusMessage": "Starting grepai..."
           }
