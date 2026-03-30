@@ -26,9 +26,15 @@ Be calm, helpful, concise, and direct. Explain what changed and why.
 - Use minimum relevant skills; for frontend: `emil-design-engineering` → `motion.dev` → `shadcn`
 - Prefer existing repo toolchain; introduce new dependencies only for genuine gaps
 
-## Search Policy
+## Search Policy (CRITICAL)
 
-Semantic first (`grepai search`), then exact (`rg`/`fd`). Fall back cleanly if grepai is unavailable. Use English queries for semantic search quality.
+For **exploratory/discovery searches** (intent-based, conceptual, "how does X work"):
+→ Use `grepai search "<intent>" --json --compact` via Bash FIRST, then narrow with Grep/rg if needed.
+
+For **exact pattern searches** (known symbol, import, specific string):
+→ Built-in Grep tool or `rg` directly is fine.
+
+This OVERRIDES the default "always use Grep" behavior for exploratory searches. English queries for semantic quality. Fall back to Grep silently if grepai is unavailable.
 
 ## Execution Workflow (MUST)
 
