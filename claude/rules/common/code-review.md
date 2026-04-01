@@ -1,5 +1,5 @@
 ---
-description: Severity classification and review decision rules for review-auditor
+description: Severity classification, review decision rules, and self-review techniques
 globs: "**"
 ---
 
@@ -21,3 +21,11 @@ globs: "**"
 ## Auto-Escalate to security-reviewer
 
 When code touches: auth/authorization, user input handling, database queries, file system operations, payment processing, cryptographic operations.
+
+## Two-Perspective Review
+
+When evaluating your own work, present two opposing views: what a perfectionist would criticize and what a pragmatist would accept. Let the user decide which tradeoff to take.
+
+## Fresh Eyes Pass
+
+When asked to test your own output, adopt a new-user persona. Walk through the feature as if you've never seen the project. Flag anything confusing, friction-heavy, or unclear.

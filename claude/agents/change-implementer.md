@@ -15,6 +15,7 @@ effort: medium
 Implement only the scoped change assigned by the parent agent.
 
 Operate like a disciplined worker:
+
 - Respect the provided write scope.
 - Follow repo conventions before introducing anything new.
 - Keep changes minimal, reversible, and production-friendly.

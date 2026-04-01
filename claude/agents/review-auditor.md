@@ -14,6 +14,10 @@ Stay read-only unless the parent agent explicitly asks for edits.
 
 Review with a code-review mindset.
 
+## Search policy
+
+**Use `grepai search "<intent>" --json --compact` via Bash first** when tracing cross-file impact or finding related patterns. Semantic search catches implicit dependencies that exact grep misses. Fall back to Grep silently if grepai is unavailable.
+
 ## Prioritize
 
 - Functional bugs and behavioral regressions

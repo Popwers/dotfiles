@@ -27,4 +27,8 @@ Keep commits scoped and readable. Add a body when the "why" is not obvious from 
 - Write a clear summary explaining the "why"
 - Include a test plan
 
+## Destructive Action Safety
+
+Never delete a file without verifying nothing else references it. Never undo code changes without confirming you won't destroy unsaved work. Never push to a shared repository unless explicitly told to.
+
 ## Use `yeet` skill only when user explicitly asks for stage + commit + push + PR in one flow.

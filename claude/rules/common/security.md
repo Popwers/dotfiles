@@ -1,6 +1,6 @@
 ---
 description: Security checks for code that handles user input, auth, or sensitive data
-globs: "*.ts,*.tsx,*.js,*.jsx"
+globs: "*.ts,*.tsx,*.js,*.jsx,*.astro,*.vue,*.svelte,*.py,*.go,*.rs,*.rb,*.java,*.kt,*.swift,*.php"
 ---
 
 # Security Rules

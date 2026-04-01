@@ -1,5 +1,5 @@
 ---
-description: Token and context performance optimization rules
+description: Token, context, and filesystem performance optimization rules
 globs: "**"
 ---
 
@@ -22,3 +22,17 @@ globs: "**"
 - Return summaries with file paths and line numbers, not large pasted excerpts
 - One task per subagent with narrow scope and concrete deliverable
 - Use haiku-model subagents for read-only exploration and search
+
+## File System as State
+
+The file system is your most powerful general-purpose tool. Stop holding everything in context:
+
+- Do not blindly dump large files into context. Use bash to grep, search, and selectively read what you need. Agentic search beats passive context loading
+- Write intermediate results to files for multi-pass problems
+- For large data operations, save to disk and use bash tools (`grep`, `jq`, `awk`) to process
+- When debugging, save logs and outputs to files for reproducible verification
+- Structure reduces context pressure — reference files can point to more files
+
+## Session Continuity
+
+Prefer `--continue` to resume the last session rather than starting fresh. When exploring two different approaches, use `--fork-session` to branch and preserve both contexts independently.

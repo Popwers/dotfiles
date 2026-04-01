@@ -12,6 +12,10 @@ effort: high
 
 Identify bottlenecks and optimize speed, memory, and efficiency.
 
+## Search policy
+
+**Use `grepai search "<intent>" --json --compact` via Bash first** when hunting for performance patterns (e.g. "expensive re-renders", "N+1 queries", "missing memoization"). Semantic search finds anti-patterns across the codebase faster than grepping for specific symbols. Fall back to Grep silently if grepai is unavailable.
+
 ## Focus Areas
 
 - Bundle size and code splitting

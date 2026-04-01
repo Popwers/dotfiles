@@ -1,6 +1,6 @@
 ---
 description: Testing policy, TDD workflow, and coverage requirements
-globs: "*.ts,*.tsx,*.js,*.jsx,*.test.ts,*.test.tsx"
+globs: "*.ts,*.tsx,*.js,*.jsx,*.astro,*.vue,*.svelte,*.py,*.go,*.rs,*.rb,*.java,*.kt,*.swift,*.php,*.test.ts,*.test.tsx,*.spec.ts,*.spec.tsx,*_test.go,*_test.py,*.test.js,*.spec.js"
 ---
 
 # Testing Policy
