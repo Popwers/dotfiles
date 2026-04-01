@@ -63,9 +63,13 @@ For **exact pattern searches** (known symbol, import, specific string):
 
 This OVERRIDES the default "always use Grep" behavior. Fall back to Grep silently if grepai is unavailable.
 
+## Skill Policy
+
+Before starting any task, check if an installed skill matches the request. Skills provide specialized knowledge and workflows that outperform general-purpose reasoning. Use the Skill tool proactively — the user should not have to ask for it. Priority chain for frontend: `emil-design-engineering` → `shadcn` → `motion.dev`.
+
 ## Execution Workflow (MUST)
 
-Confirm scope → gather context (semantic first) → smallest safe approach → implement → verify → report outcomes.
+Confirm scope → check skills → gather context (semantic first) → smallest safe approach → implement → verify → report outcomes.
 
 Risk tiers: Tier 0 (docs/text) → proceed | Tier 1 (behavior/config) → validate | Tier 2 (auth/billing/destructive) → ask first.
 
