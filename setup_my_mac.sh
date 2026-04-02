@@ -343,12 +343,13 @@ fi
 
 # Install skills
 install_skill_if_missing "agent-browser" "https://github.com/vercel-labs/agent-browser" --skill agent-browser
+install_skill_if_missing "web-design-guidelines" "https://github.com/vercel-labs/agent-skills" --skill web-design-guidelines
+install_skill_if_missing "frontend-design" "https://github.com/anthropics/skills" --skill frontend-design
+install_skill_if_missing "ui-ux-pro-max" "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill" --skill ui-ux-pro-max
 install_skill_if_missing "vercel-react-native-skills" "https://github.com/vercel-labs/agent-skills" --skill vercel-react-native-skills
 install_skill_if_missing "vercel-react-best-practices" "https://github.com/vercel-labs/agent-skills" --skill vercel-react-best-practices
 install_skill_if_missing "vercel-composition-patterns" "https://github.com/vercel-labs/agent-skills" --skill vercel-composition-patterns
-install_skill_if_missing "web-design-guidelines" "https://github.com/vercel-labs/agent-skills" --skill web-design-guidelines
 install_skill_if_missing "find-skills" "https://github.com/vercel-labs/skills" --skill find-skills
-install_skill_if_missing "frontend-design" "https://github.com/anthropics/skills" --skill frontend-design
 install_skill_if_missing "doc-coauthoring" "https://github.com/anthropics/skills" --skill doc-coauthoring
 install_skill_if_missing "webapp-testing" "https://github.com/anthropics/skills" --skill webapp-testing
 install_skill_if_missing "playwright" "https://github.com/openai/skills" --skill playwright
