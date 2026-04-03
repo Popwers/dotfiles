@@ -8,7 +8,7 @@
 # - Compact after exploration, before execution
 # - Compact after completing a milestone, before starting next
 
-COUNTER_FILE="/tmp/claude-tool-count-$$"
+COUNTER_FILE="/tmp/claude-tool-count-${CLAUDE_SESSION_ID:-global}"
 THRESHOLD=${COMPACT_THRESHOLD:-50}
 
 if [ -f "$COUNTER_FILE" ]; then

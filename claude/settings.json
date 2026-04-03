@@ -28,7 +28,6 @@
 	},
 	"model": "opus",
 	"language": "Français",
-	"fastMode": false,
 	"autoConnectIde": true,
 	"env": {
 		"CLAUDE_CODE_AUTO_COMPACT_WINDOW": "220000",

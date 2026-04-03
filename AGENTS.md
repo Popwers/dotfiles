@@ -163,7 +163,7 @@ if ! grep -q $(which fish) /etc/shells; then  # Check before modifying
 
 **Via Cask:** android-platform-tools
 
-**Via Bun (global):** eslint, prettier, ngrok, npm-check-updates, pm2, typescript, commitizen, cz-conventional-changelog, nx
+**Via Bun (global):** ngrok, npm-check-updates, typescript, commitizen, cz-conventional-changelog, @openai/codex, @anthropic-ai/claude-code, @cometix/ccline
 
 **Via Bun (global, npm postinstall trusted):** @cometix/ccline (Claude Code statusline + patch)
 
@@ -173,7 +173,7 @@ if ! grep -q $(which fish) /etc/shells; then  # Check before modifying
 
 **Fonts:** JetBrains Mono Nerd Font, Symbols Only Nerd Font
 
-**Fisher plugins:** `jorgebucaran/nvm.fish`, `rstacruz/fish-npm-global`
+**Fisher plugins:** `jorgebucaran/nvm.fish`
 
 ## NOTES
 

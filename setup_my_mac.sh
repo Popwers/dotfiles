@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 # Get the directory where this script is located
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -28,7 +29,7 @@ sync_dir_with_status() {
 # Install Homebrew
 if ! command -v brew >/dev/null 2>&1; then
     echo "Installing Homebrew for you."
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" || { echo "Homebrew install failed"; exit 1; }
 else
     echo "Homebrew is already installed."
 fi
@@ -100,9 +101,9 @@ else
 fi
 
 # Switch to fish shell and execute commands
-fish <<EOF
-if test -f "$SCRIPT_DIR/config.fish"
-    source "$SCRIPT_DIR/config.fish"
+SCRIPT_DIR_EXPORT="$SCRIPT_DIR" fish <<'FISH'
+if test -f "$SCRIPT_DIR_EXPORT/config.fish"
+    source "$SCRIPT_DIR_EXPORT/config.fish"
 end
 
 fish_add_path /opt/homebrew/bin
@@ -123,15 +124,9 @@ else
     fisher install jorgebucaran/nvm.fish
 end
 
-if fisher list | string match -q 'rstacruz/fish-npm-global'
-    echo "Fisher plugin 'rstacruz/fish-npm-global' is already installed."
-else
-    fisher install rstacruz/fish-npm-global
-end
-
 # Install NVM and use LTS version
 if command -q nvm
-    if nvm ls lts 2>/dev/null | string match -rq 'v[0-9]+\.[0-9]+\.[0-9]+'; then
+    if nvm ls lts 2>/dev/null | string match -rq 'v[0-9]+\.[0-9]+\.[0-9]+'
         echo "Node.js LTS is already installed in nvm."
     else
         nvm install lts
@@ -144,7 +139,7 @@ end
 # Install global packages
 set -l bun_global_listing (bun pm ls -g 2>/dev/null | string collect)
 set -l missing_bun_globals
-for pkg in ngrok npm-check-updates typescript commitizen cz-conventional-changelog agent-browser @openai/codex @anthropic-ai/claude-code @cometix/ccline
+for pkg in ngrok npm-check-updates typescript commitizen cz-conventional-changelog @openai/codex @anthropic-ai/claude-code @cometix/ccline
     if string match -rq "(^|\\s)$pkg@" -- $bun_global_listing
         echo "Bun global package '$pkg' is already installed."
     else
@@ -166,7 +161,7 @@ fish_add_path ~/.bun/bin
 
 # Update fish completions
 fish_update_completions
-EOF
+FISH
 
 # Cleanup
 brew cleanup
@@ -221,13 +216,23 @@ fi
 copy_file_with_status "$SCRIPT_DIR/claude/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
 copy_file_with_status "$SCRIPT_DIR/claude/settings.json" "$HOME/.claude/settings.json"
 copy_file_with_status "$SCRIPT_DIR/claude/ccline/config.toml" "$HOME/.claude/ccline/config.toml"
-# Register local MCP servers (user scope)
+# Register local MCP servers (user scope) — only if not already registered
 if command -v claude &>/dev/null; then
-    echo "Registering MCP servers..."
-    claude mcp add --transport stdio --scope user playwright -- bunx @playwright/mcp@latest
-    claude mcp add --transport http --scope user context7 https://mcp.context7.com/mcp --header "CONTEXT7_API_KEY:ctx7sk-1c3efdc8-aec6-417e-9cca-e36ed9696664"
-    claude mcp add --transport http --scope user gh_grep https://mcp.grep.app
-    claude mcp add --transport http --scope user exa https://mcp.exa.ai --header "x-api-key:469853ea-7c4e-499e-8113-621615e8ebd2"
+    registered_mcps=$(claude mcp list --scope user 2>/dev/null || true)
+    register_mcp_if_missing() {
+        local name=$1; shift
+        if echo "$registered_mcps" | grep -q "$name"; then
+            echo "MCP server '$name' is already registered."
+        else
+            echo "Registering MCP server '$name'..."
+            claude mcp add "$@" || true
+        fi
+    }
+    register_mcp_if_missing "playwright" --transport stdio --scope user playwright -- bunx @playwright/mcp@latest
+    register_mcp_if_missing "context7" --transport http --scope user context7 https://mcp.context7.com/mcp --header "CONTEXT7_API_KEY:ctx7sk-1c3efdc8-aec6-417e-9cca-e36ed9696664"
+    register_mcp_if_missing "gh_grep" --transport http --scope user gh_grep https://mcp.grep.app
+    register_mcp_if_missing "exa" --transport http --scope user exa https://mcp.exa.ai --header "x-api-key:469853ea-7c4e-499e-8113-621615e8ebd2"
+    unset -f register_mcp_if_missing
 else
     echo "  ⚠ claude CLI not found, skipping MCP registration"
 fi

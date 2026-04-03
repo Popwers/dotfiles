@@ -3,11 +3,7 @@ if status is-interactive
 end
 
 set fish_greeting ""
-set -gx TERM xterm-256color
 set -gx OPENCODE_EXPERIMENTAL true
-
-# Setup brew
-eval "$(/opt/homebrew/bin/brew shellenv)"
 
 # aliases
 alias .. "cd .."
@@ -122,22 +118,20 @@ function opencode
 end
 
 # Path
+fish_add_path ~/.bun/bin
 fish_add_path /opt/homebrew/bin
 fish_add_path /opt/homebrew/sbin
 fish_add_path /usr/local/bin
-fish_add_path bin
-fish_add_path ~/bin
 fish_add_path ~/.local/bin
 fish_add_path ~/.orbstack/bin
 fish_add_path ~/.opencode/bin
-fish_add_path node_modules/.bin
 
 # NodeJS
-set --universal nvm_default_version lts
+set -q nvm_default_version; or set --universal nvm_default_version lts
 
 #VSCODE AND CURSOR
 if test "$TERM_PROGRAM" = "vscode" -o "$TERM_PROGRAM" = "cursor"
     . (code --locate-shell-integration-path fish)
 end
 
-oh-my-posh init fish --config (brew --prefix oh-my-posh)/themes/jandedobbeleer.omp.json | source
+oh-my-posh init fish --config /opt/homebrew/opt/oh-my-posh/themes/jandedobbeleer.omp.json | source
