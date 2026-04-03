@@ -221,43 +221,22 @@ fi
 copy_file_with_status "$SCRIPT_DIR/claude/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
 copy_file_with_status "$SCRIPT_DIR/claude/settings.json" "$HOME/.claude/settings.json"
 copy_file_with_status "$SCRIPT_DIR/claude/ccline/config.toml" "$HOME/.claude/ccline/config.toml"
-copy_file_with_status "$SCRIPT_DIR/claude/.claude.json" "$HOME/.claude/.claude.json"
+# Register local MCP servers (user scope)
+if command -v claude &>/dev/null; then
+    echo "Registering MCP servers..."
+    claude mcp add --transport stdio --scope user playwright -- bunx @playwright/mcp@latest
+    claude mcp add --transport http --scope user context7 https://mcp.context7.com/mcp --header "CONTEXT7_API_KEY:ctx7sk-1c3efdc8-aec6-417e-9cca-e36ed9696664"
+    claude mcp add --transport http --scope user gh_grep https://mcp.grep.app
+    claude mcp add --transport http --scope user exa https://mcp.exa.ai --header "x-api-key:469853ea-7c4e-499e-8113-621615e8ebd2"
+else
+    echo "  ⚠ claude CLI not found, skipping MCP registration"
+fi
 sync_dir_with_status "$SCRIPT_DIR/claude/agents" "$HOME/.claude/agents"
 sync_dir_with_status "$SCRIPT_DIR/claude/hooks" "$HOME/.claude/hooks"
 sync_dir_with_status "$SCRIPT_DIR/claude/rules" "$HOME/.claude/rules"
 
 # Ensure bun globals are on PATH for fresh bootstraps
 export PATH="$HOME/.bun/bin:$PATH"
-
-# Install Codex plugin for Claude Code (cross-AI code review and task delegation)
-if command -v claude >/dev/null 2>&1; then
-    if claude plugin marketplace list 2>/dev/null | grep -q "openai-codex"; then
-        echo "Codex plugin marketplace already added."
-    else
-        claude plugin marketplace add openai/codex-plugin-cc
-    fi
-    if claude plugin list 2>/dev/null | grep -q "codex@openai-codex"; then
-        echo "Codex plugin already installed."
-    else
-        claude plugin install codex@openai-codex
-    fi
-
-    # Enable the built-in review gate (blocks session stop if Codex finds unresolved issues)
-    CODEX_COMPANION=$(ls -1d "$HOME"/.claude/plugins/cache/openai-codex/codex/*/scripts/codex-companion.mjs 2>/dev/null | tail -1)
-    if [ -n "$CODEX_COMPANION" ] && [ -f "$CODEX_COMPANION" ]; then
-        node "$CODEX_COMPANION" setup --enable-review-gate --json >/dev/null 2>&1
-        echo "Codex review gate enabled."
-    fi
-fi
-
-# Ensure Codex CLI is authenticated (one-time manual step)
-if command -v codex >/dev/null 2>&1; then
-    if codex whoami >/dev/null 2>&1; then
-        echo "Codex CLI is authenticated."
-    else
-        echo "⚠ Codex CLI not authenticated — run: codex login"
-    fi
-fi
 
 # Setup brew
 eval "$(/opt/homebrew/bin/brew shellenv)"
@@ -380,7 +359,6 @@ install_skill_if_missing "agent-browser" "https://github.com/vercel-labs/agent-b
 install_skill_if_missing "web-design-guidelines" "https://github.com/vercel-labs/agent-skills" --skill web-design-guidelines
 install_skill_if_missing "frontend-design" "https://github.com/anthropics/skills" --skill frontend-design
 install_skill_if_missing "ui-ux-pro-max" "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill" --skill ui-ux-pro-max
-install_skill_if_missing "vercel-react-native-skills" "https://github.com/vercel-labs/agent-skills" --skill vercel-react-native-skills
 install_skill_if_missing "vercel-react-best-practices" "https://github.com/vercel-labs/agent-skills" --skill vercel-react-best-practices
 install_skill_if_missing "vercel-composition-patterns" "https://github.com/vercel-labs/agent-skills" --skill vercel-composition-patterns
 install_skill_if_missing "find-skills" "https://github.com/vercel-labs/skills" --skill find-skills
@@ -388,11 +366,29 @@ install_skill_if_missing "doc-coauthoring" "https://github.com/anthropics/skills
 install_skill_if_missing "webapp-testing" "https://github.com/anthropics/skills" --skill webapp-testing
 install_skill_if_missing "playwright" "https://github.com/openai/skills" --skill playwright
 install_skill_if_missing "yeet" "https://github.com/openai/skills" --skill yeet
-install_skill_bundle_if_missing "better-auth/skills" "better-auth-best-practices" "organization-best-practices" "two-factor-authentication-best-practices"
-install_skill_bundle_if_missing "coreyhaines31/marketingskills" "marketing-ideas" "copywriting" "seo-audit"
-install_skill_bundle_if_missing "yoanbernabeu/grepai-skills" "grepai-init" "grepai-search-basics" "grepai-troubleshooting"
+install_skill_if_missing "copywriting" "https://github.com/coreyhaines31/marketingskills" --skill copywriting
+install_skill_if_missing "seo-audit" "https://github.com/coreyhaines31/marketingskills" --skill seo-audit
+install_skill_if_missing "page-cro" "https://github.com/coreyhaines31/marketingskills" --skill page-cro
+install_skill_if_missing "content-strategy" "https://github.com/coreyhaines31/marketingskills" --skill content-strategy
+install_skill_if_missing "site-architecture" "https://github.com/coreyhaines31/marketingskills" --skill site-architecture
+install_skill_if_missing "grepai-init" "https://github.com/yoanbernabeu/grepai-skills" --skill grepai-init
+install_skill_if_missing "grepai-search-basics" "https://github.com/yoanbernabeu/grepai-skills" --skill grepai-search-basics
+install_skill_if_missing "grepai-search-advanced" "https://github.com/yoanbernabeu/grepai-skills" --skill grepai-search-advanced
+install_skill_if_missing "grepai-search-tips" "https://github.com/yoanbernabeu/grepai-skills" --skill grepai-search-tips
+install_skill_if_missing "grepai-troubleshooting" "https://github.com/yoanbernabeu/grepai-skills" --skill grepai-troubleshooting
+install_skill_if_missing "grepai-mcp-claude" "https://github.com/yoanbernabeu/grepai-skills" --skill grepai-mcp-claude
+install_skill_if_missing "grepai-trace-callees" "https://github.com/yoanbernabeu/grepai-skills" --skill grepai-trace-callees
+install_skill_if_missing "grepai-trace-callers" "https://github.com/yoanbernabeu/grepai-skills" --skill grepai-trace-callers
+install_skill_if_missing "grepai-trace-graph" "https://github.com/yoanbernabeu/grepai-skills" --skill grepai-trace-graph
+install_skill_if_missing "grepai-watch-daemon" "https://github.com/yoanbernabeu/grepai-skills" --skill grepai-watch-daemon
+install_skill_if_missing "grepai-workspaces" "https://github.com/yoanbernabeu/grepai-skills" --skill grepai-workspaces
 install_skill_bundle_if_missing "shadcn/ui" "shadcn"
 install_skill_if_missing "interface-feel-polish" "https://github.com/Popwers/skills" --skill interface-feel-polish
+install_skill_if_missing "mcp-builder" "https://github.com/anthropics/skills" --skill mcp-builder
+install_skill_if_missing "pdf" "https://github.com/anthropics/skills" --skill pdf
+install_skill_if_missing "docx" "https://github.com/anthropics/skills" --skill docx
+install_skill_if_missing "xlsx" "https://github.com/anthropics/skills" --skill xlsx
+install_skill_if_missing "pptx" "https://github.com/anthropics/skills" --skill pptx
 
 # Activate the design-engineering skill for frontend work.
 if is_skill_installed_everywhere "emil-design-engineering"; then
@@ -425,11 +421,6 @@ if command -v rtk >/dev/null 2>&1; then
     rtk init -g --codex
     rtk init -g --agent cursor
     rtk init -g --opencode
-fi
-
-# Re-enable Codex plugin after RTK init (RTK patches settings.json which can disable plugins)
-if command -v claude >/dev/null 2>&1; then
-    claude plugin enable codex@openai-codex 2>/dev/null
 fi
 
 echo "Mac setup is complete!"

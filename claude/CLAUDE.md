@@ -110,16 +110,6 @@ Ask only when ambiguity materially changes outcomes. Prefer momentum: assume →
 
 Ask first for: `sudo`, auth/billing/security changes, deleting files outside scope, CI/CD changes, rewriting git history, external account commands.
 
-## Codex Cross-Review
-
-A `codex-review-gate` hook warns before committing 3+ files without review. When triggered (or proactively for non-trivial/security-sensitive changes):
-
-- **Preferred**: delegate to the `codex-reviewer` agent (`run_in_background: true`) — it runs `codex` CLI and reports findings
-- **Alternative**: use `/codex:review --background` or `/codex:adversarial-review --background` plugin commands directly
-- **Escape hatch**: `/codex:rescue investigate <description>` when stuck after 2 failed attempts
-
-Fix CRITICAL/HIGH findings. Report MEDIUM to user. Skip for trivial changes (docs, typos, single-line fixes).
-
 ## Validation Matrix
 
 Docs: links/format | Source: targeted tests, broader as risk grows | Build/config: lint + tests + build | UI: browser automation | Security: auth/permission paths.
