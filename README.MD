@@ -70,18 +70,20 @@ OpenCode is an AI coding agent for the terminal. Installed with the following pl
 - `@tarquinen/opencode-dcp@latest` - Automatically reduces token usage in OpenCode by removing obsolete tool outputs from conversation history.
 - `@franlol/opencode-md-table-formatter@latest` - Markdown table formatter plugin for Opencode with concealment mode support.
 - MCPs: context7, gh_grep, exa
-- The OpenCode `AGENTS.md` is also synced to Codex (`~/.codex/AGENTS.md`)
-
 Claude Code is installed globally through Bun as `@anthropic-ai/claude-code`.
 The shared skills installer now links the same skills into Claude Code, OpenCode, and Codex.
-The shared `opencode/AGENTS.md` is also copied to Claude Code as `~/.claude/CLAUDE.md`.
+Claude Code keeps its dedicated instructions in `claude/CLAUDE.md`.
 
 ## Codex
 
+Codex has its own dedicated global instructions in `codex/AGENTS.md`, copied to `~/.codex/AGENTS.md` during setup.
 Codex configuration is stored in `codex/config.toml` and copied to `~/.codex/config.toml` during setup.
+Codex hooks live in `codex/hooks.json` and `codex/hooks/`, and are synced to `~/.codex/`.
+Because Codex hooks are currently Bash-oriented, the validation hooks are implemented as a best-effort post-Bash pipeline that approximates Claude's `Edit|Write` automation: auto-format, typecheck, targeted tests, and console log scan.
 Custom subagents live in `codex/agents/` and are synced to `~/.codex/agents/` during setup.
-The curated set is intentionally small: `repo-explorer`, `review-auditor`, `test-guardian`, `change-implementer`, and `docs-researcher`.
-Keep shared behavior in `opencode/AGENTS.md`; each agent TOML should only add narrow role-specific instructions.
+Codex also falls back to repo-level `CLAUDE.md` files when `AGENTS.md` is missing, which makes older Claude-oriented repos usable without extra migration.
+The Codex agent set now mirrors the Claude setup more closely: `repo-explorer`, `review-auditor`, `test-guardian`, `change-implementer`, `docs-researcher`, `planner`, `performance-optimizer`, and `security-reviewer`.
+Keep shared cross-tool behavior in `opencode/AGENTS.md` when it is genuinely shared; keep Codex-specific runtime behavior in `codex/`.
 Subagents should stay token-efficient: use targeted discovery (`grepai`, `rg`, `fd`), read narrow line ranges, and return concise summaries instead of large raw outputs.
 
 ## Fonts

@@ -1,118 +1,130 @@
 {
-  "permissions": {
-    "defaultMode": "default",
-    "allow": [
-      "Read",
-      "Edit",
-      "Write",
-      "Glob",
-      "Grep",
-      "Bash(*)",
-      "mcp__claude_ai_Context7",
-      "mcp__claude_ai_Figma",
-      "mcp__claude_ai_Linear",
-      "mcp__gh_grep",
-      "mcp__exa"
-    ],
-    "deny": [
-      "Bash(rm -rf:*)",
-      "Bash(sudo:*)",
-      "Bash(chmod 777:*)"
-    ]
-  },
-  "attribution": {
-    "commit": "",
-    "pr": ""
-  },
-  "enableAllProjectMcpServers": true,
-  "statusLine": {
-    "type": "command",
-    "command": "ccline",
-    "padding": 0
-  },
-  "model": "opus[1m]",
-  "language": "Français",
-  "fastMode": true,
-  "effortLevel": "high",
-  "hooks": {
-    "SessionStart": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "pgrep -x ollama > /dev/null || nohup ollama serve > /dev/null 2>&1 &",
-            "timeout": 10,
-            "statusMessage": "Starting ollama..."
-          },
-          {
-            "type": "command",
-            "command": "command -v grepai >/dev/null 2>&1 && { grepai status >/dev/null 2>&1 || grepai init --yes >/dev/null 2>&1; grep -qsx '.grepai/' .gitignore 2>/dev/null || echo '.grepai/' >> .gitignore; grepai watch --background >/dev/null 2>&1; }; exit 0",
-            "timeout": 20,
-            "statusMessage": "Starting grepai..."
-          }
-        ]
-      }
-    ],
-    "PreToolUse": [
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/.claude/hooks/block-no-verify.sh",
-            "timeout": 5
-          }
-        ]
-      },
-      {
-        "matcher": "Edit|Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/.claude/hooks/strategic-compact.sh",
-            "timeout": 5
-          }
-        ]
-      }
-    ],
-    "PostToolUse": [
-      {
-        "matcher": "Edit|Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/.claude/hooks/auto-format.sh",
-            "timeout": 10
-          },
-          {
-            "type": "command",
-            "command": "~/.claude/hooks/typecheck.sh",
-            "timeout": 30
-          },
-          {
-            "type": "command",
-            "command": "~/.claude/hooks/run-tests.sh",
-            "timeout": 30
-          }
-        ]
-      }
-    ],
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/.claude/hooks/check-console-log.sh",
-            "timeout": 5
-          },
-          {
-            "type": "command",
-            "command": "command -v grepai >/dev/null 2>&1 && grepai watch --stop >/dev/null 2>&1; exit 0",
-            "timeout": 10,
-            "statusMessage": "Stopping grepai watcher..."
-          }
-        ]
-      }
-    ]
-  }
+	"permissions": {
+		"defaultMode": "default",
+		"allow": [
+			"Read",
+			"Edit",
+			"Write",
+			"Glob",
+			"Grep",
+			"Bash(*)",
+			"mcp__claude_ai_Context7",
+			"mcp__claude_ai_Figma",
+			"mcp__claude_ai_Linear",
+			"mcp__gh_grep",
+			"mcp__exa"
+		],
+		"deny": ["Bash(rm -rf:*)", "Bash(sudo:*)", "Bash(chmod 777:*)"]
+	},
+	"attribution": {
+		"commit": "",
+		"pr": ""
+	},
+	"enableAllProjectMcpServers": true,
+	"statusLine": {
+		"type": "command",
+		"command": "ccline",
+		"padding": 0
+	},
+	"model": "opus[1m]",
+	"language": "Français",
+	"fastMode": false,
+	"autoConnectIde": true,
+	"env": {
+		"CLAUDE_CODE_NO_FLICKER": "1",
+		"CLAUDE_CODE_AUTO_COMPACT_WINDOW": "220000",
+		"CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "75",
+		"CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
+		"CLAUDE_ENABLE_STREAM_WATCHDOG": "1",
+		"CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR": "1",
+		"CLAUDE_CODE_EFFORT_LEVEL": "auto"
+	},
+	"feedbackSurveyRate": 0,
+	"autoUpdatesChannel": "latest",
+	"hooks": {
+		"SessionStart": [
+			{
+				"hooks": [
+					{
+						"type": "command",
+						"command": "pgrep -x ollama > /dev/null || nohup ollama serve > /dev/null 2>&1 &",
+						"timeout": 10,
+						"statusMessage": "Starting ollama..."
+					},
+					{
+						"type": "command",
+						"command": "command -v grepai >/dev/null 2>&1 && { grepai status >/dev/null 2>&1 || grepai init --yes >/dev/null 2>&1; grep -qsx '.grepai/' .gitignore 2>/dev/null || echo '.grepai/' >> .gitignore; grepai watch --background >/dev/null 2>&1; }; exit 0",
+						"timeout": 20,
+						"statusMessage": "Starting grepai..."
+					}
+				]
+			}
+		],
+		"PreToolUse": [
+			{
+				"matcher": "Bash",
+				"hooks": [
+					{
+						"type": "command",
+						"command": "~/.claude/hooks/block-no-verify.sh",
+						"timeout": 5
+					},
+					{
+						"type": "command",
+						"command": "~/.claude/hooks/codex-review-gate.sh",
+						"timeout": 5
+					}
+				]
+			},
+			{
+				"matcher": "Edit|Write",
+				"hooks": [
+					{
+						"type": "command",
+						"command": "~/.claude/hooks/strategic-compact.sh",
+						"timeout": 5
+					}
+				]
+			}
+		],
+		"PostToolUse": [
+			{
+				"matcher": "Edit|Write",
+				"hooks": [
+					{
+						"type": "command",
+						"command": "~/.claude/hooks/auto-format.sh",
+						"timeout": 10
+					},
+					{
+						"type": "command",
+						"command": "~/.claude/hooks/typecheck.sh",
+						"timeout": 30
+					},
+					{
+						"type": "command",
+						"command": "~/.claude/hooks/run-tests.sh",
+						"timeout": 30
+					}
+				]
+			}
+		],
+		"Stop": [
+			{
+				"hooks": [
+					{
+						"type": "command",
+						"command": "~/.claude/hooks/check-console-log.sh",
+						"timeout": 5
+					},
+					{
+						"type": "command",
+						"command": "command -v grepai >/dev/null 2>&1 && grepai watch --stop >/dev/null 2>&1; exit 0",
+						"timeout": 10,
+						"statusMessage": "Stopping grepai watcher..."
+					}
+				]
+			}
+		]
+	}
 }

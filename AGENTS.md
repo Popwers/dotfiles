@@ -21,7 +21,10 @@ dotfiles/
 │   ├── settings.json   # Global settings
 │   └── agents/         # Custom subagents
 ├── codex/              # Codex config (synced to ~/.codex/)
+│   ├── AGENTS.md       # Global Codex instructions
 │   ├── config.toml     # Central config
+│   ├── hooks.json      # Codex lifecycle hooks config
+│   ├── hooks/          # Hook scripts
 │   └── agents/         # Custom subagents
 ├── opencode/           # OpenCode AI agent config
 │   ├── opencode.json   # Plugin list
@@ -166,6 +169,7 @@ if ! grep -q $(which fish) /etc/shells; then  # Check before modifying
 
 **OpenCode plugins:** opencode-supermemory, @tarquinen/opencode-dcp@latest, @franlol/opencode-md-table-formatter@0.0.3
 **OpenCode MCPs:** context7, gh_grep, exa
+**Codex fallbacks:** `CLAUDE.md` is accepted as a fallback project instruction file when `AGENTS.md` is missing
 
 **Fonts:** JetBrains Mono Nerd Font, Symbols Only Nerd Font
 

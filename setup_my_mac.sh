@@ -202,12 +202,12 @@ fi
 # Copy OpenCode configuration directory (clean sync)
 sync_dir_with_status "$SCRIPT_DIR/opencode" "$HOME/.config/opencode"
 
-# Copy OpenCode agent and Codex subagents
-copy_file_with_status "$SCRIPT_DIR/opencode/AGENTS.md" "$HOME/.codex/AGENTS.md"
-sync_dir_with_status "$SCRIPT_DIR/codex/agents" "$HOME/.codex/agents"
-
 # Copy Codex configuration
+copy_file_with_status "$SCRIPT_DIR/codex/AGENTS.md" "$HOME/.codex/AGENTS.md"
 copy_file_with_status "$SCRIPT_DIR/codex/config.toml" "$HOME/.codex/config.toml"
+copy_file_with_status "$SCRIPT_DIR/codex/hooks.json" "$HOME/.codex/hooks.json"
+sync_dir_with_status "$SCRIPT_DIR/codex/agents" "$HOME/.codex/agents"
+sync_dir_with_status "$SCRIPT_DIR/codex/hooks" "$HOME/.codex/hooks"
 
 # Apply CCometixLine patch to Claude Code (disable context warnings, enable verbose)
 CLAUDE_CLI_JS="$HOME/.bun/install/global/node_modules/@anthropic-ai/claude-code/cli.js"
@@ -220,10 +220,44 @@ fi
 # Copy Claude Code configuration
 copy_file_with_status "$SCRIPT_DIR/claude/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
 copy_file_with_status "$SCRIPT_DIR/claude/settings.json" "$HOME/.claude/settings.json"
-copy_file_with_status "$SCRIPT_DIR/claude/.mcp.json" "$HOME/.claude/.mcp.json"
+copy_file_with_status "$SCRIPT_DIR/claude/ccline/config.toml" "$HOME/.claude/ccline/config.toml"
+copy_file_with_status "$SCRIPT_DIR/claude/.claude.json" "$HOME/.claude/.claude.json"
 sync_dir_with_status "$SCRIPT_DIR/claude/agents" "$HOME/.claude/agents"
 sync_dir_with_status "$SCRIPT_DIR/claude/hooks" "$HOME/.claude/hooks"
 sync_dir_with_status "$SCRIPT_DIR/claude/rules" "$HOME/.claude/rules"
+
+# Ensure bun globals are on PATH for fresh bootstraps
+export PATH="$HOME/.bun/bin:$PATH"
+
+# Install Codex plugin for Claude Code (cross-AI code review and task delegation)
+if command -v claude >/dev/null 2>&1; then
+    if claude plugin marketplace list 2>/dev/null | grep -q "openai-codex"; then
+        echo "Codex plugin marketplace already added."
+    else
+        claude plugin marketplace add openai/codex-plugin-cc
+    fi
+    if claude plugin list 2>/dev/null | grep -q "codex@openai-codex"; then
+        echo "Codex plugin already installed."
+    else
+        claude plugin install codex@openai-codex
+    fi
+
+    # Enable the built-in review gate (blocks session stop if Codex finds unresolved issues)
+    CODEX_COMPANION=$(ls -1d "$HOME"/.claude/plugins/cache/openai-codex/codex/*/scripts/codex-companion.mjs 2>/dev/null | tail -1)
+    if [ -n "$CODEX_COMPANION" ] && [ -f "$CODEX_COMPANION" ]; then
+        node "$CODEX_COMPANION" setup --enable-review-gate --json >/dev/null 2>&1
+        echo "Codex review gate enabled."
+    fi
+fi
+
+# Ensure Codex CLI is authenticated (one-time manual step)
+if command -v codex >/dev/null 2>&1; then
+    if codex whoami >/dev/null 2>&1; then
+        echo "Codex CLI is authenticated."
+    else
+        echo "⚠ Codex CLI not authenticated — run: codex login"
+    fi
+fi
 
 # Setup brew
 eval "$(/opt/homebrew/bin/brew shellenv)"
@@ -391,6 +425,11 @@ if command -v rtk >/dev/null 2>&1; then
     rtk init -g --codex
     rtk init -g --agent cursor
     rtk init -g --opencode
+fi
+
+# Re-enable Codex plugin after RTK init (RTK patches settings.json which can disable plugins)
+if command -v claude >/dev/null 2>&1; then
+    claude plugin enable codex@openai-codex 2>/dev/null
 fi
 
 echo "Mac setup is complete!"

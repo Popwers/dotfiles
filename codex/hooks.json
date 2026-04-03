@@ -1,0 +1,53 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.codex/hooks/session-start.sh",
+            "timeout": 20,
+            "statusMessage": "Starting local coding helpers..."
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.codex/hooks/block-no-verify.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.codex/hooks/post-turn-validate.sh",
+            "timeout": 120,
+            "statusMessage": "Running post-turn validation..."
+          }
+        ]
+      }
+    ],
+    "SessionStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.codex/hooks/session-stop.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

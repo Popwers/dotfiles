@@ -19,11 +19,17 @@ Les configs Claude Code, Codex et OpenCode sont stockées dans ce repo et synchr
 |-----------------------|------------------------------|
 | `claude/CLAUDE.md`    | `~/.claude/CLAUDE.md`        |
 | `claude/settings.json`| `~/.claude/settings.json`    |
-| `claude/.mcp.json`    | `~/.claude/.mcp.json`        |
+| `claude/.claude.json` | `~/.claude/.claude.json`     |
+| `claude/ccline/`      | `~/.claude/ccline/`          |
 | `claude/agents/`      | `~/.claude/agents/`          |
-| `codex/`              | `~/.codex/`                  |
+| `codex/AGENTS.md`     | `~/.codex/AGENTS.md`         |
+| `codex/config.toml`   | `~/.codex/config.toml`       |
+| `codex/hooks.json`    | `~/.codex/hooks.json`        |
+| `codex/agents/`       | `~/.codex/agents/`           |
+| `codex/hooks/`        | `~/.codex/hooks/`            |
 
 ## Anti-patterns
 
 - Ne pas modifier `~/.claude/` directement : modifier dans `claude/` et relancer le setup
+- Ne pas modifier `~/.codex/` directement : modifier dans `codex/` et relancer le setup
 - Ne pas modifier `~/.config/fish/config.fish` directement : modifier `config.fish` dans le repo
