@@ -139,7 +139,7 @@ end
 # Install global packages
 set -l bun_global_listing (bun pm ls -g 2>/dev/null | string collect)
 set -l missing_bun_globals
-for pkg in ngrok npm-check-updates typescript commitizen cz-conventional-changelog @openai/codex @anthropic-ai/claude-code @cometix/ccline
+for pkg in ngrok npm-check-updates typescript commitizen cz-conventional-changelog @openai/codex @anthropic-ai/claude-code
     if string match -rq "(^|\\s)$pkg@" -- $bun_global_listing
         echo "Bun global package '$pkg' is already installed."
     else
@@ -153,8 +153,6 @@ else
     echo "All Bun global packages are already installed."
 end
 
-# Trust ccline postinstall (downloads platform binary)
-bun pm -g trust @cometix/ccline 2>/dev/null
 
 # Add bun to path
 fish_add_path ~/.bun/bin
@@ -204,18 +202,11 @@ copy_file_with_status "$SCRIPT_DIR/codex/hooks.json" "$HOME/.codex/hooks.json"
 sync_dir_with_status "$SCRIPT_DIR/codex/agents" "$HOME/.codex/agents"
 sync_dir_with_status "$SCRIPT_DIR/codex/hooks" "$HOME/.codex/hooks"
 
-# Apply CCometixLine patch to Claude Code (disable context warnings, enable verbose)
-CLAUDE_CLI_JS="$HOME/.bun/install/global/node_modules/@anthropic-ai/claude-code/cli.js"
-if [ -f "$CLAUDE_CLI_JS.backup" ]; then
-    echo "CCometixLine patch already applied."
-elif [ -f "$CLAUDE_CLI_JS" ] && command -v ccline >/dev/null 2>&1; then
-    ccline --patch "$CLAUDE_CLI_JS"
-fi
-
 # Copy Claude Code configuration
 copy_file_with_status "$SCRIPT_DIR/claude/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
 copy_file_with_status "$SCRIPT_DIR/claude/settings.json" "$HOME/.claude/settings.json"
-copy_file_with_status "$SCRIPT_DIR/claude/ccline/config.toml" "$HOME/.claude/ccline/config.toml"
+copy_file_with_status "$SCRIPT_DIR/claude/statusline.sh" "$HOME/.claude/statusline.sh"
+chmod +x "$HOME/.claude/statusline.sh"
 # Register local MCP servers (user scope) — only if not already registered
 if command -v claude &>/dev/null; then
     registered_mcps=$(claude mcp list --scope user 2>/dev/null || true)

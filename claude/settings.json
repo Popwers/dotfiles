@@ -14,7 +14,16 @@
 			"mcp__gh_grep",
 			"mcp__exa"
 		],
-		"deny": ["Bash(rm -rf:*)", "Bash(sudo:*)", "Bash(chmod 777:*)"]
+		"deny": [
+				"Bash(rm -rf:*)",
+				"Bash(sudo:*)",
+				"Bash(chmod 777:*)",
+				"Bash(git push --force:*)",
+				"Bash(git push -f:*)",
+				"Bash(git reset --hard:*)",
+				"Bash(curl * | sh:*)",
+				"Bash(curl * | bash:*)"
+			]
 	},
 	"attribution": {
 		"commit": "",
@@ -23,7 +32,7 @@
 	"enableAllProjectMcpServers": true,
 	"statusLine": {
 		"type": "command",
-		"command": "ccline",
+		"command": "~/.claude/statusline.sh",
 		"padding": 0
 	},
 	"model": "opus",

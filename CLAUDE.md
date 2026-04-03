@@ -19,7 +19,7 @@ Les configs Claude Code, Codex et OpenCode sont stockées dans ce repo et synchr
 |-----------------------|------------------------------|
 | `claude/CLAUDE.md`    | `~/.claude/CLAUDE.md`        |
 | `claude/settings.json`| `~/.claude/settings.json`    |
-| `claude/ccline/`      | `~/.claude/ccline/`          |
+| `claude/statusline.sh`| `~/.claude/statusline.sh`   |
 | `claude/agents/`      | `~/.claude/agents/`          |
 | `codex/AGENTS.md`     | `~/.codex/AGENTS.md`         |
 | `codex/config.toml`   | `~/.codex/config.toml`       |

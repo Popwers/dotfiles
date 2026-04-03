@@ -163,9 +163,7 @@ if ! grep -q $(which fish) /etc/shells; then  # Check before modifying
 
 **Via Cask:** android-platform-tools
 
-**Via Bun (global):** ngrok, npm-check-updates, typescript, commitizen, cz-conventional-changelog, @openai/codex, @anthropic-ai/claude-code, @cometix/ccline
-
-**Via Bun (global, npm postinstall trusted):** @cometix/ccline (Claude Code statusline + patch)
+**Via Bun (global):** ngrok, npm-check-updates, typescript, commitizen, cz-conventional-changelog, @openai/codex, @anthropic-ai/claude-code
 
 **OpenCode plugins:** opencode-supermemory, @tarquinen/opencode-dcp@latest, @franlol/opencode-md-table-formatter@0.0.3
 **OpenCode MCPs:** context7, gh_grep, exa
