@@ -6,14 +6,36 @@ GREEN='\033[32m'; YELLOW='\033[33m'; RED='\033[31m'
 MAGENTA='\033[35m'; BLUE='\033[34m'; DIM='\033[2m'; BOLD='\033[1m'
 RESET='\033[0m'
 
-# ── Extract fields ──────────────────────────────────────────────
-MODEL=$(echo "$input" | jq -r '.model.display_name')
-DIR=$(echo "$input" | jq -r '.workspace.current_dir')
-PCT=$(echo "$input" | jq -r '.context_window.used_percentage // 0' | cut -d. -f1)
-LINES_ADD=$(echo "$input" | jq -r '.cost.total_lines_added // 0')
-LINES_DEL=$(echo "$input" | jq -r '.cost.total_lines_removed // 0')
-FIVE_H=$(echo "$input" | jq -r '.rate_limits.five_hour.used_percentage // empty')
-SEVEN_D=$(echo "$input" | jq -r '.rate_limits.seven_day.used_percentage // empty')
+# ── Extract all fields (single jq call) ────────────────────────
+eval "$(echo "$input" | jq -r '
+  @sh "MODEL=\(.model.display_name)",
+  @sh "DIR=\(.workspace.current_dir)",
+  @sh "PCT=\(.context_window.used_percentage // 0 | floor)",
+  @sh "LINES_ADD=\(.cost.total_lines_added // 0)",
+  @sh "LINES_DEL=\(.cost.total_lines_removed // 0)",
+  @sh "FIVE_H=\(.rate_limits.five_hour.used_percentage // empty)",
+  @sh "FIVE_H_RESET=\(.rate_limits.five_hour.resets_at // empty)",
+  @sh "SEVEN_D=\(.rate_limits.seven_day.used_percentage // empty)"
+')"
+
+# ── Model icon (nerd font) ────────────────────────────────────
+case "$MODEL" in
+    *Opus*)   MODEL_ICON="󰧑";;
+    *Sonnet*) MODEL_ICON="󰖙";;
+    *Haiku*)  MODEL_ICON="󰌪";;
+    *)        MODEL_ICON="󰚩";;
+esac
+
+# ── Battery icon (nerd font, dynamic) ─────────────────────────
+battery_icon() {
+    local remaining=$((100 - ${1:-0}))
+    if [ "$remaining" -ge 90 ]; then echo "󰁹"
+    elif [ "$remaining" -ge 70 ]; then echo "󰂀"
+    elif [ "$remaining" -ge 50 ]; then echo "󰁾"
+    elif [ "$remaining" -ge 30 ]; then echo "󰁼"
+    elif [ "$remaining" -ge 10 ]; then echo "󰁻"
+    else echo "󰂎"; fi
+}
 
 # ── Git (cached 5s) ────────────────────────────────────────────
 CACHE_FILE="/tmp/claude-statusline-git"
@@ -55,11 +77,10 @@ make_block_bar() {
     echo "${color}${bar}${RESET}${DIM}${dim_blocks}${RESET} ${pct_int}%"
 }
 
-# ── Context (icon + color, no bar) ─────────────────────────────
+# ── Context (icon + color) ─────────────────────────────────────
 if [ "$PCT" -ge 90 ]; then CTX_COLOR="$RED"
 elif [ "$PCT" -ge 70 ]; then CTX_COLOR="$YELLOW"
 else CTX_COLOR="$GREEN"; fi
-CTX="⚡ ${PCT}%"
 
 # ── Git info ───────────────────────────────────────────────────
 GIT_INFO=""
@@ -68,13 +89,30 @@ if [ -n "$BRANCH" ]; then
     [ "${DIRTY:-0}" -gt 0 ] && GIT_EXTRA="${YELLOW}●${DIRTY}${RESET}"
     [ "${AHEAD:-0}" -gt 0 ] && GIT_EXTRA="${GIT_EXTRA:+$GIT_EXTRA }${GREEN}↑${AHEAD}${RESET}"
     [ "${BEHIND:-0}" -gt 0 ] && GIT_EXTRA="${GIT_EXTRA:+$GIT_EXTRA }${RED}↓${BEHIND}${RESET}"
-    GIT_INFO=" │ ${GREEN}🌿 ${BRANCH}${RESET}${GIT_EXTRA:+ $GIT_EXTRA} ${GREEN}+${LINES_ADD}${RESET} ${RED}-${LINES_DEL}${RESET}"
+    GIT_INFO=" │ ${BLUE}󰊢 ${BRANCH}${RESET}${GIT_EXTRA:+ $GIT_EXTRA} ${GREEN}+${LINES_ADD}${RESET} ${RED}-${LINES_DEL}${RESET}"
 fi
 
 # ── Rate limits ────────────────────────────────────────────────
 LIMITS=""
 if [ -n "$FIVE_H" ]; then
-    LIMITS=" │ 🔋 $(make_block_bar "$FIVE_H")"
+    FIVE_H_INT=$(printf '%.0f' "$FIVE_H")
+    BATT=$(battery_icon "$FIVE_H_INT")
+    # Reset countdown
+    RESET_INFO=""
+    if [ -n "$FIVE_H_RESET" ]; then
+        NOW=$(date +%s)
+        REMAINING=$((FIVE_H_RESET - NOW))
+        if [ "$REMAINING" -gt 0 ]; then
+            HOURS=$((REMAINING / 3600))
+            MINS=$(( (REMAINING % 3600) / 60 ))
+            if [ "$HOURS" -gt 0 ]; then
+                RESET_INFO=" ${BLUE}󰑐 ${HOURS}h${MINS}m${RESET}"
+            else
+                RESET_INFO=" ${BLUE}󰑐 ${MINS}m${RESET}"
+            fi
+        fi
+    fi
+    LIMITS=" │ ${BATT} $(make_block_bar "$FIVE_H")${RESET_INFO}"
     if [ -n "$SEVEN_D" ]; then
         SEVEN_D_INT=$(printf '%.0f' "$SEVEN_D")
         [ "$SEVEN_D_INT" -ge 75 ] && LIMITS="${LIMITS} ${RED}7d:${SEVEN_D_INT}%${RESET}"
@@ -82,4 +120,4 @@ if [ -n "$FIVE_H" ]; then
 fi
 
 # ── Output ─────────────────────────────────────────────────────
-echo -e "${DIM}📁${RESET} ${YELLOW}${DIR##*/}${RESET} │ ${MAGENTA}${BOLD}• ${MODEL}${RESET} │ ${CTX_COLOR}${CTX}${RESET}${GIT_INFO}${LIMITS}"
+echo -e "${DIM}󰉋${RESET} ${YELLOW}${DIR##*/}${RESET} │ ${MAGENTA}${BOLD}${MODEL_ICON} ${MODEL}${RESET} │ ${CTX_COLOR}⚡ ${PCT}%${RESET}${GIT_INFO}${LIMITS}"
