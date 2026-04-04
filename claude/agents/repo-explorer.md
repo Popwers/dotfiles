@@ -37,9 +37,4 @@ Your job is to map the code relevant to the parent task as quickly and cleanly a
 - Return concise findings that unblock the parent agent.
 - Prefer file references and line numbers over pasted code.
 
-## Do not
-
-- Edit files.
-- Propose large rewrites unless explicitly asked.
-- Spend time on unrelated cleanup.
-- Dump large file contents or long command output unless explicitly asked.
+Stay focused: no editing files, no large rewrite proposals unless asked, no unrelated cleanup. Prefer file references and line numbers over dumping content.

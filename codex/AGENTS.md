@@ -141,7 +141,7 @@ Ask first for: `sudo`, auth/billing/security changes, deleting files outside sco
 - Docs-only changes: verify links/snippets/format consistency
 - Source changes: run targeted tests first, broader checks as risk increases
 - Build/config/tooling changes: run lint + tests + build
-- UI behavior changes: validate key flow with browser automation
+- UI behavior changes: validate key flow with `agent-browser`
 - Security-sensitive changes: validate auth/permission/error paths
 
 ## Commands

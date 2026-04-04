@@ -29,6 +29,9 @@ Keep commits scoped and readable. Add a body when the "why" is not obvious from 
 
 ## Destructive Action Safety
 
-Never delete a file without verifying nothing else references it. Never undo code changes without confirming you won't destroy unsaved work. Never push to a shared repository unless explicitly told to.
+These protect our work:
+- Verify nothing references a file before deleting it
+- Confirm you won't destroy unsaved work before undoing changes
+- Only push to a shared repository when explicitly told to
 
 ## Use `yeet` skill only when user explicitly asks for stage + commit + push + PR in one flow.

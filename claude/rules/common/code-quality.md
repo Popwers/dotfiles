@@ -20,7 +20,7 @@ globs: "*.ts,*.tsx,*.js,*.jsx,*.astro,*.vue,*.svelte,*.py,*.go,*.rs,*.rb,*.java,
 
 ## One Source of Truth
 
-Never fix a display problem by duplicating data or state. One source, everything else reads from it. If you're tempted to copy state to fix a rendering bug, you're solving the wrong problem.
+One source of truth, everything else reads from it. If you're tempted to copy state to fix a rendering bug, step back — the real fix is upstream.
 
 ## Rename Safety
 

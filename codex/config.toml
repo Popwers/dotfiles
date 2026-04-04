@@ -26,11 +26,6 @@ codex_hooks = true
 [projects."/Users/lionel"]
 trust_level = "untrusted"
 
-[mcp_servers.playwright]
-enabled = true
-args = ["@playwright/mcp@latest"]
-command = "bunx"
-
 [mcp_servers.linear]
 enabled = false
 url = "https://mcp.linear.app/mcp"

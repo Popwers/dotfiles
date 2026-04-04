@@ -219,7 +219,6 @@ if command -v claude &>/dev/null; then
             claude mcp add "$@" || true
         fi
     }
-    register_mcp_if_missing "playwright" --transport stdio --scope user playwright -- bunx @playwright/mcp@latest
     register_mcp_if_missing "context7" --transport http --scope user context7 https://mcp.context7.com/mcp --header "CONTEXT7_API_KEY:ctx7sk-1c3efdc8-aec6-417e-9cca-e36ed9696664"
     register_mcp_if_missing "gh_grep" --transport http --scope user gh_grep https://mcp.grep.app
     register_mcp_if_missing "exa" --transport http --scope user exa https://mcp.exa.ai --header "x-api-key:469853ea-7c4e-499e-8113-621615e8ebd2"
@@ -360,7 +359,6 @@ install_skill_if_missing "vercel-composition-patterns" "https://github.com/verce
 install_skill_if_missing "find-skills" "https://github.com/vercel-labs/skills" --skill find-skills
 install_skill_if_missing "doc-coauthoring" "https://github.com/anthropics/skills" --skill doc-coauthoring
 install_skill_if_missing "webapp-testing" "https://github.com/anthropics/skills" --skill webapp-testing
-install_skill_if_missing "playwright" "https://github.com/openai/skills" --skill playwright
 install_skill_if_missing "yeet" "https://github.com/openai/skills" --skill yeet
 install_skill_if_missing "copywriting" "https://github.com/coreyhaines31/marketingskills" --skill copywriting
 install_skill_if_missing "seo-audit" "https://github.com/coreyhaines31/marketingskills" --skill seo-audit
