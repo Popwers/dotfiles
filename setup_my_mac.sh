@@ -206,6 +206,7 @@ sync_dir_with_status "$SCRIPT_DIR/codex/hooks" "$HOME/.codex/hooks"
 copy_file_with_status "$SCRIPT_DIR/claude/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
 copy_file_with_status "$SCRIPT_DIR/claude/settings.json" "$HOME/.claude/settings.json"
 copy_file_with_status "$SCRIPT_DIR/claude/statusline.sh" "$HOME/.claude/statusline.sh"
+copy_file_with_status "$SCRIPT_DIR/claude/claudeignore.template" "$HOME/.claude/claudeignore.template"
 chmod +x "$HOME/.claude/statusline.sh"
 # Register local MCP servers (user scope) — only if not already registered
 if command -v claude &>/dev/null; then
