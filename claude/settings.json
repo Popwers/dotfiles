@@ -49,7 +49,7 @@
 		"ENABLE_TOOL_SEARCH": "1",
 		"CLAUDE_CODE_SLIM_SUBAGENT_CLAUDEMD": "1"
 	},
-	"effortLevel": "high",
+	"effortLevel": "medium",
 	"showThinkingSummaries": true,
 	"feedbackSurveyRate": 0,
 	"autoUpdatesChannel": "latest",
