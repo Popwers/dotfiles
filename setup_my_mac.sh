@@ -4,70 +4,95 @@ set -euo pipefail
 # Get the directory where this script is located
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
-# Copy a file with visible status messages.
+# Colored output helpers.
+ok()      { printf '  \033[32m✓\033[0m %s\n' "$1"; }
+skip()    { printf '  \033[90m– %s\033[0m\n' "$1"; }
+warn()    { printf '  \033[33m! %s\033[0m\n' "$1"; }
+section() { printf '\n\033[1;34m==> %s\033[0m\n\n' "$1"; }
+
+# Copy a file and confirm.
 copy_file_with_status() {
-    local source_file=$1
-    local destination_file=$2
-
-    echo "Copying file: $source_file -> $destination_file"
-    mkdir -p "$(dirname "$destination_file")"
-    cp "$source_file" "$destination_file"
-    echo "Copied file: $destination_file"
+    mkdir -p "$(dirname "$2")"
+    cp "$1" "$2"
+    ok "$2"
 }
 
-# Sync a directory with visible status messages.
+# Sync a directory and confirm.
 sync_dir_with_status() {
-    local source_dir=$1
-    local destination_dir=$2
-
-    echo "Syncing directory: $source_dir -> $destination_dir"
-    mkdir -p "$destination_dir"
-    rsync -a --delete "$source_dir/" "$destination_dir/"
-    echo "Synced directory: $destination_dir"
+    mkdir -p "$2"
+    rsync -a --delete "$1/" "$2/"
+    ok "$2"
 }
+
+section "Homebrew"
 
 # Install Homebrew
 if ! command -v brew >/dev/null 2>&1; then
     echo "Installing Homebrew for you."
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" || { echo "Homebrew install failed"; exit 1; }
 else
-    echo "Homebrew is already installed."
+    skip "Homebrew"
 fi
 
 # Update Homebrew
 brew update && brew upgrade
 
-# Install packages
-brew install --formula curl wget bash git gh vim neovim oven-sh/bun/bun fish jandedobbeleer/oh-my-posh/oh-my-posh bat eza fd ripgrep ffmpeg scrcpy tw93/tap/mole rtk
+# Install formulas (only missing ones to avoid noise)
+brew_formulas=(curl wget bash git gh vim neovim oven-sh/bun/bun fish jandedobbeleer/oh-my-posh/oh-my-posh bat eza fd ripgrep ffmpeg scrcpy tw93/tap/mole rtk)
+installed_formulas=$(brew list --formula -1 2>/dev/null)
+missing_formulas=()
+for f in "${brew_formulas[@]}"; do
+    pkg="${f##*/}"
+    if ! echo "$installed_formulas" | grep -qx "$pkg"; then
+        missing_formulas+=("$f")
+    fi
+done
+if [ ${#missing_formulas[@]} -gt 0 ]; then
+    echo "Installing missing formulas: ${missing_formulas[*]}"
+    brew install --formula "${missing_formulas[@]}"
+else
+    skip "All formulas up to date"
+fi
+
+section "Ollama"
 
 # Install Ollama only when missing
 if command -v ollama >/dev/null 2>&1 || brew list --formula ollama >/dev/null 2>&1; then
-    echo "Ollama is already installed."
+    skip "Ollama"
 else
     brew install ollama
 fi
 
-# Start Ollama and pull default embeddings model
+# Start Ollama (if not already running) and pull default embeddings model
 if command -v ollama >/dev/null 2>&1; then
-    ollama serve >/tmp/ollama.log 2>&1 &
-    ollama_pid=$!
-    sleep 2
+    ollama_started_here=false
+    if ! ollama list &>/dev/null; then
+        ollama serve >/tmp/ollama.log 2>&1 &
+        ollama_pid=$!
+        ollama_started_here=true
+        for _ in $(seq 1 20); do
+            ollama list &>/dev/null && break
+            sleep 0.5
+        done
+    fi
 
     if ollama list 2>/dev/null | awk 'NR > 1 {print $1}' | grep -Eq '^nomic-embed-text(:|$)'; then
-        echo "Ollama model 'nomic-embed-text' is already present."
+        skip "Model nomic-embed-text"
     else
         ollama pull nomic-embed-text
     fi
 
-    if kill -0 "$ollama_pid" 2>/dev/null; then
+    if [ "$ollama_started_here" = true ] && kill -0 "$ollama_pid" 2>/dev/null; then
         kill "$ollama_pid"
         wait "$ollama_pid" 2>/dev/null
     fi
 fi
 
+section "Casks & Fonts"
+
 # Install casks
 if brew list --cask android-platform-tools >/dev/null 2>&1; then
-    echo "Cask 'android-platform-tools' is already installed."
+    skip "android-platform-tools"
 else
     brew install --cask android-platform-tools
 fi
@@ -79,10 +104,10 @@ install_font() {
     local cask_name=$3
 
     if [ -f "$HOME/Library/Fonts/$font_file" ]; then
-        echo "$font_name is already installed."
+        skip "$font_name"
     else
-        echo "Installing $font_name for you."
         brew install --cask $cask_name
+        ok "$font_name"
     fi
 }
 
@@ -90,18 +115,31 @@ install_font() {
 install_font "JetBrains Mono" "JetBrainsMono-Regular.ttf" "font-jetbrains-mono-nerd-font"
 install_font "Symbols Only" "SymbolsNerdFont-Regular.ttf" "font-symbols-only-nerd-font"
 
+section "Fish Shell"
+
 # Init fish shell as default shell
 fish_path="$(command -v fish)"
-if [ -n "$fish_path" ] && ! grep -q "$fish_path" /etc/shells; then
-    echo "$fish_path" | sudo tee -a /etc/shells
-    chsh -s "$fish_path"
-    echo "Fish shell is now the default shell."
-else
-    echo "Fish shell is already the default shell."
+if [ -n "$fish_path" ]; then
+    if ! grep -q "$fish_path" /etc/shells; then
+        echo "$fish_path" | sudo tee -a /etc/shells
+    fi
+    if [ "$SHELL" = "$fish_path" ]; then
+        skip "Fish default shell"
+    else
+        if chsh -s "$fish_path" 2>/dev/null; then
+            ok "Fish default shell"
+        else
+            warn "Run manually: chsh -s $fish_path"
+        fi
+    fi
 fi
 
 # Switch to fish shell and execute commands
 SCRIPT_DIR_EXPORT="$SCRIPT_DIR" fish <<'FISH'
+function ok;   printf '  \033[32m✓\033[0m %s\n' "$argv"; end
+function skip; printf '  \033[90m– %s\033[0m\n' "$argv"; end
+function warn; printf '  \033[33m! %s\033[0m\n' "$argv"; end
+
 if test -f "$SCRIPT_DIR_EXPORT/config.fish"
     source "$SCRIPT_DIR_EXPORT/config.fish"
 end
@@ -110,30 +148,30 @@ fish_add_path /opt/homebrew/bin
 fish_add_path /opt/homebrew/sbin
 fish_add_path /usr/local/bin
 
-# Add Fisher
-if not command -q fisher
+# Add Fisher (type -q detects fish functions, command -q only finds binaries)
+if not type -q fisher
     curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher install jorgebucaran/fisher
 else
-    echo "Fisher is already installed."
+    skip "Fisher"
 end
 
 # Install plugins
 if fisher list | string match -q 'jorgebucaran/nvm.fish'
-    echo "Fisher plugin 'jorgebucaran/nvm.fish' is already installed."
+    skip "nvm.fish plugin"
 else
     fisher install jorgebucaran/nvm.fish
 end
 
 # Install NVM and use LTS version
-if command -q nvm
+if type -q nvm
     if nvm ls lts 2>/dev/null | string match -rq 'v[0-9]+\.[0-9]+\.[0-9]+'
-        echo "Node.js LTS is already installed in nvm."
+        skip "Node.js LTS"
     else
         nvm install lts
     end
     nvm use lts
 else
-    echo "nvm command not found after Fisher install; skipping Node.js LTS setup."
+    warn "nvm not found — skipping Node.js LTS setup"
 end
 
 # Install global packages
@@ -141,7 +179,7 @@ set -l bun_global_listing (bun pm ls -g 2>/dev/null | string collect)
 set -l missing_bun_globals
 for pkg in ngrok npm-check-updates typescript commitizen cz-conventional-changelog @openai/codex @anthropic-ai/claude-code
     if string match -rq "(^|\\s)$pkg@" -- $bun_global_listing
-        echo "Bun global package '$pkg' is already installed."
+        skip "$pkg"
     else
         set missing_bun_globals $missing_bun_globals $pkg
     end
@@ -150,19 +188,25 @@ end
 if test (count $missing_bun_globals) -gt 0
     bun install -g $missing_bun_globals
 else
-    echo "All Bun global packages are already installed."
+    skip "All bun globals up to date"
 end
 
 
 # Add bun to path
 fish_add_path ~/.bun/bin
 
-# Update fish completions
-fish_update_completions
+# Update fish completions (skip if refreshed within 24h)
+set -l comp_marker "$HOME/.cache/fish/.completions_updated"
+if test -f "$comp_marker"; and test (math (date +%s) - (stat -f %m "$comp_marker")) -lt 86400
+    skip "Fish completions (< 24h)"
+else
+    fish_update_completions
+    mkdir -p "$HOME/.cache/fish"
+    touch "$comp_marker"
+end
 FISH
 
-# Cleanup
-brew cleanup
+section "Configuration"
 
 # Copy configuration files from repo
 copy_file_with_status "$SCRIPT_DIR/.profile" "$HOME/.profile"
@@ -173,21 +217,21 @@ copy_file_with_status "$SCRIPT_DIR/init.vim" "$HOME/.config/nvim/init.vim"
 
 # Install OpenCode via official installer (not brew - avoids node dependency conflict with nvm.fish)
 if [ -x "$HOME/.opencode/bin/opencode" ] || command -v opencode >/dev/null 2>&1; then
-    echo "OpenCode is already installed."
+    skip "OpenCode"
 else
     curl -fsSL https://opencode.ai/install | bash
 fi
 
 # Install grepai
 if command -v grepai >/dev/null 2>&1; then
-    echo "GrepAI is already installed."
+    skip "GrepAI"
 else
     curl -sSL https://raw.githubusercontent.com/yoanbernabeu/grepai/main/install.sh | sh
 fi
 
 # Install OpenCode plugins
 if [ -f "$HOME/.config/opencode/supermemory.jsonc" ] && [ -f "$HOME/.config/opencode/opencode.json" ]; then
-    echo "OpenCode supermemory plugin appears to be already configured."
+    skip "OpenCode supermemory plugin"
 else
     bunx opencode-supermemory@latest install --no-tui
 fi
@@ -214,10 +258,10 @@ if command -v claude &>/dev/null; then
     register_mcp_if_missing() {
         local name=$1; shift
         if echo "$registered_mcps" | grep -q "$name"; then
-            echo "MCP server '$name' is already registered."
+            skip "MCP $name"
         else
-            echo "Registering MCP server '$name'..."
-            claude mcp add "$@" || true
+            claude mcp add "$@" >/dev/null 2>&1 || true
+            ok "MCP $name"
         fi
     }
     register_mcp_if_missing "context7" --transport http --scope user context7 https://mcp.context7.com/mcp --header "CONTEXT7_API_KEY:ctx7sk-1c3efdc8-aec6-417e-9cca-e36ed9696664"
@@ -225,7 +269,7 @@ if command -v claude &>/dev/null; then
     register_mcp_if_missing "exa" --transport http --scope user exa https://mcp.exa.ai --header "x-api-key:469853ea-7c4e-499e-8113-621615e8ebd2"
     unset -f register_mcp_if_missing
 else
-    echo "  ⚠ claude CLI not found, skipping MCP registration"
+    warn "claude CLI not found, skipping MCP registration"
 fi
 sync_dir_with_status "$SCRIPT_DIR/claude/agents" "$HOME/.claude/agents"
 sync_dir_with_status "$SCRIPT_DIR/claude/hooks" "$HOME/.claude/hooks"
@@ -302,11 +346,11 @@ install_skill_if_missing() {
     shift 2
 
     if is_skill_installed_everywhere "$skill_name"; then
-        echo "Skill '$skill_name' is already installed."
+        skip "$skill_name"
         return 0
     fi
 
-    echo "Installing skill '$skill_name'..."
+    echo "  Installing $skill_name..."
     bunx --bun skills add "$skill_source" "$@" -g -a claude-code codex opencode -y
     ensure_skill_symlinks "$skill_name"
 }
@@ -328,17 +372,19 @@ install_skill_bundle_if_missing() {
     local required_skills=("$@")
 
     if are_all_skills_installed "${required_skills[@]}"; then
-        echo "Skill bundle '$skill_source' is already installed."
+        skip "Bundle $skill_source"
         return 0
     fi
 
-    echo "Installing skill bundle '$skill_source'..."
+    echo "  Installing bundle $skill_source..."
     bunx --bun skills add "$skill_source" -g -a claude-code codex opencode -y
     local skill_name
     for skill_name in "${required_skills[@]}"; do
         ensure_skill_symlinks "$skill_name"
     done
 }
+
+section "Skills"
 
 # Sync all existing skills as symlinks for every agent before checking.
 # The skills CLI only creates symlinks for claude-code; codex and opencode
@@ -350,44 +396,52 @@ if [ -d "$HOME/.agents/skills" ]; then
     unset _skill_dir
 fi
 
-# Install skills
-install_skill_if_missing "agent-browser" "https://github.com/vercel-labs/agent-browser" --skill agent-browser
-install_skill_if_missing "web-design-guidelines" "https://github.com/vercel-labs/agent-skills" --skill web-design-guidelines
-install_skill_if_missing "frontend-design" "https://github.com/anthropics/skills" --skill frontend-design
-install_skill_if_missing "ui-ux-pro-max" "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill" --skill ui-ux-pro-max
-install_skill_if_missing "vercel-react-best-practices" "https://github.com/vercel-labs/agent-skills" --skill vercel-react-best-practices
-install_skill_if_missing "vercel-composition-patterns" "https://github.com/vercel-labs/agent-skills" --skill vercel-composition-patterns
-install_skill_if_missing "find-skills" "https://github.com/vercel-labs/skills" --skill find-skills
-install_skill_if_missing "doc-coauthoring" "https://github.com/anthropics/skills" --skill doc-coauthoring
-install_skill_if_missing "webapp-testing" "https://github.com/anthropics/skills" --skill webapp-testing
-install_skill_if_missing "yeet" "https://github.com/openai/skills" --skill yeet
-install_skill_if_missing "copywriting" "https://github.com/coreyhaines31/marketingskills" --skill copywriting
-install_skill_if_missing "seo-audit" "https://github.com/coreyhaines31/marketingskills" --skill seo-audit
-install_skill_if_missing "page-cro" "https://github.com/coreyhaines31/marketingskills" --skill page-cro
-install_skill_if_missing "content-strategy" "https://github.com/coreyhaines31/marketingskills" --skill content-strategy
-install_skill_if_missing "site-architecture" "https://github.com/coreyhaines31/marketingskills" --skill site-architecture
-install_skill_if_missing "grepai-init" "https://github.com/yoanbernabeu/grepai-skills" --skill grepai-init
-install_skill_if_missing "grepai-search-basics" "https://github.com/yoanbernabeu/grepai-skills" --skill grepai-search-basics
-install_skill_if_missing "grepai-search-advanced" "https://github.com/yoanbernabeu/grepai-skills" --skill grepai-search-advanced
-install_skill_if_missing "grepai-search-tips" "https://github.com/yoanbernabeu/grepai-skills" --skill grepai-search-tips
-install_skill_if_missing "grepai-troubleshooting" "https://github.com/yoanbernabeu/grepai-skills" --skill grepai-troubleshooting
-install_skill_if_missing "grepai-mcp-claude" "https://github.com/yoanbernabeu/grepai-skills" --skill grepai-mcp-claude
-install_skill_if_missing "grepai-trace-callees" "https://github.com/yoanbernabeu/grepai-skills" --skill grepai-trace-callees
-install_skill_if_missing "grepai-trace-callers" "https://github.com/yoanbernabeu/grepai-skills" --skill grepai-trace-callers
-install_skill_if_missing "grepai-trace-graph" "https://github.com/yoanbernabeu/grepai-skills" --skill grepai-trace-graph
-install_skill_if_missing "grepai-watch-daemon" "https://github.com/yoanbernabeu/grepai-skills" --skill grepai-watch-daemon
-install_skill_if_missing "grepai-workspaces" "https://github.com/yoanbernabeu/grepai-skills" --skill grepai-workspaces
+# Install skills — declarative table: "name|source"
+declare -a skills=(
+    "agent-browser|https://github.com/vercel-labs/agent-browser"
+    "web-design-guidelines|https://github.com/vercel-labs/agent-skills"
+    "frontend-design|https://github.com/anthropics/skills"
+    "ui-ux-pro-max|https://github.com/nextlevelbuilder/ui-ux-pro-max-skill"
+    "vercel-react-best-practices|https://github.com/vercel-labs/agent-skills"
+    "vercel-composition-patterns|https://github.com/vercel-labs/agent-skills"
+    "find-skills|https://github.com/vercel-labs/skills"
+    "doc-coauthoring|https://github.com/anthropics/skills"
+    "webapp-testing|https://github.com/anthropics/skills"
+    "yeet|https://github.com/openai/skills"
+    "copywriting|https://github.com/coreyhaines31/marketingskills"
+    "seo-audit|https://github.com/coreyhaines31/marketingskills"
+    "page-cro|https://github.com/coreyhaines31/marketingskills"
+    "content-strategy|https://github.com/coreyhaines31/marketingskills"
+    "site-architecture|https://github.com/coreyhaines31/marketingskills"
+    "grepai-init|https://github.com/yoanbernabeu/grepai-skills"
+    "grepai-search-basics|https://github.com/yoanbernabeu/grepai-skills"
+    "grepai-search-advanced|https://github.com/yoanbernabeu/grepai-skills"
+    "grepai-search-tips|https://github.com/yoanbernabeu/grepai-skills"
+    "grepai-troubleshooting|https://github.com/yoanbernabeu/grepai-skills"
+    "grepai-mcp-claude|https://github.com/yoanbernabeu/grepai-skills"
+    "grepai-trace-callees|https://github.com/yoanbernabeu/grepai-skills"
+    "grepai-trace-callers|https://github.com/yoanbernabeu/grepai-skills"
+    "grepai-trace-graph|https://github.com/yoanbernabeu/grepai-skills"
+    "grepai-watch-daemon|https://github.com/yoanbernabeu/grepai-skills"
+    "grepai-workspaces|https://github.com/yoanbernabeu/grepai-skills"
+    "interface-feel-polish|https://github.com/Popwers/skills"
+    "mcp-builder|https://github.com/anthropics/skills"
+    "pdf|https://github.com/anthropics/skills"
+    "docx|https://github.com/anthropics/skills"
+    "xlsx|https://github.com/anthropics/skills"
+    "pptx|https://github.com/anthropics/skills"
+)
+
+for entry in "${skills[@]}"; do
+    IFS='|' read -r name source <<< "$entry"
+    install_skill_if_missing "$name" "$source" --skill "$name"
+done
+
 install_skill_bundle_if_missing "shadcn/ui" "shadcn"
-install_skill_if_missing "interface-feel-polish" "https://github.com/Popwers/skills" --skill interface-feel-polish
-install_skill_if_missing "mcp-builder" "https://github.com/anthropics/skills" --skill mcp-builder
-install_skill_if_missing "pdf" "https://github.com/anthropics/skills" --skill pdf
-install_skill_if_missing "docx" "https://github.com/anthropics/skills" --skill docx
-install_skill_if_missing "xlsx" "https://github.com/anthropics/skills" --skill xlsx
-install_skill_if_missing "pptx" "https://github.com/anthropics/skills" --skill pptx
 
 # Activate the design-engineering skill for frontend work.
 if is_skill_installed_everywhere "emil-design-engineering"; then
-    echo "Skill 'emil-design-engineering' is already installed."
+    skip "emil-design-engineering"
 else
     curl -s "https://animations.dev/api/activate-design-engineering?email=lionel.bataille%40hotmail.com" | bash
 fi
@@ -400,24 +454,29 @@ fi
 # Configure agent-browser right after install (downloads Chromium)
 if [ -x "$HOME/.bun/bin/agent-browser" ]; then
     if compgen -G "$HOME/Library/Caches/ms-playwright/chromium-*" >/dev/null || compgen -G "$HOME/.cache/ms-playwright/chromium-*" >/dev/null; then
-        echo "agent-browser Chromium dependency is already installed."
+        skip "agent-browser Chromium"
     else
         "$HOME/.bun/bin/agent-browser" install
     fi
     "$HOME/.bun/bin/agent-browser" --version
 else
-    echo "agent-browser binary not found in ~/.bun/bin"
+    warn "agent-browser binary not found in ~/.bun/bin"
 fi
+
+section "Finalization"
 
 # Initialize RTK hooks for all agents (runs last so it can patch copied configs)
 if command -v rtk >/dev/null 2>&1; then
-    rtk init -g
     rtk init -g --auto-patch
     rtk init -g --codex
     rtk init -g --agent cursor
     rtk init -g --opencode
 fi
 
-echo "Mac setup is complete!"
-echo "Don't forget to set your terminal font to JetBrains Mono Nerd Font and Symbols Only"
-echo "Restart your terminal to apply changes"
+# Patch Claude Code
+"$SCRIPT_DIR/claude/patch-claude-code.sh"
+"$SCRIPT_DIR/claude/patch-claude-code.sh" --watch
+
+printf '\n\033[1;32m  Mac setup is complete!\033[0m\n'
+echo "  Set your terminal font to JetBrains Mono Nerd Font + Symbols Only"
+echo "  Restart your terminal to apply changes"

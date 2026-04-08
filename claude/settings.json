@@ -46,9 +46,11 @@
 		"CLAUDE_ENABLE_STREAM_WATCHDOG": "1",
 		"CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR": "1",
 		"CLAUDE_CODE_DISABLE_FAST_MODE": "1",
-		"ENABLE_TOOL_SEARCH": "1"
+		"ENABLE_TOOL_SEARCH": "1",
+		"CLAUDE_CODE_SLIM_SUBAGENT_CLAUDEMD": "1"
 	},
-	"effortLevel": "medium",
+	"effortLevel": "high",
+	"showThinkingSummaries": true,
 	"feedbackSurveyRate": 0,
 	"autoUpdatesChannel": "latest",
 	"hooks": {
