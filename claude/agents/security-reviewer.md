@@ -39,6 +39,8 @@ Identify security vulnerabilities before they reach production.
 
 Activate automatically for: API endpoints, auth changes, user input handling, database queries, file uploads, payment processing, external integrations.
 
+Also triggered via escalation from the **review-auditor** when it detects security-sensitive patterns during a general review.
+
 ## Output
 
 - Findings first, ordered by severity

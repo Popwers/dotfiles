@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # SessionStart hook: ensures .claudeignore exists and contains all template patterns.
 # - No .claudeignore? Creates one from template.
 # - Existing .claudeignore? Merges missing lines (preserves custom entries).

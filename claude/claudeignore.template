@@ -25,5 +25,12 @@ __pycache__/
 .venv/
 venv/
 
+# Minified assets
+*.min.js
+*.min.css
+
+# OS noise
+.DS_Store
+
 # Indexing / tooling
 .grepai/

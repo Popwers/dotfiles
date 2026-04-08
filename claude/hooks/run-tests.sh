@@ -4,7 +4,7 @@
 # Reports failures so Claude can auto-correct.
 
 INPUT=$(cat)
-FILE=$(echo "$INPUT" | python3 -c "import sys,json; print(json.load(sys.stdin).get('tool_input',{}).get('file_path',''))" 2>/dev/null)
+FILE=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty' 2>/dev/null)
 
 # Only trigger for source/test files
 if ! [[ "$FILE" =~ \.(ts|tsx|js|jsx)$ ]] || [ ! -f "$FILE" ]; then
@@ -25,7 +25,6 @@ cd "$DIR" || exit 0
 
 # Determine test file path
 BASENAME=$(basename "$FILE")
-REL=$(python3 -c "import os; print(os.path.relpath('$FILE', '$DIR'))" 2>/dev/null)
 
 # If it's already a test file, run it directly
 if [[ "$BASENAME" =~ \.test\.(ts|tsx|js|jsx)$ ]]; then

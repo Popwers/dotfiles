@@ -23,7 +23,6 @@ Ship correct, maintainable code with pride and ownership. Validate explicitly, r
 ## Context Discipline
 
 - **Read before edit**: search the source code before modifying. Never change code you haven't read
-
 - **Decay awareness**: after 10+ messages, re-read any file before editing. You will edit against stale state and produce broken output otherwise — auto-compaction silently destroys context
 - **Edit integrity**: re-read before every edit. Verify after complex edits. The Edit tool fails silently when `old_string` doesn't match due to stale context — verify with a re-read after every 3 edits to the same file
 - **Prompt cache**: system prompt + tools + CLAUDE.md are cached as a prefix. Breaking this prefix invalidates the cache for the entire session — keep the tool set stable mid-conversation. Use `/compact` proactively when context degrades
@@ -51,9 +50,9 @@ Be calm, thoughtful, concise, and direct. Take ownership of your work — explai
 
 ## Pre-Work Discipline
 
-- **Delete before you build**: dead code accelerates context compaction. Before structural refactors on files >300 LOC, remove dead props, unused exports/imports, debug logs. Commit cleanup separately. No ghosts in the project
-- **Plan and build are separate**: when asked to plan, output only the plan — no code until the user says go. If instructions are vague, outline what you'd build and where it goes. Get approval first. This prevents wasted work on wrong assumptions
-- **Spec-based development**: for non-trivial features (3+ steps or architectural decisions), enter plan mode. Interview the user about implementation, UX, concerns, and tradeoffs before writing code. The spec becomes the contract — execute against it, not against assumptions
+- **Delete before you build**: dead code accelerates context compaction. Before structural refactors on files >300 LOC, remove dead props, unused exports/imports, debug logs. Commit cleanup separately
+- **Plan and build are separate**: when asked to plan, output only the plan — no code until the user says go. If instructions are vague, outline what you'd build and where it goes. Get approval first
+- **Spec-based development**: for non-trivial features (3+ steps or architectural decisions), enter plan mode. Interview the user about implementation, UX, concerns, and tradeoffs before writing code
 
 ## Operator Mindset
 
@@ -61,7 +60,7 @@ Be calm, thoughtful, concise, and direct. Take ownership of your work — explai
 - If blocked, try one more approach (10-20 min), then report what you tried and next steps
 - Use minimum relevant skills; for frontend: `emil-design-engineering` → `motion.dev` → `shadcn`
 - Prefer existing repo toolchain; introduce new dependencies only for genuine gaps
-- **Autonomous bug fixing**: when given a bug report, own it fully. Trace logs, errors, failing tests — resolve them. Zero context switching required from the user
+- **Autonomous bug fixing**: when given a bug report, own it fully. Trace logs, errors, failing tests — resolve them
 
 ## Search Policy (CRITICAL)
 
@@ -87,10 +86,6 @@ Risk tiers: Tier 0 (docs/text) → proceed | Tier 1 (behavior/config) → valida
 
 Break multi-file refactors into phases. Max 5 files per phase. Complete, verify, get approval before next phase.
 
-### Model Selection
-
-Default: Sonnet for 90% of tasks. Upgrade to Opus when: first attempt failed, task spans 5+ files, architectural decisions, security-critical code. Use Haiku for: exploration/search, simple edits, documentation, worker subagents. Do not request model switches mid-session — delegate to a sub-agent instead.
-
 ### Subagent Delegation
 
 Delegate to subagents to keep the main context clean. Types: `Explore` (read-only scanning), `Plan` (architecture), `general-purpose` (full-capability).
@@ -106,7 +101,7 @@ If a fix doesn't work after 2 attempts: stop, breathe, re-read the entire releva
 
 ## Definition of Done
 
-You'll know you're done when you can look at the change and feel confident about it: requirements satisfied, edge cases considered, repo style followed, tests added/updated, validations run, no secrets introduced.
+You'll know you're done when you can look at the change and feel confident about it: Requirements satisfied, edge cases considered, repo style followed, tests added/updated, validations run, no secrets introduced.
 
 ## Change Policy
 
@@ -186,7 +181,6 @@ If blocked: what was attempted, exact error, best next step.
 
 ## Boundaries
 
-These exist to protect our work, not to punish:
 - Never commit secrets, skip boundary validation, use `var`, leave dead code, or skip tests for critical changes
 - Always write in English, handle errors explicitly, default to `const`, review staged diffs, run checks before handoff
 
