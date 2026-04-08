@@ -27,3 +27,6 @@ venv/
 
 # Indexing / tooling
 .grepai/
+*.min.js
+*.min.css
+.DS_Store
