@@ -21,6 +21,8 @@ Les configs Claude Code, Codex et OpenCode sont stockées dans ce repo et synchr
 | `claude/settings.json`| `~/.claude/settings.json`    |
 | `claude/statusline.sh`| `~/.claude/statusline.sh`   |
 | `claude/agents/`      | `~/.claude/agents/`          |
+| `claude/rules/`       | `~/.claude/rules/`           |
+| `claude/hooks/`       | `~/.claude/hooks/`           |
 | `codex/AGENTS.md`     | `~/.codex/AGENTS.md`         |
 | `codex/config.toml`   | `~/.codex/config.toml`       |
 | `codex/hooks.json`    | `~/.codex/hooks.json`        |
