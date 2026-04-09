@@ -45,8 +45,6 @@
 		"command": "~/.claude/statusline.sh",
 		"padding": 0
 	},
-	"model": "sonnet",
-	"language": "Français",
 	"autoConnectIde": true,
 	"env": {
 		"CLAUDE_CODE_AUTO_COMPACT_WINDOW": "195000",
@@ -57,9 +55,16 @@
 		"CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR": "1",
 		"CLAUDE_CODE_DISABLE_FAST_MODE": "1",
 		"ENABLE_TOOL_SEARCH": "1",
-		"CLAUDE_CODE_SLIM_SUBAGENT_CLAUDEMD": "1"
+		"CLAUDE_CODE_SLIM_SUBAGENT_CLAUDEMD": "1",
+		"ANTHROPIC_AUTH_TOKEN": "4e72bfa767754620a58e14b4a3b5b29e.24eAXxjY9hQAPULH",
+		"ANTHROPIC_BASE_URL": "https://api.z.ai/api/anthropic",
+		"API_TIMEOUT_MS": "3000000",
+		"ANTHROPIC_DEFAULT_HAIKU_MODEL": "glm-4.5-air",
+		"ANTHROPIC_DEFAULT_SONNET_MODEL": "glm-5.1",
+		"ANTHROPIC_DEFAULT_OPUS_MODEL": "glm-5.1"
 	},
 	"effortLevel": "high",
+	"autoMemory": false,
 	"showThinkingSummaries": true,
 	"feedbackSurveyRate": 0,
 	"autoUpdatesChannel": "latest",
@@ -84,12 +89,6 @@
 						"command": "~/.claude/hooks/ensure-claudeignore.sh",
 						"timeout": 5,
 						"statusMessage": "Ensuring .claudeignore..."
-					},
-					{
-						"type": "command",
-						"command": "~/.claude/hooks/recall-gotchas.sh",
-						"timeout": 5,
-						"statusMessage": "Recalling past lessons..."
 					}
 				]
 			}
@@ -101,16 +100,6 @@
 					{
 						"type": "command",
 						"command": "~/.claude/hooks/block-no-verify.sh",
-						"timeout": 5
-					}
-				]
-			},
-			{
-				"matcher": "Edit|Write",
-				"hooks": [
-					{
-						"type": "command",
-						"command": "~/.claude/hooks/strategic-compact.sh",
 						"timeout": 5
 					}
 				]

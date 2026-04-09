@@ -473,10 +473,6 @@ if command -v rtk >/dev/null 2>&1; then
     rtk init -g --opencode
 fi
 
-# Patch Claude Code
-"$SCRIPT_DIR/claude/patch-claude-code.sh"
-"$SCRIPT_DIR/claude/patch-claude-code.sh" --watch
-
 printf '\n\033[1;32m  Mac setup is complete!\033[0m\n'
 echo "  Set your terminal font to JetBrains Mono Nerd Font + Symbols Only"
 echo "  Restart your terminal to apply changes"
