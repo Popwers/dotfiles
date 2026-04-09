@@ -149,7 +149,8 @@ Layout: `src/`, `tests/`, `public/`, `config/`. Names: `PascalCase.tsx` (compone
 - Trust types and assert at boundaries; validate only at system boundaries
 - Prefer assertions over try/catch or silent recovery when a value must exist
 - Keep argument counts low; no optional args unless truly optional
-- Bias toward fewer lines; avoid splitting logic into many small functions when it hurts readability
+- Never use `as any` — write a typed helper or use a type guard instead
+- Bias toward fewer lines, but never at the expense of type safety or readability
 - Write code that reads like a human wrote it — no robotic comments, no corporate boilerplate
 
 ### React and State
