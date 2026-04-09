@@ -1,5 +1,5 @@
 name = 'docs-researcher'
-description = 'Read-only agent for verifying framework, library, and API behavior from primary documentation.'
+description = 'Read-only agent for verifying framework, library, and API behavior from primary documentation. Use for unfamiliar APIs and version-specific behavior.'
 model = 'gpt-5.4-mini'
 model_reasoning_effort = 'medium'
 developer_instructions = """

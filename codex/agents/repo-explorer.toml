@@ -1,5 +1,5 @@
 name = 'repo-explorer'
-description = 'Read-heavy agent for codebase discovery, execution tracing, and pinpointing the files and symbols relevant to a task.'
+description = 'Read-only agent for codebase discovery, execution tracing, and pinpointing the files, symbols, and configs relevant to a task.'
 model = 'gpt-5.4-mini'
 model_reasoning_effort = 'medium'
 developer_instructions = """

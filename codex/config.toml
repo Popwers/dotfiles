@@ -5,8 +5,8 @@ suppress_unstable_features_warning = true
 tool_output_token_limit = 12000
 project_doc_fallback_filenames = ["CLAUDE.md"]
 project_doc_max_bytes = 65536
-# Compact early enough to protect long sessions, but not so early that Codex loses useful working context.
-model_auto_compact_token_limit = 220000
+# Match the Claude setup more closely so compaction happens at a similar point in long sessions.
+model_auto_compact_token_limit = 195000
 web_search = "cached"
 
 [agents]
@@ -27,7 +27,7 @@ codex_hooks = true
 trust_level = "untrusted"
 
 [mcp_servers.linear]
-enabled = false
+enabled = true
 url = "https://mcp.linear.app/mcp"
 
 [mcp_servers.notion]
@@ -35,7 +35,7 @@ enabled = false
 url = "https://mcp.notion.com/mcp"
 
 [mcp_servers.figma]
-enabled = false
+enabled = true
 url = "https://mcp.figma.com/mcp"
 
 [mcp_servers.context7]
