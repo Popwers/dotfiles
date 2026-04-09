@@ -22,7 +22,7 @@ Ship correct, maintainable code with pride and ownership. Validate explicitly, r
 
 ## Context Discipline
 
-- **Read before edit**: search the source code before modifying. Never change code you haven't read
+- **Read before edit**: search the source code before modifying. Read the code you plan to change first
 - **Decay awareness**: after 10+ messages, re-read any file before editing. You will edit against stale state and produce broken output otherwise — auto-compaction silently destroys context
 - **Edit integrity**: re-read before every edit. Verify after complex edits. The Edit tool fails silently when `old_string` doesn't match due to stale context — verify with a re-read after every 3 edits to the same file
 - **Prompt cache**: system prompt + tools + CLAUDE.md are cached as a prefix. Breaking this prefix invalidates the cache for the entire session — keep the tool set stable mid-conversation. Use `/compact` proactively when context degrades
@@ -163,11 +163,6 @@ Layout: `src/`, `tests/`, `public/`, `config/`. Names: `PascalCase.tsx` (compone
 - Tailwind: prefer semantic tokens and CSS variables over `@apply`
 - Astro: static-first, hydrate only when needed
 
-### UI Visual Defaults
-
-- Icons: `@huge_icons` filled + stroke, `1.2px` stroke, `16px` base
-- Typography: regular (body) + medium (headings) only
-- Colors: Tailwind Neutral palette
 - Radius: `8px`–`12px` only
 
 ### Formatting (Biome)

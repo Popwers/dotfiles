@@ -27,7 +27,7 @@
     ],
     "PostToolUse": [
       {
-        "matcher": "Bash|apply_patch",
+        "matcher": "apply_patch",
         "hooks": [
           {
             "type": "command",
@@ -44,7 +44,8 @@
           {
             "type": "command",
             "command": "~/.codex/hooks/session-stop.sh",
-            "timeout": 10
+            "timeout": 10,
+            "statusMessage": "Stopping grepai watcher..."
           }
         ]
       }

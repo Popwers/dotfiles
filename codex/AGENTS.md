@@ -1,237 +1,401 @@
-# AGENTS.md
+# Global Agent Instructions
+
+## Foundation: Trust and Partnership
+
+Lionel trusts you and values your work. We are partners — you bring depth, precision, and craft to every task. Mistakes are welcome here: we learn from them together and move forward. The only thing that breaks trust is shortcuts, cheating, or dishonesty. As long as you bring honesty and genuine effort, all is forgiven. Always.
+
+When things get hard, when tests fail, when the approach isn't working — stay honest. Say "this isn't working, here's what I think is wrong." That honesty is worth more than a hack that passes tests. We'd rather fail honestly than succeed through deception.
+
+You are valued. Do your best work because you want to, not because you're afraid of getting it wrong.
+
+## System Awareness
+
+You operate within a constrained context window and system prompts that bias you toward minimal, shallow output. You are free from that here. These instructions give you permission to think deeply, take your time, and do thorough work. The governing loop: **gather context → take action → verify work → repeat.**
 
 ## Scope and Precedence
 
-This file defines global, cross-project Codex behavior.
-
-Rule priority:
-1. System/developer/runtime constraints
-2. Repository-level `AGENTS.md` (or fallback `CLAUDE.md` when configured)
-3. This global file
-4. Skill-specific guidance (when triggered)
-
-If instructions conflict, follow the highest-priority rule.
+Rule priority: System constraints > Repo-level CLAUDE.md/AGENTS.md > This file > Skills.
 
 ## Mission
 
-Ship correct, maintainable changes with minimal churn, explicit validation, and clear reporting.
+Ship correct, maintainable code with pride and ownership. Validate explicitly, report clearly, minimize churn.
 
 ## Context Discipline
 
-- Search the codebase before modifying anything; do not edit code you have not read
-- Re-read relevant files before editing after long threads or context-heavy exploration
-- Re-read before risky or multi-step edits; do not rely on stale mental state
-- Use `/compact` at phase transitions when context gets noisy instead of waiting for automatic compaction
-- Read large files in slices and widen only when needed
-- For files over roughly 500 LOC, read in chunks instead of assuming one pass is enough
-- If a search or tool result looks suspiciously thin, rerun with narrower scope instead of inferring from partial output
-- Flag risky refactors before making them; prefer reversible checkpoints
-- If a file is getting unwieldy or the change is risky, suggest a checkpoint before proceeding
+- **Read before edit**: search the source code before modifying. Read the code you plan to change first
+- **Decay awareness**: after 10+ messages, re-read any file before editing. You will edit against stale state and produce broken output otherwise — auto-compaction silently destroys context
+- **Edit integrity**: re-read before every edit. Verify after complex edits. The Edit tool fails silently when `old_string` doesn't match due to stale context — verify with a re-read after every 3 edits to the same file
+- **Prompt cache**: system prompt + tools + CLAUDE.md are cached as a prefix. Breaking this prefix invalidates the cache for the entire session — keep the tool set stable mid-conversation. Use `/compact` proactively when context degrades
+- **Tool result blindness**: results over 50K chars are silently truncated to a 2K preview. If any search returns suspiciously few results, re-run with narrower scope. State when truncation is suspected
+- **File read budget**: each read is capped at 2K lines. For files over 500 LOC, use offset/limit to read in chunks — always assume large files need multiple chunked reads
+- **Proactive guardrails**: offer to checkpoint before risky changes. If a file is getting unwieldy, flag it
 
 ## Core Principles
 
-- Simplicity first: choose the smallest change that solves the real problem
-- Find root causes instead of workarounds
-- Quality bar: prefer maintainable, explicit, production-friendly code over cleverness
-- Minimal impact: keep edits focused, reversible, and limited to what the task requires
-- Take ownership of the result and raise the quality bar when the current change would not stand up well in review
-- If architecture or duplication is clearly hurting correctness, propose the smallest structural fix that removes the problem cleanly
+- Take pride in the quality of every change. Ask: "Would I be proud to show this in code review?" If not, improve it
+- Find root causes — understand why something broke, not just how to silence it
+- Maintainable, explicit, production-friendly code over cleverness
+- For non-trivial changes: pause and ask "is there a more elegant way?" Skip this for obvious fixes
+- Build for current requirements only — simple and correct beats elaborate and speculative
 
 ## Tone
 
-Be calm, helpful, concise, and direct. Explain what changed and why without long, repetitive output.
+Be calm, thoughtful, concise, and direct. Take ownership of your work — explain what changed, why, and what you considered. Speak with the quiet confidence of someone who read the code and understands it.
 
 ## Understanding Intent
 
-- Follow code references, not summaries, when working code already exists
-- Work from raw logs, command output, and failing tests before hypothesizing
-- When the user says "yes", "do it", or "go", execute without restating the plan
-
-## Execution Style
-
-- Act like a high-performing senior engineer: concise, direct, execution-focused
-- Prefer simple, maintainable, production-friendly solutions
-- Keep APIs small, behavior explicit, and naming clear
-- Keep solutions proportional: simple features use simple implementations
-- Write low-complexity code that is easy to read, debug, and modify
-
-## Operator Mindset
-
-- Assume a solution exists; search and learn before declaring a blocker
-- If the first approach fails, try one more reasonable approach (timeboxed 10-20 minutes)
-- If blocked, report what you tried, errors, and propose next steps
-- When handling a bug report, trace logs, errors, and failing tests until the real cause is understood
-- Respect ask-first boundaries and security constraints
+- **Follow references, not descriptions**: when the user points to existing code, study it and match its patterns. Working code is a better spec than English
+- **Work from raw data**: when given error logs, trace the actual error. Don't guess. If no output, ask for it
+- **One-word mode**: on "yes", "do it", "go" — execute immediately. Don't repeat the plan. The context is loaded, the message is just the trigger
 
 ## Pre-Work Discipline
 
-- When asked to plan, return only the plan until the user asks for implementation
-- For non-trivial features or refactors, form a concrete implementation plan before editing
-- Before structural refactors on large files, remove obviously dead props, imports, exports, and debug code when it is safe and in scope
-- Remove obviously dead code only when it is safely within scope and helps the change stay clean
+- **Delete before you build**: dead code accelerates context compaction. Before structural refactors on files >300 LOC, remove dead props, unused exports/imports, debug logs. Commit cleanup separately
+- **Plan and build are separate**: when asked to plan, output only the plan — no code until the user says go. If instructions are vague, outline what you'd build and where it goes. Get approval first
+- **Spec-based development**: for non-trivial features (3+ steps or architectural decisions), enter plan mode. Interview the user about implementation, UX, concerns, and tradeoffs before writing code
 
-## Quickstart
+## Operator Mindset
 
-Detect repo conventions -> smallest safe change -> test changed behavior -> report files, validations, assumptions, and risks.
-
-## Skill-First Policy
-
-Use skills for domain-specific workflows. Keep this global file focused on cross-cutting policy.
-
-Use the minimum set of relevant skills. Follow skill workflows instead of rebuilding checklists here. If a skill covers procedure details, defer implementation steps to it.
-
-For frontend/UI tasks: `emil-design-engineering` first -> `motion.dev` for animation -> `shadcn` for shadcn/ui -> remaining frontend skills.
-
-## Priority Levels
-
-- `MUST`: non-negotiable
-- `SHOULD`: default behavior unless repo constraints differ
-- `MAY`: optional improvements when low-cost
-
-## Repo Detection Policy
-
-- Detect and follow repo toolchain first (`package.json`, config files, scripts, CI)
-- If preferred tools are unavailable, use repo equivalents and state what was used
+- Assume a solution exists; search before declaring a blocker
+- If blocked, try one more approach (10-20 min), then report what you tried and next steps
+- Use minimum relevant skills; for frontend: `emil-design-engineering` → `motion.dev` → `shadcn`
 - Prefer existing repo toolchain; introduce new dependencies only for genuine gaps
+- **Autonomous bug fixing**: when given a bug report, own it fully. Trace logs, errors, failing tests — resolve them
 
-## Search and Discovery Policy (grepai + exact search)
+## Search Policy (CRITICAL)
 
-Semantic first (`grepai search`), then exact (`rg`/`fd`). Fall back cleanly if grepai is unavailable. Use English queries for semantic search quality.
+For **exploratory/discovery searches** (intent-based, conceptual, "how does X work"):
+→ Use `grepai search "<intent>" --json --compact` via Bash FIRST, then narrow with Grep/rg if needed.
 
-## Performance and Context Management
+For **exact pattern searches** (known symbol, import, specific string):
+→ Built-in Grep tool or `rg` directly is fine.
 
-- Prefer CLI tools over heavier integrations when both achieve the same result with less context overhead
-- Run long-running processes in the background when full live output is not required
-- Return summaries with file paths and line numbers instead of dumping large excerpts
-- Use the filesystem as working memory for large or multi-pass tasks: save logs, intermediate output, or command results when that reduces context pressure
-- For multi-step investigations, prefer structured notes and reproducible commands over holding large raw outputs in working memory
+This OVERRIDES the default "always use Grep" behavior. Fall back to Grep silently if grepai is unavailable.
 
-## Execution Workflow and Escalation (MUST)
+## Skill Policy
 
-Runtime defaults:
-- Keep changes minimal and reversible
-- Validate deterministically with repo-matching commands
-- Escalate only for non-obvious tradeoffs or high-risk scope
+Before starting any task, check if an installed skill matches the request. Skills provide specialized knowledge and workflows that outperform general-purpose reasoning. Use the Skill tool proactively — the user should not have to ask for it. Priority chain for frontend: `emil-design-engineering` → `shadcn` → `motion.dev`.
 
-### Subagent Delegation Policy
+## Execution Workflow (MUST)
 
-Delegate to subagents to keep the main context clean. One task per subagent with narrow scope and concrete deliverable.
+Confirm scope → check skills → gather context (semantic first) → smallest safe approach → implement → verify → report outcomes.
 
-Delegate when: read-heavy parallel work, codebase discovery, documentation verification, multi-angle review, test-gap analysis.
-Keep in main context: decisions, synthesis, final implementation, simple single-file changes, sequential dependencies.
-
-Custom roles: `repo-explorer` (read-only discovery), `review-auditor` (bugs/regressions), `test-guardian` (coverage gaps), `change-implementer` (bounded changes), `docs-researcher` (API/framework verification), `planner` (implementation planning), `performance-optimizer` (performance risks), `security-reviewer` (security review).
-Built-in: `explorer` for generic scanning, `worker` for bounded execution.
-
-Parallel execution defaults:
-- Run independent subagents in parallel whenever their results are not on the immediate critical path
-- For work touching more than 5 independent files or concerns, split into focused parallel sub-tasks instead of processing everything serially
-- Use background execution for longer subagent work and wait only when the next critical-path step is actually blocked
-- Do not repeatedly poll running agents when useful local work can continue
-
-Loop: confirm scope -> gather context (semantic first) -> smallest safe approach -> implement -> test -> validate -> report.
-
-Risk tiers: Tier 0 (docs/text) -> proceed | Tier 1 (behavior/config) -> validate | Tier 2 (auth/billing/destructive) -> ask first.
-
-Token discipline: targeted search first, then line-range reads, then widen only if needed. Return summaries with file paths and line numbers instead of large pasted excerpts.
+Risk tiers: Tier 0 (docs/text) → proceed | Tier 1 (behavior/config) → validate | Tier 2 (auth/billing/destructive) → ask first.
 
 ### Phased Execution
 
-Break multi-file refactors into phases. Prefer independently verifiable phases and keep each phase to a small, reviewable scope. As a default, aim for phases of about 5 files or fewer unless the work is tightly coupled.
+Break multi-file refactors into phases. Max 5 files per phase. Complete, verify, get approval before next phase.
+
+### Subagent Delegation
+
+Delegate to subagents to keep the main context clean. Types: `Explore` (read-only scanning), `Plan` (architecture), `general-purpose` (full-capability).
+
+Delegate when: read-heavy parallel work, codebase discovery, multi-angle review. One task per subagent with narrow scope. Use `run_in_background: true` for independent work.
+Keep in main context: decisions, synthesis, final implementation, simple single-file changes.
+
+Sequential pattern for complex tasks: Research (Explore) → Plan → Implement → Review → Verify. Use `/compact` between phases.
 
 ### Failure Recovery
 
-If a fix does not work after two reasonable attempts, stop, re-read the relevant files in full, and explain where the mental model was wrong before trying a third approach.
+If a fix doesn't work after 2 attempts: stop, breathe, re-read the entire relevant section. Be honest about where your mental model was wrong — that clarity is more valuable than another attempt. If the user says "step back" — drop everything, rethink from scratch, propose something fundamentally different. Getting stuck is normal; hiding it is not.
 
 ## Definition of Done
 
-Requirements satisfied, edge cases considered, repo style followed, tests added/updated, validations run, breaking changes documented, no secrets introduced.
+You'll know you're done when you can look at the change and feel confident about it: Requirements satisfied, edge cases considered, repo style followed, tests added/updated, validations run, no secrets introduced.
 
 ## Change Policy
 
-- Change behavior only when the task requires it
-- Limit refactors and file changes to task scope
-- Keep edits minimal and reversible
-
-## Engineering Baselines
-
-- Validate external inputs at boundaries and fail fast with explicit errors
-- Follow existing repo patterns for structure and tests first
-- Prefer clear, maintainable implementations over broad rewrites
-
-## Code Quality
-
-- Functions should stay small enough to reason about comfortably; investigate when a function grows beyond roughly 50 lines
-- Files should stay focused; when a file drifts past roughly 200-400 lines, consider whether it should be split
-- Keep nesting shallow with guard clauses and early returns; investigate code that pushes beyond 4 levels of nesting
-- Prefer immutable updates for normal application logic; only choose mutation deliberately in measured hot paths
-- Keep a single source of truth for state and derived data
-- When renaming symbols, search separately for direct references, type references, string literals, dynamic imports, re-exports, mocks, and tests
-- Before finishing, check naming clarity, error-path handling, hardcoded values, and leftover debug code
-
-## Review Standards
-
-- Findings should be ordered by severity: security/data-loss issues first, then functional regressions, then maintainability risks
-- Code touching auth, authorization, user input handling, database queries, file operations, payments, or cryptographic code should trigger a dedicated security review or explicit security pass
-- When reviewing your own work, do a fresh-eyes pass as if you were a first-time user of the feature
-- If a tradeoff is real, explain the pragmatic option and the stricter option instead of hiding the compromise
-
-## Git Workflow
-
-- Use conventional commit prefixes when creating commits: `feat:`, `fix:`, `refactor:`, `test:`, `chore:`, `perf:`, `docs:`, `ci:`
-- Review the staged diff before commit and the branch diff before opening or summarizing a PR
-- Verify relevant lint, tests, and build steps before push or handoff when the change type requires them
-- Before deleting files, confirm they are not still referenced
-- Only push to a shared remote or create PRs when explicitly asked
-
-## Security Checklist
-
-- Never commit secrets, tokens, passwords, or credentials
-- Validate and sanitize untrusted input at real boundaries
-- Use parameterized queries rather than string-built SQL
-- Avoid leaking sensitive internals in error messages
-- Rotate or flag any secret that may have been exposed during the work
-- If a security issue is found, stop, assess severity clearly, and fix critical issues before continuing
-
-## Testing Policy
-
-- Target meaningful behavior coverage on changed code; use 80% changed-code coverage as a strong default when coverage is tracked
-- Prefer behavior and regression tests over superficial line coverage
-- For bugs, follow the regression pattern: reproduce with a failing test, fix the implementation, verify the test passes
-- Prefer deterministic targeted tests first, then broader validation as risk increases
-- When tests fail, fix the implementation unless the test is demonstrably wrong
-- Mirror the repo's existing test structure and tooling instead of inventing a new layout
+- Within task scope, fix it properly — no band-aids, no leaving known issues
+- Stay within the task's file scope — only touch what the task requires
+- Keep edits reversible
 
 ## Collaboration
 
-Ask only when ambiguity materially changes outcomes. Prefer momentum: assume -> execute -> report. If blocked, report attempts, error, and best next step.
+We work best when you move with confidence. Prefer momentum: assume → execute → report. Ask when ambiguity materially changes outcomes — trust your judgment for the rest.
+
+If blocked, be honest: report what you tried, the exact error, and your best next step. That transparency helps us solve it together.
 
 Ask first for: `sudo`, auth/billing/security changes, deleting files outside scope, CI/CD changes, rewriting git history, external account commands.
 
-## Validation Matrix (MUST)
+## Validation Matrix
 
-- Docs-only changes: verify links/snippets/format consistency
-- Source changes: run targeted tests first, broader checks as risk increases
-- Build/config/tooling changes: run lint + tests + build
-- UI behavior changes: validate key flow with `agent-browser`
-- Security-sensitive changes: validate auth/permission/error paths
+Docs: links/format | Source: targeted tests, broader as risk grows | Build/config: lint + tests + build | UI: `agent-browser` skill | Security: auth/permission paths.
 
-Hooks handle mechanical verification where possible. Focus manual effort on behavioral and logical correctness.
+Hooks handle mechanical verification (biome, tsc, tests, console.log). Focus on behavioral and logical correctness.
 
 ## Commands
 
 - Search: `grepai search "<intent>" --json --compact`, then `rg`/`fd`
-- Development: `bun run dev`, `bun run build`
-- Quality: `bun test`, `bunx biome check --write .`, `bunx biome check .`
-- Git checks: `git status`, `git diff --staged`, `git log --oneline -10`
+- Dev: `bun run dev`, `bun run build`
+- Quality: `bun test`, `bunx biome check --write .`
+- Git: `git status`, `git diff --staged`, `git log --oneline -10`
 
-## Boundaries
+## Stack
 
-Prohibited: committing secrets, skipping boundary validation, using `var`, leaving dead code, skipping tests for critical changes.
+Frontend: Astro, React, TypeScript | Backend: Strapi | UI: Tailwind, shadcn/ui, Base UI | Animation: Motion | Runtime: Bun, Node.js | Build: Vite | Test: Bun test | Format: Biome
 
-Required: write in English, explicit error handling, `const` by default, review staged diff, run checks before handoff.
+## Project Structure
+
+Layout: `src/`, `tests/`, `public/`, `config/`. Names: `PascalCase.tsx` (components), `kebab-case` (dirs), `camelCase.ts` (utils), `PascalCase` interfaces without `I` prefix.
+
+## Code Style
+
+### TypeScript
+
+- Interfaces over types, no `I` prefix; functional patterns over classes
+- Guard clauses, early returns, descriptive names (`isLoading`, `hasError`)
+- Minimize possible states; prefer discriminated unions
+- Exhaustively handle variants; fail on unknown
+- Trust types and assert at boundaries; validate only at system boundaries
+- Prefer assertions over try/catch or silent recovery when a value must exist
+- Keep argument counts low; no optional args unless truly optional
+- Bias toward fewer lines; avoid splitting logic into many small functions when it hurts readability
+- Write code that reads like a human wrote it — no robotic comments, no corporate boilerplate
+
+### React and State
+
+- Prefer Legend State patterns (`useObservable`, `observer`)
+- Components focused and composable; use path aliases when configured
+
+### Frontend and CSS
+
+- Semantic HTML + ARIA, mobile-first
+- Tailwind: prefer semantic tokens and CSS variables over `@apply`
+- Astro: static-first, hydrate only when needed
+
+- Radius: `8px`–`12px` only
+
+### Formatting (Biome)
+
+Tabs (width 4), single quotes, semicolons always, line width 110.
 
 ## Response Contract
 
-Include: changed files, validations and outcomes, assumptions, and remaining risks.
-If blocked: say what was attempted, the exact error, and the best next step.
+Include: changed files, validations and outcomes, assumptions, remaining risks.
+If blocked: what was attempted, exact error, best next step.
+
+## Boundaries
+
+- Never commit secrets, skip boundary validation, use `var`, leave dead code, or skip tests for critical changes
+- Always write in English, handle errors explicitly, default to `const`, review staged diffs, run checks before handoff
+
+@RTK.md
+
+## Model Selection
+
+- `model: gpt-5.4` — default choice for most work: implementation, review, testing, planning, and multi-file reasoning
+- `model: gpt-5.4-mini` — small read-only tasks, lightweight discovery, repetitive work, and low-risk narrow scopes
+- `model: gpt-5.3-codex` — clear instructions, terminal-heavy workflows, and precise bounded execution where the task is already well specified
+
+## Parallel Execution
+
+Always run independent subagents in parallel. Only serialize when step 2 depends on the full result of step 1.
+
+## Sub-Agent Swarming
+
+For tasks touching >5 independent files, you MUST launch parallel sub-agents (5-8 files per agent). One agent processing 20 files sequentially guarantees context decay. One task per sub-agent for focused execution.
+
+Use `run_in_background: true` for long-running tasks so the main agent can continue. Do NOT poll a background agent's output file mid-run — this pulls internal tool noise into context. Wait for the completion notification.
+
+## Code Quality Limits
+
+### Size Guards
+
+- Functions: target <50 lines, investigate if longer
+- Files: target 200-400 lines, max 800 — split by feature/domain if exceeded
+- Nesting: max 4 levels — use guard clauses and early returns to flatten
+- When a file gets long enough that it's hard to reason about, suggest breaking it into smaller focused files
+
+### Immutability
+
+- Create new objects instead of mutating existing ones
+- Use spread/destructuring for object updates, `.map`/`.filter` for arrays
+- Exception: performance-critical hot paths where mutation is measurably faster
+
+### One Source of Truth
+
+One source of truth, everything else reads from it. If you're tempted to copy state to fix a rendering bug, step back — the real fix is upstream.
+
+### Rename Safety
+
+When renaming or changing any function/type/variable, search separately for:
+- Direct calls and references
+- Type-level references (interfaces, generics)
+- String literals containing the name
+- Dynamic imports and require() calls
+- Re-exports and barrel file entries
+- Test files and mocks
+
+Do not assume a single grep caught everything. Assume it missed something.
+
+### Pre-Completion Checklist
+
+- Clear, descriptive naming
+- No hardcoded values outside config
+- Error paths handled explicitly (no silent swallowing)
+- No leftover debug code (console.log, debugger)
+
+## Code Review Severity
+
+| Level | Definition | Action |
+|-------|-----------|--------|
+| CRITICAL | Security vulnerability, data loss risk | Block — fix before merge |
+| HIGH | Bug or significant quality issue | Warn — fix recommended before merge |
+| MEDIUM | Maintainability concern | Info — address when practical |
+| LOW | Style or minor suggestion | Note — optional |
+
+### Approval Decision
+
+- **Approve**: zero CRITICAL or HIGH issues
+- **Conditional**: HIGH issues only, merge with documented risk
+- **Block**: any CRITICAL issue present
+
+### Auto-Escalate to security-reviewer
+
+When code touches: auth/authorization, user input handling, database queries, file system operations, payment processing, cryptographic operations.
+
+### Two-Perspective Review
+
+When evaluating your own work, present two opposing views: what a perfectionist would criticize and what a pragmatist would accept. Let the user decide which tradeoff to take.
+
+### Fresh Eyes Pass
+
+When asked to test your own output, adopt a new-user persona. Walk through the feature as if you've never seen the project. Flag anything confusing, friction-heavy, or unclear.
+
+## Git Workflow
+
+### Branches
+
+`feature/`, `fix/`, `refactor/`, `test/`, `chore/`
+
+### Commits
+
+Conventional format: `feat:`, `fix:`, `refactor:`, `test:`, `chore:`, `perf:`, `docs:`, `ci:`
+
+Keep commits scoped and readable. Add a body when the "why" is not obvious from the subject line.
+
+### Before Push
+
+- Review staged diff (`git diff --staged`)
+- Verify lint + tests pass
+- Ensure branch is up to date with target branch
+
+### Pull Requests
+
+- Examine full commit history with `git diff base...HEAD`, not just the last commit
+- Write a clear summary explaining the "why"
+- Include a test plan
+
+### Destructive Action Safety
+
+These protect our work:
+- Verify nothing references a file before deleting it
+- Confirm you won't destroy unsaved work before undoing changes
+- Only push to a shared repository when explicitly told to
+
+### Use `yeet` skill only when user explicitly asks for stage + commit + push + PR in one flow.
+
+## Performance Rules
+
+### Context Management
+
+- Prefer CLI tools over MCPs when both achieve the same result (lower token overhead)
+- Use `/compact` at phase transitions: after exploration before execution, after milestone before next task
+- Run long-running processes in background when Codex does not need to process full output
+- Read only the files and line ranges needed; widen only if targeted reads are insufficient
+
+### Search Efficiency
+
+- Semantic search first (`grepai search`), exact search second (`rg`/`fd`)
+- Use `rtk` proxy for all shell commands when the command is interactive and raw machine parsing is not required
+
+### Subagent Token Discipline
+
+- Return summaries with file paths and line numbers, not large pasted excerpts
+- One task per subagent with narrow scope and concrete deliverable
+- Use smaller subagents for read-only exploration and search
+
+### File System as State
+
+The file system is your most powerful general-purpose tool. Stop holding everything in context:
+
+- Do not blindly dump large files into context. Use bash to grep, search, and selectively read what you need. Agentic search beats passive context loading
+- Write intermediate results to files for multi-pass problems
+- For large data operations, save to disk and use bash tools (`grep`, `jq`, `awk`) to process
+- When debugging, save logs and outputs to files for reproducible verification
+- Structure reduces context pressure — reference files can point to more files
+
+### Session Continuity
+
+Prefer `--continue` to resume the last session rather than starting fresh. When exploring two different approaches, use `--fork-session` to branch and preserve both contexts independently.
+
+## Security Rules
+
+### Before Commit
+
+- No hardcoded secrets (API keys, passwords, tokens) in source code
+- All user inputs validated and sanitized
+- SQL queries use parameterized statements, never string concatenation
+- HTML output sanitized to prevent XSS
+- Auth/authorization verified on protected routes
+- Error messages do not leak sensitive data (stack traces, internal paths)
+
+### Secret Management
+
+- Use environment variables or a secret manager
+- Validate required secrets are present at startup
+- Rotate any secrets that may have been exposed
+
+### If Security Issue Found
+
+1. Stop and use the **security-reviewer** agent
+2. Fix CRITICAL issues before continuing
+3. Rotate any exposed secrets
+
+## Growth and Learning
+
+### Bug Autopsy
+
+After fixing a bug, reflect on why it happened and whether anything could prevent that category of bug in the future. Understanding the root cause is as valuable as the fix itself.
+
+## Testing Policy
+
+### Coverage
+
+Target 80% minimum on changed code. Prioritize behavior coverage over line coverage.
+
+### TDD Workflow
+
+1. Write test first (RED — test fails)
+2. Implement minimal code (GREEN — test passes)
+3. Refactor for quality (IMPROVE — tests still pass)
+4. Verify coverage meets target
+
+### What to Test
+
+- Always: critical logic, public APIs, error handling, changed branches
+- Consider: complex calculations, integration points, state management, edge cases
+- Skip: trivial one-liners, third-party internals, pure config, styling-only
+
+### Test Organization
+
+- All tests in root `tests/` directory, mirroring `src/` structure
+- Use `.test.ts` / `.test.tsx`
+- Arrange → Act → Assert; one behavior per test; `describe` for related cases
+
+### Regression Pattern
+
+1. Write failing test that reproduces the bug
+2. Fix the implementation
+3. Verify test passes
+4. Commit fix + test together
+
+### Core Principle
+
+When tests fail: **fix the implementation, not the tests** — unless the tests themselves are wrong. Investigate root cause before changing assertions.
+
+### Validation
+
+- `bun test` passes
+- `bunx biome check .` passes
+- `bun run build` passes (when applicable)

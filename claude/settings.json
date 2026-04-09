@@ -15,25 +15,25 @@
 			"mcp__exa"
 		],
 		"deny": [
-				"Bash(rm -rf:*)",
-				"Bash(rm -r :*)",
-				"Bash(rm -f :*)",
-				"Bash(sudo:*)",
-				"Bash(su :*)",
-				"Bash(doas :*)",
-				"Bash(chmod 777:*)",
-				"Bash(git push --force:*)",
-				"Bash(git push -f:*)",
-				"Bash(git push --force-with-lease:*)",
-				"Bash(git reset --hard:*)",
-				"Bash(curl * | sh:*)",
-				"Bash(curl * | bash:*)",
-				"Bash(curl * | fish:*)",
-				"Bash(curl * | zsh:*)",
-				"Bash(wget * | sh:*)",
-				"Bash(wget * | bash:*)",
-				"Bash(wget * | fish:*)"
-			]
+			"Bash(rm -rf:*)",
+			"Bash(rm -r :*)",
+			"Bash(rm -f :*)",
+			"Bash(sudo:*)",
+			"Bash(su :*)",
+			"Bash(doas :*)",
+			"Bash(chmod 777:*)",
+			"Bash(git push --force:*)",
+			"Bash(git push -f:*)",
+			"Bash(git push --force-with-lease:*)",
+			"Bash(git reset --hard:*)",
+			"Bash(curl * | sh:*)",
+			"Bash(curl * | bash:*)",
+			"Bash(curl * | fish:*)",
+			"Bash(curl * | zsh:*)",
+			"Bash(wget * | sh:*)",
+			"Bash(wget * | bash:*)",
+			"Bash(wget * | fish:*)"
+		]
 	},
 	"attribution": {
 		"commit": "",
@@ -56,12 +56,7 @@
 		"CLAUDE_CODE_DISABLE_FAST_MODE": "1",
 		"ENABLE_TOOL_SEARCH": "1",
 		"CLAUDE_CODE_SLIM_SUBAGENT_CLAUDEMD": "1",
-		"ANTHROPIC_AUTH_TOKEN": "4e72bfa767754620a58e14b4a3b5b29e.24eAXxjY9hQAPULH",
-		"ANTHROPIC_BASE_URL": "https://api.z.ai/api/anthropic",
-		"API_TIMEOUT_MS": "3000000",
-		"ANTHROPIC_DEFAULT_HAIKU_MODEL": "glm-4.5-air",
-		"ANTHROPIC_DEFAULT_SONNET_MODEL": "glm-5.1",
-		"ANTHROPIC_DEFAULT_OPUS_MODEL": "glm-5.1"
+		"CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING": "1"
 	},
 	"effortLevel": "high",
 	"autoMemory": false,

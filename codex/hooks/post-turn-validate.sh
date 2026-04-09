@@ -20,16 +20,14 @@ fi
 AUTO_FORMAT_RESULT=$("$SCRIPT_DIR/auto-format.sh")
 TYPECHECK_RESULT=$("$SCRIPT_DIR/typecheck.sh")
 TEST_RESULT=$("$SCRIPT_DIR/run-tests.sh")
-CONSOLE_RESULT=$("$SCRIPT_DIR/check-console-log.sh")
 
-python3 - "$AUTO_FORMAT_RESULT" "$TYPECHECK_RESULT" "$TEST_RESULT" "$CONSOLE_RESULT" <<'PY'
+python3 - "$AUTO_FORMAT_RESULT" "$TYPECHECK_RESULT" "$TEST_RESULT" <<'PY'
 import json
 import sys
 
 auto = json.loads(sys.argv[1])
 typecheck = json.loads(sys.argv[2])
 tests = json.loads(sys.argv[3])
-console = json.loads(sys.argv[4])
 
 messages = []
 should_continue = False
@@ -45,9 +43,6 @@ if typecheck["status"] == "failed":
 if tests["status"] == "failed":
     should_continue = True
     messages.append(tests["message"])
-
-if console["status"] == "failed":
-    messages.append(console["message"])
 
 if should_continue:
     reason = (
