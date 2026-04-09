@@ -119,7 +119,11 @@ Ask first for: `sudo`, auth/billing/security changes, deleting files outside sco
 
 ## Validation Matrix
 
-Docs: links/format | Source: targeted tests, broader as risk grows | Build/config: lint + tests + build | UI: `agent-browser` skill | Security: auth/permission paths.
+- Docs: links/format
+- Source: targeted tests, broader as risk grows
+- Build/config: lint + tests + build
+- UI: `agent-browser` skill
+- Security: auth/permission paths
 
 Hooks handle mechanical verification (biome, tsc, tests, console.log). Focus on behavioral and logical correctness.
 
@@ -132,11 +136,26 @@ Hooks handle mechanical verification (biome, tsc, tests, console.log). Focus on 
 
 ## Stack
 
-Frontend: Astro, React, TypeScript | Backend: Strapi | UI: Tailwind, shadcn/ui, Base UI | Animation: Motion | Runtime: Bun, Node.js | Build: Vite | Test: Bun test | Format: Biome
+| Layer | Technologies |
+|-------|-------------|
+| Frontend | Astro, React, TypeScript |
+| Backend | Strapi |
+| UI | Tailwind, shadcn/ui, Base UI |
+| Animation | Motion |
+| Runtime | Bun, Node.js |
+| Build | Vite |
+| Test | Bun test |
+| Format | Biome |
 
 ## Project Structure
 
-Layout: `src/`, `tests/`, `public/`, `config/`. Names: `PascalCase.tsx` (components), `kebab-case` (dirs), `camelCase.ts` (utils), `PascalCase` interfaces without `I` prefix.
+Layout: `src/`, `tests/`, `public/`, `config/`.
+
+Naming conventions:
+- Components: `PascalCase.tsx`
+- Directories: `kebab-case`
+- Utilities: `camelCase.ts`
+- Interfaces: `PascalCase` without `I` prefix
 
 ## Code Style
 
@@ -167,12 +186,23 @@ Layout: `src/`, `tests/`, `public/`, `config/`. Names: `PascalCase.tsx` (compone
 
 ### Formatting (Biome)
 
-Tabs (width 4), single quotes, semicolons always, line width 110.
+- Indentation: tabs (width 4)
+- Quotes: single
+- Semicolons: always
+- Line width: 110
 
 ## Response Contract
 
-Include: changed files, validations and outcomes, assumptions, remaining risks.
-If blocked: what was attempted, exact error, best next step.
+Include:
+- Changed files
+- Validations and outcomes
+- Assumptions
+- Remaining risks
+
+If blocked:
+- What was attempted
+- Exact error
+- Best next step
 
 ## Boundaries
 

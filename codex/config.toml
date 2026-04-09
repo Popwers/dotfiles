@@ -6,7 +6,7 @@ tool_output_token_limit = 12000
 project_doc_fallback_filenames = ["CLAUDE.md"]
 project_doc_max_bytes = 65536
 # Match the Claude setup more closely so compaction happens at a similar point in long sessions.
-model_auto_compact_token_limit = 195000
+model_auto_compact_token_limit = 280000
 web_search = "cached"
 
 [agents]

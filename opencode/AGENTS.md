@@ -192,13 +192,6 @@ Naming conventions:
 - Tailwind: prefer semantic tokens and CSS variables over `@apply`
 - Astro: static-first, hydrate only when needed (`server:defer`, `client:visible`, etc.)
 
-### UI Visual Defaults
-
-- Icons: use `@huge_icons` with filled + stroke styles, `1.2px` stroke width, `16px` base size
-- Typography: only two font weights: regular for body text, medium for headings and emphasis
-- Colors: Tailwind CSS Neutral palette
-- Radius: keep border radius between `8px` and `12px` only
-
 ### Formatting (Biome)
 
 - Indentation: tabs (width: 4)
