@@ -449,22 +449,6 @@ if [ -d "$HOME/.claude/skills/emil-design-engineering" ] && [ ! -e "$HOME/.confi
     ln -s "$HOME/.claude/skills/emil-design-engineering" "$HOME/.config/opencode/skills/emil-design-engineering"
 fi
 
-# Install chrome-devtools-mcp plugin for UI testing
-if command -v claude >/dev/null 2>&1; then
-    # Add marketplace if not present
-    if ! claude plugin marketplace list 2>/dev/null | grep -q "chrome-devtools"; then
-        claude plugin marketplace add ChromeDevTools/chrome-devtools-mcp
-    else
-        skip "chrome-devtools-mcp marketplace"
-    fi
-    # Install plugin if not present
-    if ! claude plugin list 2>/dev/null | grep -q "chrome-devtools-mcp"; then
-        claude plugin install chrome-devtools-mcp
-    else
-        skip "chrome-devtools-mcp plugin"
-    fi
-fi
-
 section "Finalization"
 
 # Initialize RTK hooks for all agents (runs last so it can patch copied configs)
