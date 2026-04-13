@@ -398,7 +398,6 @@ fi
 
 # Install skills — declarative table: "name|source"
 declare -a skills=(
-    "agent-browser|https://github.com/vercel-labs/agent-browser"
     "web-design-guidelines|https://github.com/vercel-labs/agent-skills"
     "impeccable|https://github.com/pbakaus/impeccable"
     "vercel-react-best-practices|https://github.com/vercel-labs/agent-skills"
@@ -450,16 +449,20 @@ if [ -d "$HOME/.claude/skills/emil-design-engineering" ] && [ ! -e "$HOME/.confi
     ln -s "$HOME/.claude/skills/emil-design-engineering" "$HOME/.config/opencode/skills/emil-design-engineering"
 fi
 
-# Configure agent-browser right after install (downloads Chromium)
-if [ -x "$HOME/.bun/bin/agent-browser" ]; then
-    if compgen -G "$HOME/Library/Caches/ms-playwright/chromium-*" >/dev/null || compgen -G "$HOME/.cache/ms-playwright/chromium-*" >/dev/null; then
-        skip "agent-browser Chromium"
+# Install chrome-devtools-mcp plugin for UI testing
+if command -v claude >/dev/null 2>&1; then
+    # Add marketplace if not present
+    if ! claude plugin marketplace list 2>/dev/null | grep -q "chrome-devtools"; then
+        claude plugin marketplace add ChromeDevTools/chrome-devtools-mcp
     else
-        "$HOME/.bun/bin/agent-browser" install
+        skip "chrome-devtools-mcp marketplace"
     fi
-    "$HOME/.bun/bin/agent-browser" --version
-else
-    warn "agent-browser binary not found in ~/.bun/bin"
+    # Install plugin if not present
+    if ! claude plugin list 2>/dev/null | grep -q "chrome-devtools-mcp"; then
+        claude plugin install chrome-devtools-mcp
+    else
+        skip "chrome-devtools-mcp plugin"
+    fi
 fi
 
 section "Finalization"

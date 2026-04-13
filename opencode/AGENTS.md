@@ -215,7 +215,7 @@ Naming conventions:
 
 ### Tooling and When to Test
 
-- `bun test` for unit/integration/component, `agent-browser` for UI/E2E
+- `bun test` for unit/integration/component, `chrome-devtools-mcp` for UI/E2E
 - Always test: critical logic, public APIs, error handling, changed branches
 - Consider: complex calculations, integration points, state management, edge cases
 - Skip: trivial one-liners, third-party internals, pure config, styling-only
@@ -287,8 +287,8 @@ If blocked, include:
 - Use Context7 MCP for documentation lookups
 - Use gh_grep MCP for real-world code examples
 - Use Exa MCP for general web research
-- Use agent-browser for live UI interaction/verification
-- If agent-browser is unavailable, provide a clear fallback summary
+- Use chrome-devtools-mcp for live UI interaction/verification
+- If chrome-devtools-mcp is unavailable, provide a clear fallback summary
 
 ## Boundaries
 

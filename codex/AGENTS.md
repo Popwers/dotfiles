@@ -122,7 +122,7 @@ Ask first for: `sudo`, auth/billing/security changes, deleting files outside sco
 - Docs: links/format
 - Source: targeted tests, broader as risk grows
 - Build/config: lint + tests + build
-- UI: `agent-browser` skill
+- UI: `chrome-devtools-mcp` plugin
 - Security: auth/permission paths
 
 Hooks handle mechanical verification (biome, tsc, tests, console.log). Focus on behavioral and logical correctness.

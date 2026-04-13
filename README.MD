@@ -60,7 +60,7 @@ The setup includes various tools and utilities to enhance the development experi
 - Ollama (local embeddings for GrepAI)
 - Android Platform Tools (ADB, fastboot)
 - Node.js (via NVM)
-- Global npm packages: ngrok, npm-check-updates, typescript, commitizen, cz-conventional-changelog, agent-browser, @openai/codex
+- Global npm packages: ngrok, npm-check-updates, typescript, commitizen, cz-conventional-changelog, @openai/codex
 
 ## OpenCode
 
