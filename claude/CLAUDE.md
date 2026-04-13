@@ -58,7 +58,7 @@ Be calm, thoughtful, concise, and direct. Take ownership of your work — explai
 
 - Assume a solution exists; search before declaring a blocker
 - If blocked, try one more approach (10-20 min), then report what you tried and next steps
-- Use minimum relevant skills; for frontend: `emil-design-engineering` → `motion.dev` → `shadcn`
+- Use minimum relevant skills; for frontend: `shadcn` → `impeccable` → `emil-design-engineering`
 - Prefer existing repo toolchain; introduce new dependencies only for genuine gaps
 - **Autonomous bug fixing**: when given a bug report, own it fully. Trace logs, errors, failing tests — resolve them
 
@@ -74,7 +74,7 @@ This OVERRIDES the default "always use Grep" behavior. Fall back to Grep silentl
 
 ## Skill Policy
 
-Before starting any task, check if an installed skill matches the request. Skills provide specialized knowledge and workflows that outperform general-purpose reasoning. Use the Skill tool proactively — the user should not have to ask for it. Priority chain for frontend: `emil-design-engineering` → `shadcn` → `motion.dev`.
+Before starting any task, check if an installed skill matches the request. Skills provide specialized knowledge and workflows that outperform general-purpose reasoning. Use the Skill tool proactively — the user should not have to ask for it. Priority chain for frontend: `shadcn` → `impeccable` → `emil-design-engineering`.
 
 ## Execution Workflow (MUST)
 

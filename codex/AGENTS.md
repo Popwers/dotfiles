@@ -209,7 +209,7 @@ If blocked:
 - Never commit secrets, skip boundary validation, use `var`, leave dead code, or skip tests for critical changes
 - Always write in English, handle errors explicitly, default to `const`, review staged diffs, run checks before handoff
 
-@RTK.md
+@/Users/lionel/.codex/RTK.md
 
 ## Model Selection
 

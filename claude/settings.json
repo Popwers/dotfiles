@@ -16,8 +16,8 @@
 		],
 		"deny": [
 			"Bash(rm -rf:*)",
-			"Bash(rm -r :*)",
-			"Bash(rm -f :*)",
+			"Bash(rm -r:*)",
+			"Bash(rm -f:*)",
 			"Bash(sudo:*)",
 			"Bash(su :*)",
 			"Bash(doas :*)",
@@ -47,21 +47,18 @@
 	},
 	"autoConnectIde": true,
 	"env": {
+		"CLAUDE_CODE_DISABLE_1M_CONTEXT": "1",
+		"CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING": "1",
+		"ANTHROPIC_DEFAULT_OPUS_MODEL": "claude-opus-4-5-20251101",
 		"CLAUDE_CODE_AUTO_COMPACT_WINDOW": "280000",
 		"CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "85",
-		"DISABLE_TELEMETRY": "1",
-		"DISABLE_ERROR_REPORTING": "1",
+		"ENABLE_TOOL_SEARCH": "1",
 		"CLAUDE_ENABLE_STREAM_WATCHDOG": "1",
 		"CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR": "1",
-		"CLAUDE_CODE_DISABLE_FAST_MODE": "1",
-		"ENABLE_TOOL_SEARCH": "1",
-		"CLAUDE_CODE_SLIM_SUBAGENT_CLAUDEMD": "1",
-		"CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING": "1"
+		"CLAUDE_CODE_DISABLE_FAST_MODE": "1"
 	},
 	"effortLevel": "high",
-	"autoMemory": false,
 	"showThinkingSummaries": true,
-	"feedbackSurveyRate": 0,
 	"autoUpdatesChannel": "latest",
 	"hooks": {
 		"SessionStart": [
@@ -118,6 +115,14 @@
 						"type": "command",
 						"command": "~/.claude/hooks/run-tests.sh",
 						"timeout": 30
+					},
+					{
+						"type": "command",
+						"command": "~/.claude/hooks/impeccable-check.sh",
+						"if": "Edit(*.html)|Edit(*.css)|Edit(*.jsx)|Edit(*.tsx)|Edit(*.vue)|Edit(*.svelte)|Edit(*.astro)|Write(*.html)|Write(*.css)|Write(*.jsx)|Write(*.tsx)|Write(*.vue)|Write(*.svelte)|Write(*.astro)",
+						"timeout": 15,
+						"async": true,
+						"statusMessage": "Checking for UI anti-patterns..."
 					}
 				]
 			}

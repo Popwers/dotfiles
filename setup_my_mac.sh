@@ -177,7 +177,7 @@ end
 # Install global packages
 set -l bun_global_listing (bun pm ls -g 2>/dev/null | string collect)
 set -l missing_bun_globals
-for pkg in ngrok npm-check-updates typescript commitizen cz-conventional-changelog @openai/codex @anthropic-ai/claude-code
+for pkg in ngrok npm-check-updates typescript commitizen cz-conventional-changelog @openai/codex @anthropic-ai/claude-code impeccable
     if string match -rq "(^|\\s)$pkg@" -- $bun_global_listing
         skip "$pkg"
     else
@@ -400,8 +400,7 @@ fi
 declare -a skills=(
     "agent-browser|https://github.com/vercel-labs/agent-browser"
     "web-design-guidelines|https://github.com/vercel-labs/agent-skills"
-    "frontend-design|https://github.com/anthropics/skills"
-    "ui-ux-pro-max|https://github.com/nextlevelbuilder/ui-ux-pro-max-skill"
+    "impeccable|https://github.com/pbakaus/impeccable"
     "vercel-react-best-practices|https://github.com/vercel-labs/agent-skills"
     "vercel-composition-patterns|https://github.com/vercel-labs/agent-skills"
     "find-skills|https://github.com/vercel-labs/skills"
@@ -467,6 +466,7 @@ section "Finalization"
 
 # Initialize RTK hooks for all agents (runs last so it can patch copied configs)
 if command -v rtk >/dev/null 2>&1; then
+    rtk init -g
     rtk init -g --auto-patch
     rtk init -g --codex
     rtk init -g --agent cursor
