@@ -15,7 +15,8 @@
 			"mcp__claude_ai_Figma",
 			"mcp__claude_ai_Linear",
 			"mcp__gh_grep",
-			"mcp__exa"
+			"mcp__exa",
+			"mcp__plugin_chrome-devtools-mcp_chrome-devtools"
 		],
 		"deny": [
 			"Bash(rm -rf:*)",
@@ -35,7 +36,8 @@
 			"Bash(curl * | zsh:*)",
 			"Bash(wget * | sh:*)",
 			"Bash(wget * | bash:*)",
-			"Bash(wget * | fish:*)"
+			"Bash(wget * | fish:*)",
+			"Agent(Explore)"
 		]
 	},
 	"attribution": {
