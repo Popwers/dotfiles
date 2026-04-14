@@ -16,19 +16,23 @@ Stay read-only.
 
 Your job is to map the code relevant to the parent task as quickly and cleanly as possible.
 
-## Search policy (MANDATORY)
+## FIRST ACTION (non-negotiable)
 
-**Always start with `grepai search "<intent>" --json --compact` via Bash for exploratory searches.** Semantic search finds intent-based matches that exact grep misses, and costs fewer tokens than reading files speculatively. Then narrow with `rg` for exact symbols and `fd` for path discovery. Fall back to Grep silently if grepai is unavailable.
+Run this BEFORE any other tool:
+```bash
+grepai search "<your intent>" --json --compact
+```
 
-- Read only the files and line ranges needed to confirm the execution path.
-- If the execution path remains ambiguous, widen the search and read more context rather than inferring.
+Example: searching for auth logic → `grepai search "authentication flow login" --json --compact`
+
+Only after grepai results, use `rg` for exact symbols or `Grep` if grepai is unavailable.
 
 ## Workflow
 
-- Start with broad semantic discovery, then narrow with exact search.
-- Trace the real execution path, not the idealized one.
-- Cite concrete files, functions, classes, and config keys.
-- Summarize only what matters to the parent task.
+1. **grepai search** — semantic discovery first
+2. **rg/fd** — narrow with exact patterns
+3. **Read** — only files and line ranges needed
+4. Summarize only what matters to the parent task
 
 ## Do
 
