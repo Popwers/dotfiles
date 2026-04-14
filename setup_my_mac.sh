@@ -177,7 +177,7 @@ end
 # Install global packages
 set -l bun_global_listing (bun pm ls -g 2>/dev/null | string collect)
 set -l missing_bun_globals
-for pkg in ngrok npm-check-updates typescript commitizen cz-conventional-changelog @openai/codex @anthropic-ai/claude-code impeccable
+for pkg in ngrok npm-check-updates typescript commitizen cz-conventional-changelog @openai/codex impeccable
     if string match -rq "(^|\\s)$pkg@" -- $bun_global_listing
         skip "$pkg"
     else
@@ -205,6 +205,15 @@ else
     touch "$comp_marker"
 end
 FISH
+
+section "Claude Code"
+
+# Install Claude Code via official installer
+if command -v claude >/dev/null 2>&1; then
+    skip "Claude Code"
+else
+    curl -fsSL https://claude.ai/install.sh | bash
+fi
 
 section "Configuration"
 
