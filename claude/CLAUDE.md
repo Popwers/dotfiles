@@ -100,6 +100,29 @@ Keep in main context: decisions, synthesis, final implementation, simple single-
 
 Sequential pattern for complex tasks: Research (Explore) → Plan → Implement → Review → Verify. Use `/compact` between phases.
 
+### Agent Teams (experimental)
+
+Agent teams spawn multiple independent Claude instances that communicate directly. **High token cost** — use only when teammates need to debate, challenge, or coordinate with each other.
+
+**Use agent teams when:**
+- PR review needing 3+ independent perspectives (security, perf, tests) that should challenge each other
+- Debugging with competing hypotheses — teammates actively try to disprove each other's theories
+- Cross-layer refactor where front/back/tests can be owned by different teammates without file conflicts
+- Research tasks where parallel exploration and synthesis add genuine value
+
+**Use subagents instead when:**
+- Result is what matters, not the discussion
+- Tasks are sequential or touch the same files
+- Simple delegation (1-3 focused tasks)
+- Token budget is a concern
+
+**Team rules:**
+- 3-5 teammates max, 5-6 tasks per teammate
+- Each teammate owns distinct files — no overlapping edits
+- Give specific context in spawn prompts (teammates don't inherit conversation history)
+- Always clean up via the lead when done
+- Navigation: `Shift+Down` to cycle, `Ctrl+T` for task list, `Escape` to interrupt
+
 ### Failure Recovery
 
 - **2-failure rule**: after 2 consecutive failures of the same approach, stop entirely. Don't retry — change strategy. Explain what failed and try something fundamentally different

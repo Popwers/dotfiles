@@ -1,0 +1,10 @@
+{
+  "autoUpdates": true,
+  "theme": "light-daltonized",
+  "autoConnectIde": true,
+  "showSpinnerTree": true,
+  "companionMuted": true,
+  "agentPushNotifEnabled": true,
+  "remoteControlAtStartup": true,
+  "teammateMode": "auto"
+}

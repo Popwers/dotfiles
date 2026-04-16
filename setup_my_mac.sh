@@ -261,6 +261,19 @@ copy_file_with_status "$SCRIPT_DIR/claude/settings.json" "$HOME/.claude/settings
 copy_file_with_status "$SCRIPT_DIR/claude/statusline.sh" "$HOME/.claude/statusline.sh"
 copy_file_with_status "$SCRIPT_DIR/claude/claudeignore.template" "$HOME/.claude/claudeignore.template"
 chmod +x "$HOME/.claude/statusline.sh"
+# Merge user preferences into ~/.claude.json (preserves existing state like stats/sessions)
+if command -v jq &>/dev/null; then
+    if [[ -f "$HOME/.claude.json" ]]; then
+        jq -s '.[0] * .[1]' "$HOME/.claude.json" "$SCRIPT_DIR/claude/defaults.json" > /tmp/claude-merged.json \
+            && mv /tmp/claude-merged.json "$HOME/.claude.json" \
+            && ok "claude.json (merged)"
+    else
+        cp "$SCRIPT_DIR/claude/defaults.json" "$HOME/.claude.json"
+        ok "claude.json (created)"
+    fi
+else
+    warn "jq not found, skipping claude.json merge"
+fi
 # Register local MCP servers (user scope) — only if not already registered
 if command -v claude &>/dev/null; then
     registered_mcps=$(claude mcp list --scope user 2>/dev/null || true)

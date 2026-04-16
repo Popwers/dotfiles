@@ -15,14 +15,15 @@ Repo de bootstrap macOS. Voir `AGENTS.md` pour la knowledge base complète du pr
 
 Les configs Claude Code, Codex et OpenCode sont stockées dans ce repo et synchronisées par `setup_my_mac.sh` :
 
-| Source (repo)         | Destination                  |
-|-----------------------|------------------------------|
-| `claude/CLAUDE.md`    | `~/.claude/CLAUDE.md`        |
-| `claude/settings.json`| `~/.claude/settings.json`    |
-| `claude/statusline.sh`| `~/.claude/statusline.sh`   |
-| `claude/agents/`      | `~/.claude/agents/`          |
-| `claude/rules/`       | `~/.claude/rules/`           |
-| `claude/hooks/`       | `~/.claude/hooks/`           |
+| Source (repo)         | Destination                  | Mode   |
+|-----------------------|------------------------------|--------|
+| `claude/CLAUDE.md`    | `~/.claude/CLAUDE.md`        | copy   |
+| `claude/settings.json`| `~/.claude/settings.json`    | copy   |
+| `claude/defaults.json`| `~/.claude.json`             | merge  |
+| `claude/statusline.sh`| `~/.claude/statusline.sh`    | copy   |
+| `claude/agents/`      | `~/.claude/agents/`          | sync   |
+| `claude/rules/`       | `~/.claude/rules/`           | sync   |
+| `claude/hooks/`       | `~/.claude/hooks/`           | sync   |
 | `codex/AGENTS.md`     | `~/.codex/AGENTS.md`         |
 | `codex/config.toml`   | `~/.codex/config.toml`       |
 | `codex/hooks.json`    | `~/.codex/hooks.json`        |
@@ -32,5 +33,6 @@ Les configs Claude Code, Codex et OpenCode sont stockées dans ce repo et synchr
 ## Anti-patterns
 
 - Ne pas modifier `~/.claude/` directement : modifier dans `claude/` et relancer le setup
+- Ne pas modifier `~/.claude.json` via `/config` pour les préférences par défaut : modifier `claude/defaults.json` et relancer le setup
 - Ne pas modifier `~/.codex/` directement : modifier dans `codex/` et relancer le setup
 - Ne pas modifier `~/.config/fish/config.fish` directement : modifier `config.fish` dans le repo

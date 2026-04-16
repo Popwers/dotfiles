@@ -60,7 +60,9 @@
 		"ENABLE_TOOL_SEARCH": "1",
 		"CLAUDE_ENABLE_STREAM_WATCHDOG": "1",
 		"CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR": "1",
-		"CLAUDE_CODE_DISABLE_FAST_MODE": "1"
+		"CLAUDE_CODE_DISABLE_FAST_MODE": "1",
+		"CLAUDE_CODE_NO_FLICKER": "1",
+		"CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
 	},
 	"effortLevel": "high",
 	"showThinkingSummaries": true,
@@ -145,6 +147,42 @@
 						"command": "command -v grepai >/dev/null 2>&1 && grepai watch --stop >/dev/null 2>&1; exit 0",
 						"timeout": 10,
 						"statusMessage": "Stopping grepai watcher..."
+					}
+				]
+			}
+		],
+		"TaskCompleted": [
+			{
+				"hooks": [
+					{
+						"type": "command",
+						"command": "~/.claude/hooks/task-completed.sh",
+						"timeout": 30,
+						"statusMessage": "Verifying task quality..."
+					}
+				]
+			}
+		],
+		"TaskCreated": [
+			{
+				"hooks": [
+					{
+						"type": "command",
+						"command": "~/.claude/hooks/task-created.sh",
+						"timeout": 5,
+						"statusMessage": "Validating task..."
+					}
+				]
+			}
+		],
+		"TeammateIdle": [
+			{
+				"hooks": [
+					{
+						"type": "command",
+						"command": "~/.claude/hooks/teammate-idle.sh",
+						"timeout": 10,
+						"statusMessage": "Checking idle state..."
 					}
 				]
 			}
