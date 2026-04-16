@@ -123,6 +123,18 @@ Agent teams spawn multiple independent Claude instances that communicate directl
 - Always clean up via the lead when done
 - Navigation: `Shift+Down` to cycle, `Ctrl+T` for task list, `Escape` to interrupt
 
+**Model selection for teammates:**
+
+| Role | Model | Use case |
+|------|-------|----------|
+| Lead | opus | Synthesis, final decisions, complex debugging, architectural calls |
+| Implementer | sonnet | Code changes, testing, review, most coding tasks |
+| Explorer | haiku | Read-only discovery, parallel searches, repetitive verification |
+
+**Isolation:**
+- Use `isolation: "worktree"` when teammates may touch overlapping files — each gets an independent git worktree
+- Without isolation, teammates editing the same file will conflict — assign distinct file ownership instead
+
 ### Failure Recovery
 
 - **2-failure rule**: after 2 consecutive failures of the same approach, stop entirely. Don't retry — change strategy. Explain what failed and try something fundamentally different
@@ -174,7 +186,7 @@ Hooks handle mechanical verification (biome, tsc, tests, console.log). Focus on 
 
 | Layer | Technologies |
 |-------|-------------|
-| Frontend | Astro, React, TypeScript |
+| Frontend | Astro, React, Tanstack Start, TypeScript |
 | Backend | Strapi |
 | UI | Tailwind, shadcn/ui, Base UI |
 | Animation | Motion |

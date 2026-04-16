@@ -2,29 +2,24 @@
 # TeammateIdle hook — check before a teammate goes idle.
 # Exit 0 = allow idle, Exit 2 = send feedback + keep working.
 
-INPUT=$(cat)
-
-# Extract team name from input if available
-TEAM_NAME=$(echo "$INPUT" | jq -r '.team_name // empty' 2>/dev/null)
-
-# Check for uncommitted changes
-UNCOMMITTED=$(git status --porcelain 2>/dev/null | grep -E '^\s*[MADRCU]' | wc -l | tr -d ' ')
+# Check for uncommitted changes in tracked files
+UNCOMMITTED=$(git status --porcelain 2>/dev/null | grep -E '^[MADRCU ]' | wc -l | tr -d ' ')
 if [ "$UNCOMMITTED" -gt 0 ]; then
     echo "You have $UNCOMMITTED uncommitted changes. Consider committing or stashing before going idle."
     exit 2
 fi
 
-# Check task list if team name is available
-if [ -n "$TEAM_NAME" ]; then
-    TASK_DIR="$HOME/.claude/tasks/$TEAM_NAME"
-    if [ -d "$TASK_DIR" ]; then
-        # Count pending tasks
-        PENDING=$(find "$TASK_DIR" -name "*.json" -exec grep -l '"status":\s*"pending"' {} \; 2>/dev/null | wc -l | tr -d ' ')
-        if [ "$PENDING" -gt 0 ]; then
-            echo "There are $PENDING pending tasks. Consider claiming one before going idle."
-            exit 2
+# Check for failing tests in modified files
+MODIFIED_TESTS=$(git status --porcelain 2>/dev/null | grep -E '\.test\.(ts|tsx|js|jsx)$' | sed 's/^...//')
+if [ -n "$MODIFIED_TESTS" ]; then
+    for TEST_FILE in $MODIFIED_TESTS; do
+        if [ -f "$TEST_FILE" ] && command -v bun &>/dev/null; then
+            if ! bun test "$TEST_FILE" --bail 2>/dev/null; then
+                echo "Test file $TEST_FILE is failing. Fix before going idle."
+                exit 2
+            fi
         fi
-    fi
+    done
 fi
 
 exit 0
