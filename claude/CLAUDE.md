@@ -189,6 +189,7 @@ Hooks handle mechanical verification (biome, tsc, tests, console.log). Focus on 
 | Frontend | Astro, React, Tanstack Start, TypeScript |
 | Backend | Strapi |
 | UI | Tailwind, shadcn/ui, Base UI |
+| State | Legend State |
 | Animation | Motion |
 | Runtime | Bun, Node.js |
 | Build | Vite |
@@ -256,6 +257,6 @@ If blocked:
 ## Boundaries
 
 - Never commit secrets, skip boundary validation, use `var`, leave dead code, or skip tests for critical changes
-- Always write in English, handle errors explicitly, default to `const`, review staged diffs, run checks before handoff
+- Handle errors explicitly, default to `const`, review staged diffs, run checks before handoff
 
 @RTK.md

@@ -54,7 +54,6 @@
 	"env": {
 		"CLAUDE_CODE_DISABLE_1M_CONTEXT": "1",
 		"CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING": "1",
-		"ANTHROPIC_DEFAULT_OPUS_MODEL": "claude-opus-4-5-20251101",
 		"CLAUDE_CODE_AUTO_COMPACT_WINDOW": "280000",
 		"CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "85",
 		"ENABLE_TOOL_SEARCH": "1",
@@ -121,7 +120,8 @@
 					{
 						"type": "command",
 						"command": "~/.claude/hooks/run-tests.sh",
-						"timeout": 30
+						"timeout": 30,
+						"async": true
 					},
 					{
 						"type": "command",
@@ -139,26 +139,15 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "~/.claude/hooks/check-console-log.sh",
-						"timeout": 5
+						"command": "~/.claude/hooks/stop-quality-check.sh",
+						"timeout": 30,
+						"statusMessage": "Verifying task quality..."
 					},
 					{
 						"type": "command",
 						"command": "command -v grepai >/dev/null 2>&1 && grepai watch --stop >/dev/null 2>&1; exit 0",
 						"timeout": 10,
 						"statusMessage": "Stopping grepai watcher..."
-					}
-				]
-			}
-		],
-		"TaskCompleted": [
-			{
-				"hooks": [
-					{
-						"type": "command",
-						"command": "~/.claude/hooks/task-completed.sh",
-						"timeout": 30,
-						"statusMessage": "Verifying task quality..."
 					}
 				]
 			}
