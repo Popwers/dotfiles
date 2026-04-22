@@ -182,8 +182,6 @@ Naming conventions:
 - Tailwind: prefer semantic tokens and CSS variables over `@apply`
 - Astro: static-first, hydrate only when needed
 
-- Radius: `8px`–`12px` only
-
 ### Formatting (Biome)
 
 - Indentation: tabs (width 4)
