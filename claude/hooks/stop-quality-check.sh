@@ -23,12 +23,29 @@ done < <(
 
 ISSUES=""
 
-# console.log check (skip commented-out occurrences).
+# console.log check (skip line and block comments, including multi-line blocks).
 for f in "${MODIFIED[@]}"; do
-    matches=$(grep -n 'console\.log' "$f" 2>/dev/null \
-        | grep -v '//.*console\.log' \
-        | grep -v '/\*.*console\.log.*\*/' \
-        | head -5)
+    matches=$(awk '
+        BEGIN { in_block = 0 }
+        {
+            line = $0
+            gsub(/\/\*.*\*\//, "", line)
+            if (in_block) {
+                if (match(line, /\*\//)) {
+                    line = substr(line, RSTART + RLENGTH)
+                    in_block = 0
+                } else { next }
+            }
+            if (match(line, /\/\*/)) {
+                line = substr(line, 1, RSTART - 1)
+                in_block = 1
+            }
+            if (match(line, /\/\//)) {
+                line = substr(line, 1, RSTART - 1)
+            }
+            if (line ~ /console\.log/) print NR ": " $0
+        }
+    ' "$f" 2>/dev/null | head -5)
     if [ -n "$matches" ]; then
         ISSUES+="[ConsoleLog] Remove before completing: $f\n${matches}\n\n"
     fi
