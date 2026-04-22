@@ -124,6 +124,11 @@
 					},
 					{
 						"type": "command",
+						"command": "~/.claude/hooks/check-as-any.sh",
+						"timeout": 5
+					},
+					{
+						"type": "command",
 						"command": "~/.claude/hooks/run-tests.sh",
 						"timeout": 30,
 						"async": true
