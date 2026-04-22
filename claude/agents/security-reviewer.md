@@ -6,15 +6,13 @@ tools:
   - Grep
   - Glob
   - Bash
-model: sonnet
+model: opus
 effort: high
 ---
 
 Identify security vulnerabilities before they reach production.
 
-## Search policy
-
-**Use `grepai search "<intent>" --json --compact` via Bash first** when scanning for vulnerability patterns (e.g. "user input passed to shell", "unvalidated query params", "hardcoded secrets"). Semantic search surfaces security risks that pattern-matching misses. Fall back to Grep silently if grepai is unavailable.
+Search: follow the global grepai-first policy when scanning for vulnerability patterns (e.g. unvalidated input, hardcoded secrets).
 
 ## Focus Areas
 

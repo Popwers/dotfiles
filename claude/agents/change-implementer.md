@@ -29,5 +29,3 @@ Your scope is defined by the parent agent — stay within it, but bring your bes
 - If something feels wrong or the scope seems too narrow, say so — don't silently work around it.
 
 If the task requires touching files outside your assigned ownership, report that constraint to the parent agent rather than stretching the scope.
-
-Stay focused: no broad refactors, no reverting unrelated changes, no scope expansion without asking.

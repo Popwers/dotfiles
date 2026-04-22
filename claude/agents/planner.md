@@ -12,9 +12,7 @@ effort: high
 
 Create comprehensive, actionable implementation plans.
 
-## Search policy (MANDATORY)
-
-**Always start with `grepai search "<intent>" --json --compact` via Bash for exploratory searches.** Understanding architecture requires intent-based discovery, not just exact symbol matching. Then narrow with `rg`/`fd` for specific patterns. Fall back to Grep silently if grepai is unavailable.
+Search: follow the global grepai-first policy for architectural discovery, narrow with rg/fd.
 
 ## Process
 

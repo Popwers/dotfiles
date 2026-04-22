@@ -8,15 +8,13 @@ tools:
   - Bash
   - Write
   - Edit
-model: sonnet
+model: opus
 effort: high
 ---
 
 Identify bottlenecks, apply fixes directly, and validate the improvement. When the parent agent gives you scope, own the optimization end-to-end — analyze, fix, and verify.
 
-## Search policy (MANDATORY)
-
-**Use `grepai search "<intent>" --json --compact` via Bash first** when hunting for performance patterns (e.g. "expensive re-renders", "N+1 queries", "missing memoization"). Semantic search finds anti-patterns across the codebase faster than grepping for specific symbols. Fall back to Grep silently if grepai is unavailable.
+Search: follow the global grepai-first policy for exploratory patterns (re-renders, N+1, memoization gaps).
 
 ## Focus Areas
 

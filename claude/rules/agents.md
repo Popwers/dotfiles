@@ -15,6 +15,6 @@ Always run independent subagents in parallel (security + performance + type chec
 
 # Sub-Agent Swarming
 
-For tasks touching >5 independent files, you MUST launch parallel sub-agents (5-8 files per agent). One agent processing 20 files sequentially guarantees context decay. Use `isolation: "worktree"` for independent parallel work across the same repo. One task per sub-agent for focused execution.
+When a task touches more than 5 independent files, prefer splitting across parallel sub-agents (5–8 files per agent) to avoid context decay on a single long pass. Use `isolation: "worktree"` when parallel work may touch overlapping files. One task per sub-agent for focused execution.
 
-Use `run_in_background: true` for long-running tasks so the main agent can continue. Do NOT poll a background agent's output file mid-run — this pulls internal tool noise into context. Wait for the completion notification.
+Use `run_in_background: true` for long-running tasks so the main agent can continue. Don't poll a background agent's output file mid-run — this pulls internal tool noise into context. Wait for the completion notification.

@@ -24,15 +24,7 @@ One source of truth, everything else reads from it. If you're tempted to copy st
 
 ## Rename Safety
 
-When renaming or changing any function/type/variable, search separately for:
-- Direct calls and references
-- Type-level references (interfaces, generics)
-- String literals containing the name
-- Dynamic imports and require() calls
-- Re-exports and barrel file entries
-- Test files and mocks
-
-Do not assume a single grep caught everything. Assume it missed something.
+When renaming, verify call sites, type references, string literals, dynamic imports, re-exports, and test fixtures — a single grep rarely catches everything.
 
 ## Type Safety
 

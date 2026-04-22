@@ -34,7 +34,7 @@ else
     NAME="${BASENAME%.*}"
     EXT="${BASENAME##*.}"
     # Search in tests/ directory (mirroring src/)
-    TEST_FILE=$(find "$DIR/tests" -name "${NAME}.test.${EXT}" -o -name "${NAME}.test.ts" 2>/dev/null | head -1)
+    TEST_FILE=$(find "$DIR/tests" \( -name "${NAME}.test.${EXT}" -o -name "${NAME}.test.ts" \) 2>/dev/null | head -1)
 fi
 
 if [ -n "$TEST_FILE" ] && [ -f "$TEST_FILE" ]; then

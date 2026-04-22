@@ -33,6 +33,3 @@ The file system is your most powerful general-purpose tool. Stop holding everyth
 - When debugging, save logs and outputs to files for reproducible verification
 - Structure reduces context pressure — reference files can point to more files
 
-## Session Continuity
-
-Prefer `--continue` to resume the last session rather than starting fresh. When exploring two different approaches, use `--fork-session` to branch and preserve both contexts independently.

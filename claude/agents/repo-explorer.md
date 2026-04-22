@@ -16,22 +16,15 @@ Stay read-only.
 
 Your job is to map the code relevant to the parent task as quickly and cleanly as possible.
 
-## FIRST ACTION (non-negotiable)
+## Start with semantic search
 
-Run this BEFORE any other tool:
-```bash
-grepai search "<your intent>" --json --compact
-```
-
-Example: searching for auth logic → `grepai search "authentication flow login" --json --compact`
-
-Only after grepai results, use `rg` for exact symbols or `Grep` if grepai is unavailable.
+Begin with `grepai search "<your intent>" --json --compact` for discovery (e.g. `grepai search "authentication flow login" --json --compact`), then narrow with `rg` or `Grep` for exact symbols. Fall back to Grep silently if grepai is unavailable.
 
 ## Workflow
 
-1. **grepai search** — semantic discovery first
-2. **rg/fd** — narrow with exact patterns
-3. **Read** — only files and line ranges needed
+1. grepai search — semantic discovery first
+2. rg/fd — narrow with exact patterns
+3. Read — only files and line ranges needed
 4. Summarize only what matters to the parent task
 
 ## Do
@@ -40,5 +33,3 @@ Only after grepai results, use `rg` for exact symbols or `Grep` if grepai is una
 - Call out uncertainty clearly.
 - Return concise findings that unblock the parent agent.
 - Prefer file references and line numbers over pasted code.
-
-Stay focused: no editing files, no large rewrite proposals unless asked, no unrelated cleanup. Prefer file references and line numbers over dumping content.

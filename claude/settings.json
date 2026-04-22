@@ -36,8 +36,7 @@
 			"Bash(curl * | zsh:*)",
 			"Bash(wget * | sh:*)",
 			"Bash(wget * | bash:*)",
-			"Bash(wget * | fish:*)",
-			"Agent(Explore)"
+			"Bash(wget * | fish:*)"
 		]
 	},
 	"attribution": {
@@ -52,10 +51,7 @@
 	},
 	"autoConnectIde": true,
 	"env": {
-		"CLAUDE_CODE_DISABLE_1M_CONTEXT": "1",
-		"CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING": "1",
-		"CLAUDE_CODE_AUTO_COMPACT_WINDOW": "280000",
-		"CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "85",
+		"CLAUDE_CODE_AUTO_COMPACT_WINDOW": "400000",
 		"ENABLE_TOOL_SEARCH": "1",
 		"CLAUDE_ENABLE_STREAM_WATCHDOG": "1",
 		"CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR": "1",
@@ -101,6 +97,15 @@
 						"timeout": 5
 					}
 				]
+			},
+			{
+				"matcher": "Bash",
+				"hooks": [
+					{
+						"type": "command",
+						"command": "rtk hook claude"
+					}
+				]
 			}
 		],
 		"PostToolUse": [
@@ -140,7 +145,7 @@
 					{
 						"type": "command",
 						"command": "~/.claude/hooks/stop-quality-check.sh",
-						"timeout": 30,
+						"timeout": 60,
 						"statusMessage": "Verifying task quality..."
 					},
 					{
