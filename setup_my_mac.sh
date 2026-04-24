@@ -297,6 +297,31 @@ sync_dir_with_status "$SCRIPT_DIR/claude/agents" "$HOME/.claude/agents"
 sync_dir_with_status "$SCRIPT_DIR/claude/hooks" "$HOME/.claude/hooks"
 sync_dir_with_status "$SCRIPT_DIR/claude/rules" "$HOME/.claude/rules"
 
+section "Pi"
+
+# Install Pi coding agent
+if command -v pi >/dev/null 2>&1; then
+    skip "Pi"
+else
+    bun install -g @mariozechner/pi-coding-agent
+fi
+
+# Copy Pi configuration
+copy_file_with_status "$SCRIPT_DIR/pi/AGENTS.md" "$HOME/.pi/agent/AGENTS.md"
+copy_file_with_status "$SCRIPT_DIR/pi/settings.json" "$HOME/.pi/agent/settings.json"
+copy_file_with_status "$SCRIPT_DIR/pi/mcp.json" "$HOME/.pi/agent/mcp.json"
+sync_dir_with_status "$SCRIPT_DIR/pi/extensions" "$HOME/.pi/agent/extensions"
+sync_dir_with_status "$SCRIPT_DIR/pi/agents" "$HOME/.pi/agent/agents"
+
+# Install Pi packages (idempotent — pi install skips if already present)
+for pkg in pi-subagents pi-mcp-adapter; do
+    if pi list 2>/dev/null | grep -q "$pkg"; then
+        skip "Pi package $pkg"
+    else
+        pi install "npm:$pkg" 2>/dev/null && ok "Pi package $pkg"
+    fi
+done
+
 # Ensure bun globals are on PATH for fresh bootstraps
 export PATH="$HOME/.bun/bin:$PATH"
 
@@ -317,6 +342,9 @@ skill_agent_dir() {
         claude-code)
             printf '%s\n' "$HOME/.claude/skills"
             ;;
+        pi)
+            printf '%s\n' "$HOME/.pi/agent/skills"
+            ;;
         *)
             return 1
             ;;
@@ -336,7 +364,7 @@ is_skill_installed_everywhere() {
     local skill_name=$1
     local agent_name
 
-    for agent_name in opencode codex claude-code; do
+    for agent_name in opencode codex claude-code pi; do
         if ! is_skill_installed_for_agent "$skill_name" "$agent_name"; then
             return 1
         fi
@@ -352,7 +380,7 @@ ensure_skill_symlinks() {
     [ -d "$global_dir" ] || return 0
 
     local agent_name agent_dir
-    for agent_name in opencode codex claude-code; do
+    for agent_name in opencode codex claude-code pi; do
         agent_dir=$(skill_agent_dir "$agent_name") || continue
         if [ ! -e "$agent_dir/$skill_name" ]; then
             mkdir -p "$agent_dir"
@@ -373,7 +401,7 @@ install_skill_if_missing() {
     fi
 
     echo "  Installing $skill_name..."
-    bunx --bun skills add "$skill_source" "$@" -g -a claude-code codex opencode -y
+    bunx --bun skills add "$skill_source" "$@" -g -a claude-code codex opencode pi -y
     ensure_skill_symlinks "$skill_name"
 }
 
@@ -399,7 +427,7 @@ install_skill_bundle_if_missing() {
     fi
 
     echo "  Installing bundle $skill_source..."
-    bunx --bun skills add "$skill_source" -g -a claude-code codex opencode -y
+    bunx --bun skills add "$skill_source" -g -a claude-code codex opencode pi -y
     local skill_name
     for skill_name in "${required_skills[@]}"; do
         ensure_skill_symlinks "$skill_name"

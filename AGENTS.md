@@ -26,6 +26,12 @@ dotfiles/
 │   ├── hooks.json      # Codex lifecycle hooks config
 │   ├── hooks/          # Hook scripts
 │   └── agents/         # Custom subagents
+├── pi/                 # Pi coding agent config (synced to ~/.pi/agent/)
+│   ├── AGENTS.md       # Global agent instructions
+│   ├── settings.json   # Global settings (model, compaction, packages)
+│   ├── mcp.json        # MCP servers config
+│   ├── extensions/     # TypeScript extensions (hooks, tools)
+│   └── auth.example.json # Auth template (copy to auth.json)
 ├── opencode/           # OpenCode AI agent config
 │   ├── opencode.json   # Plugin list
 │   ├── AGENTS.md       # Global coding guidelines
@@ -163,11 +169,16 @@ if ! grep -q $(which fish) /etc/shells; then  # Check before modifying
 
 **Via Cask:** android-platform-tools
 
-**Via Bun (global):** ngrok, npm-check-updates, typescript, commitizen, cz-conventional-changelog, @openai/codex, @anthropic-ai/claude-code
+**Via Bun (global):** ngrok, npm-check-updates, typescript, commitizen, cz-conventional-changelog, @openai/codex, @anthropic-ai/claude-code, @mariozechner/pi-coding-agent
+
+**Pi packages:** pi-subagents, pi-mcp-adapter
+**Pi extensions:** hooks.ts (session start, tool gates, post-edit format/typecheck, quality check)
+**Pi model:** zai/glm-5.1 (thinking: medium)
 
 **OpenCode plugins:** opencode-supermemory, @tarquinen/opencode-dcp@latest, @franlol/opencode-md-table-formatter@0.0.3
 **OpenCode MCPs:** context7, gh_grep, exa
 **Codex fallbacks:** `CLAUDE.md` is accepted as a fallback project instruction file when `AGENTS.md` is missing
+**Pi MCPs:** context7, gh_grep (via pi-mcp-adapter)
 
 **Fonts:** JetBrains Mono Nerd Font, Symbols Only Nerd Font
 
