@@ -162,18 +162,6 @@
 				]
 			}
 		],
-		"TaskCreated": [
-			{
-				"hooks": [
-					{
-						"type": "command",
-						"command": "~/.claude/hooks/task-created.sh",
-						"timeout": 5,
-						"statusMessage": "Validating task..."
-					}
-				]
-			}
-		],
 		"TeammateIdle": [
 			{
 				"hooks": [

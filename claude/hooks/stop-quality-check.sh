@@ -45,8 +45,10 @@ if command -v bunx &>/dev/null; then
 fi
 
 if [ -n "$ISSUES" ]; then
-    echo -e "Task completion blocked. Fix these issues first:\n"
-    echo -e "$ISSUES"
+    {
+        echo -e "Task completion blocked. Fix these issues first:\n"
+        echo -e "$ISSUES"
+    } >&2
     exit 2
 fi
 

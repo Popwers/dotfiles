@@ -9,7 +9,7 @@ if [[ "$FILE" =~ \.(ts|tsx)$ ]] && [ -f "$FILE" ]; then
     DIR=$(dirname "$FILE")
     while [ "$DIR" != "/" ]; do
         if [ -f "$DIR/tsconfig.json" ]; then
-            ERRORS=$(cd "$DIR" && bunx tsc --noEmit --pretty 2>&1 | grep -E "error TS" | head -10)
+            ERRORS=$(cd "$DIR" && bunx tsc --noEmit --pretty false 2>&1 | grep -E "error TS" | head -10)
             if [ -n "$ERRORS" ]; then
                 COUNT=$(echo "$ERRORS" | wc -l | tr -d ' ')
                 echo "[TypeCheck] $COUNT error(s) — fix before commit:" >&2
