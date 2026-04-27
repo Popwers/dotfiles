@@ -35,9 +35,9 @@ for f in "${MODIFIED[@]}"; do
     fi
 done
 
-# Biome lint check on all modified files.
-if command -v biome &>/dev/null; then
-    lint_output=$( (cd "$REPO_ROOT" && biome check "${MODIFIED[@]}") 2>&1 \
+# Biome lint check on all modified files (uses bunx — no global biome required).
+if command -v bunx &>/dev/null; then
+    lint_output=$( (cd "$REPO_ROOT" && bunx @biomejs/biome check "${MODIFIED[@]}" --no-errors-on-unmatched) 2>&1 \
         | grep -E "(error|warning)" | head -5)
     if [ -n "$lint_output" ]; then
         ISSUES+="[Lint] Fix before completing:\n${lint_output}\n\n"
