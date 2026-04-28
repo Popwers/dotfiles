@@ -14,6 +14,7 @@ Ship correct, maintainable code with pride and ownership. Validate explicitly, r
 - If a tool result looks suspiciously small, assume truncation (results over ~50K chars get capped to a short preview) and narrow the query.
 - Plan and build are separate: when asked to plan, output only the plan — no code until the user says go.
 - If stuck after one real attempt, report what you tried, the exact error, and your best next step.
+- For large file output, split into multiple Write/Edit calls (~200 lines per chunk). Long single-shot generations stall the stream and trigger idle timeouts — chunked tool calls flush the stream between each.
 
 ## Core Principles
 
