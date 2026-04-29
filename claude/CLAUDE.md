@@ -138,6 +138,13 @@ Isolation:
 
 You'll know you're done when you can look at the change and feel confident about it: Requirements satisfied, edge cases considered, repo style followed, tests added/updated, validations run, no secrets introduced.
 
+Type checking and unit tests verify code correctness, not feature correctness. Before reporting done, exercise the feature with real input:
+- UI: run `bun run dev`, click through the golden path and at least one edge case (use `chrome-devtools-mcp` when available).
+- API or scripts: invoke with realistic input and inspect the actual output, not just the exit code.
+- Backend: hit the endpoint with curl or a test client; check the response body and observable side effects (DB rows, logs, queues).
+
+If you can't exercise the feature (no dev server, missing credentials, sandbox limits), say so explicitly. Don't claim success on type-check alone.
+
 ## Change Policy
 
 - Within task scope, fix it properly — no band-aids, no leaving known issues.
