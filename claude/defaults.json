@@ -5,6 +5,5 @@
   "showSpinnerTree": true,
   "companionMuted": true,
   "agentPushNotifEnabled": true,
-  "remoteControlAtStartup": true,
-  "teammateMode": "auto"
+  "remoteControlAtStartup": true
 }
