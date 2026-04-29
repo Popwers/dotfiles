@@ -340,9 +340,11 @@ export default function (pi: ExtensionAPI) {
 					.split("\n")
 					.filter((l: string) => /FAIL|Error|[✗×]/.test(l))
 					.slice(0, 5);
-				issues.push(
-					`[Tests] Failures in ${basename(f)}:\n${failures.join("\n")}`,
-				);
+				if (failures.length > 0) {
+					issues.push(
+						`[Tests] Failures in ${basename(f)}:\n${failures.join("\n")}`,
+					);
+				}
 			}
 		}
 

@@ -32,7 +32,9 @@ for file in "${modified[@]}"; do
     [[ "$file" =~ \.test\.(ts|tsx|js|jsx)$ ]] || continue
     if ! output=$(cd "$repo_root" && bun test "$file" 2>&1); then
         failures=$(printf '%s\n' "$output" | grep -E "(FAIL|Error|✗|×)" | head -5)
-        printf -v issues '%s[Tests] Failures in %s:\n%s\n\n' "$issues" "$(basename "$file")" "$failures"
+        if [ -n "$failures" ]; then
+            printf -v issues '%s[Tests] Failures in %s:\n%s\n\n' "$issues" "$(basename "$file")" "$failures"
+        fi
     fi
 done
 
