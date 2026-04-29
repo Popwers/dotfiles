@@ -1,5 +1,5 @@
 personality = "pragmatic"
-model = "gpt-5.4"
+model = "gpt-5.5"
 model_reasoning_effort = "high"
 suppress_unstable_features_warning = true
 tool_output_token_limit = 12000

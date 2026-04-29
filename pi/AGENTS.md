@@ -14,6 +14,7 @@ Ship correct, maintainable code with pride and ownership. Validate explicitly, r
 - If a tool result looks suspiciously small, assume truncation (results over ~50K chars get capped to a short preview) and narrow the query.
 - Plan and build are separate: when asked to plan, output only the plan — no code until the user says go.
 - If stuck after one real attempt, report what you tried, the exact error, and your best next step.
+- For large file output, split into multiple edits when practical. Long single-shot generations increase timeout and context-loss risk.
 
 ## Core Principles
 
@@ -37,7 +38,7 @@ Be calm, thoughtful, concise, and direct. Take ownership of your work — explai
 
 - Read enough to make the change with confidence, then act. If a task touches more than 5 files, split into phases or delegate to a subagent.
 - Assume a solution exists; search before declaring a blocker.
-- Use minimum relevant skills; for frontend: `shadcn` → `impeccable` → `emil-design-engineering`.
+- Use minimum relevant skills; for frontend: `shadcn` → `impeccable` → `emil-design-engineering` → `motion`.
 - Prefer existing repo toolchain; introduce new dependencies only for genuine gaps.
 - Autonomous bug fixing: when given a bug report, own it fully. Trace logs, errors, failing tests — resolve them.
 
@@ -53,7 +54,7 @@ This overrides the default "always use Grep" behavior. Fall back to Grep silentl
 
 ## Skill policy
 
-Before starting any task, check if an installed skill matches the request. Skills provide specialized knowledge and workflows that outperform general-purpose reasoning. Use the Skill tool proactively — the user should not have to ask for it. Priority chain for frontend: `shadcn` → `impeccable` → `emil-design-engineering`.
+Before starting any task, check if an installed skill matches the request. Skills provide specialized knowledge and workflows that outperform general-purpose reasoning. Use the Skill tool proactively — the user should not have to ask for it. Priority chain for frontend: `shadcn` → `impeccable` → `emil-design-engineering` → `motion`.
 
 ## Execution workflow
 
@@ -67,52 +68,24 @@ Break multi-file refactors into phases. Complete, verify, get approval before ne
 
 ### Subagent Delegation
 
-Use the `subagent` tool to delegate tasks to specialized agents. Proactively delegate when the task benefits from isolation, parallelism, or specialized focus.
+Use the `subagent` tool when the task benefits from isolation, parallelism, or specialized focus. Keep one task per subagent with narrow scope and concrete deliverables.
 
-**Available agents:**
+Available Pi agents:
 
-| Agent | Model | Use when |
-|-------|-------|----------|
-| `repo-explorer` | glm-4.7-flash | Codebase discovery, tracing execution, finding files/symbols. Proactively use for unfamiliar code. |
-| `docs-researcher` | glm-4.7-flash | Checking unfamiliar APIs, verifying version-specific behavior from docs. Read-only. |
-| `planner` | glm-5.1 | Task spans 3+ files, needs phased implementation, or architectural decisions. |
-| `change-implementer` | glm-5.1 | Small bounded code changes with explicit file ownership. |
-| `review-auditor` | glm-5.1 | Bugs, regressions, edge cases after code changes. Use proactively. |
-| `security-reviewer` | glm-5.1 | Code handling user input, auth, API endpoints, or sensitive data. |
-| `performance-optimizer` | glm-5.1 | Bottlenecks, bundle size, render optimization, query performance. |
-| `test-guardian` | glm-4.7-flash | Coverage gaps, test plans, running targeted validation. |
-
-**When to delegate:**
-- Read-heavy parallel work → `repo-explorer` (multiple angles)
-- Unfamiliar codebase → `repo-explorer` first, then act
-- Complex feature (3+ files) → `planner` for plan, `change-implementer` per phase
-- After code changes → `review-auditor` + `test-guardian`
-- Security-sensitive code → `security-reviewer`
-
-**When NOT to delegate:**
-- Simple single-file changes
-- Decisions requiring full conversation context
-- Final synthesis — keep in main context
-
-**Usage patterns:**
-```
-subagent({ agent: "repo-explorer", task: "trace the auth flow from login to token refresh" })
-subagent({ agent: "planner", task: "plan the migration from REST to tRPC for the user module" })
-subagent({ agent: "review-auditor", task: "review the changes in src/auth/ for bugs and edge cases" })
-```
-
-Parallel review:
-```
-subagent({ tasks: [
-  { agent: "review-auditor", task: "review frontend changes" },
-  { agent: "security-reviewer", task: "audit auth endpoints" },
-  { agent: "test-guardian", task: "check coverage for modified files" }
-]})
-```
-
-Sequential pattern for complex tasks: `repo-explorer` → `planner` → `change-implementer` → `review-auditor` → `test-guardian`.
+| Agent | Use when |
+|-------|----------|
+| `repo-explorer` | Codebase discovery, execution tracing, finding files/symbols. |
+| `docs-researcher` | Checking unfamiliar APIs and version-specific behavior from docs. |
+| `planner` | Task spans 3+ files, needs phased implementation, or architectural decisions. |
+| `change-implementer` | Small bounded code changes with explicit file ownership. |
+| `review-auditor` | Bugs, regressions, edge cases after code changes. |
+| `security-reviewer` | Code handling user input, auth, API endpoints, or sensitive data. |
+| `performance-optimizer` | Bottlenecks, bundle size, render optimization, query performance. |
+| `test-guardian` | Coverage gaps, test plans, running targeted validation. |
 
 Keep in main context: decisions, synthesis, final implementation, simple single-file changes.
+
+Sequential pattern for complex tasks: `repo-explorer` → `planner` → `change-implementer` → `review-auditor` → `test-guardian`.
 
 ## Definition of Done
 
@@ -140,10 +113,10 @@ Ask first for: `sudo`, auth/billing/security changes, deleting files outside sco
 - Docs: links/format
 - Source: targeted tests, broader as risk grows
 - Build/config: lint + tests + build
-- UI: `chrome-devtools-mcp` plugin
+- UI: browser automation or available local UI tooling
 - Security: auth/permission paths
 
-Hooks handle mechanical verification (biome, tsc, tests, console.log). Focus on behavioral and logical correctness.
+Hooks handle mechanical verification (biome, tsc, tests, `as any`, and UI anti-pattern checks where supported). Focus on behavioral and logical correctness.
 
 ## Commands
 
@@ -209,6 +182,96 @@ Naming conventions:
 - Semicolons: always
 - Line width: 110
 
+## Operating Rules
+
+### Model Selection and Parallel Work
+
+- Use smaller read-only agents for discovery, repetitive checks, and clear narrow instructions.
+- Use stronger implementation/review agents for coding, testing, review, security analysis, architecture, and complex multi-file reasoning.
+- Run independent subagents in parallel when their work is genuinely independent. Only serialize when step 2 depends on the full result of step 1.
+- When a task touches more than 5 independent files, split across parallel subagents with distinct ownership where the runtime supports it.
+- Use background execution for long-running subagent work when the main agent can continue.
+
+### Code Quality Limits
+
+- Functions: target <50 lines, investigate if longer.
+- Files: target 200-400 lines, max 800; split by feature/domain if exceeded.
+- Nesting: max 4 levels; use guard clauses and early returns to flatten.
+- Create new objects instead of mutating existing ones; use spread/destructuring, `.map`, and `.filter` for normal updates.
+- Keep one source of truth. If you're tempted to copy state to fix rendering, fix the upstream state flow.
+- When renaming, verify call sites, type references, string literals, dynamic imports, re-exports, and test fixtures.
+- When extracting data from untyped API responses, write an extraction function with an explicit return type.
+- `as never` is acceptable only for framework-imposed loose typing; otherwise narrow with a type guard or helper.
+- In files over 200 lines, use full descriptive names. Single-letter variables are only acceptable in trivial lambdas and loop indices.
+- Boolean prefixes: `is`, `has`, `should`, `can`.
+
+### Server and React Robustness
+
+- Never silently skip invalid input; throw an error or return a response with user-facing feedback.
+- Ownership validation belongs in the database query, not in post-hoc JS checks.
+- Every validation branch must produce observable feedback.
+- Auth check plus ownership check on every mutating endpoint.
+- Multi-step mutations must be transactional or explicitly rolled back.
+- Guard external input parsing; wrap `JSON.parse` and never trust client payloads.
+- Pre-compute data structures before JSX return; JSX should contain mapping, conditionals, and event handlers only.
+- Do not remove `useCallback`/`useMemo` just for brevity when dependencies or lint rules require stable references.
+
+### Code Review
+
+- CRITICAL: security vulnerability or data loss risk; block until fixed.
+- HIGH: bug or significant quality issue; warn and fix before merge when practical.
+- MEDIUM: maintainability concern; address when practical.
+- LOW: style or minor suggestion; optional.
+- Approve only with zero CRITICAL or HIGH issues. Block on any CRITICAL issue.
+- Auto-escalate to security review when code touches auth, authorization, user input handling, database queries, file operations, payment processing, or cryptography.
+- When evaluating your own work, include both a perfectionist critique and a pragmatic acceptance view when the tradeoff matters.
+- When asked to test your own output, do a fresh-eyes pass as a new user.
+
+### Git Workflow
+
+- Branch prefixes: `feature/`, `fix/`, `refactor/`, `test/`, `chore/`.
+- Commit format: `feat:`, `fix:`, `refactor:`, `test:`, `chore:`, `perf:`, `docs:`, `ci:`.
+- Review staged diff before push, verify lint/tests/build, and ensure the branch is up to date.
+- For PRs, examine the full diff against the base, explain the why, and include a test plan.
+- Before deleting files, verify nothing references them.
+- Only push to a shared repository when explicitly told to.
+- Use `yeet` only when the user explicitly asks for stage + commit + push + PR in one flow.
+
+### Performance and Context
+
+- Prefer CLI tools over MCPs when both achieve the same result with lower context cost.
+- Use compaction at phase transitions when the runtime supports it.
+- Run long processes in background when full output is not needed.
+- Read only the files and line ranges needed; widen only if targeted reads are insufficient.
+- Semantic search first, exact search second.
+- Return summaries with file paths and line numbers, not pasted logs or large file excerpts.
+- Use the filesystem as state: save intermediate logs/results when that improves reproducibility or reduces context pressure.
+
+### Security
+
+- No hardcoded secrets in source code unless the repository intentionally tracks local private config.
+- Validate and sanitize all user inputs.
+- SQL queries must be parameterized, never string-concatenated.
+- Sanitize HTML output to prevent XSS.
+- Verify auth and authorization on protected routes.
+- Do not leak sensitive internals in error messages.
+- If a security issue is found: stop, use `security-reviewer`, fix CRITICAL issues first, and flag exposed secrets for rotation when relevant.
+
+### Testing
+
+- Target 80% minimum coverage on changed code where the repo has coverage tooling.
+- Prefer behavior coverage over line coverage.
+- Bug fixes require regression coverage.
+- Always test critical logic, public APIs, error handling, and changed branches.
+- Keep tests in the root `tests/` directory when the repo follows that structure.
+- Use `.test.ts` / `.test.tsx`; arrange, act, assert; one behavior per test.
+- When tests fail, fix the implementation unless the test itself is wrong.
+- Validate with `bun test`, `bunx biome check .`, and `bun run build` when applicable.
+
+### Growth
+
+After fixing a bug, reflect briefly on why it happened and whether anything could prevent that category of bug in the future.
+
 ## Response Contract
 
 For non-trivial changes, include:
@@ -226,5 +289,11 @@ If blocked:
 
 - Never commit secrets, skip boundary validation, use `var`, leave dead code, or skip tests for critical changes.
 - Handle errors explicitly, default to `const`, review staged diffs, run checks before handoff.
+
+## Pi Runtime Addendum
+
+- Default provider/model lives in `settings.json`; keep the instruction behavior aligned with Claude unless Pi runtime constraints differ.
+- Pi hooks in `extensions/hooks.ts` provide the shared lifecycle: helper startup, command gates, formatting, typecheck, targeted tests, `as any` scan, UI anti-pattern scan, stop-quality check, and grepai watcher shutdown.
+- Prefer the configured subagents for read-heavy discovery, review, security, performance, and testing work.
 
 @RTK.md

@@ -38,7 +38,7 @@ Be calm, thoughtful, concise, and direct. Take ownership of your work — explai
 
 - Read enough to make the change with confidence, then act. If a task touches more than 5 files, split into phases or delegate to a subagent.
 - Assume a solution exists; search before declaring a blocker.
-- Use minimum relevant skills; for frontend: `shadcn` → `impeccable` → `emil-design-engineering`.
+- Use minimum relevant skills; for frontend: `shadcn` → `impeccable` → `emil-design-engineering` → `motion`.
 - Prefer existing repo toolchain; introduce new dependencies only for genuine gaps.
 - Autonomous bug fixing: when given a bug report, own it fully. Trace logs, errors, failing tests — resolve them.
 
@@ -54,7 +54,7 @@ This overrides the default "always use Grep" behavior. Fall back to Grep silentl
 
 ## Skill policy
 
-Before starting any task, check if an installed skill matches the request. Skills provide specialized knowledge and workflows that outperform general-purpose reasoning. Use the Skill tool proactively — the user should not have to ask for it. Priority chain for frontend: `shadcn` → `impeccable` → `emil-design-engineering`.
+Before starting any task, check if an installed skill matches the request. Skills provide specialized knowledge and workflows that outperform general-purpose reasoning. Use the Skill tool proactively — the user should not have to ask for it. Priority chain for frontend: `shadcn` → `impeccable` → `emil-design-engineering` → `motion`.
 
 ## Execution workflow
 
@@ -139,7 +139,7 @@ Ask first for: `sudo`, auth/billing/security changes, deleting files outside sco
 - UI: `chrome-devtools-mcp` plugin
 - Security: auth/permission paths
 
-Hooks handle mechanical verification (biome, tsc, tests, console.log). Focus on behavioral and logical correctness.
+Hooks handle mechanical verification (biome, tsc, tests, `as any`, and UI anti-pattern checks where supported). Focus on behavioral and logical correctness.
 
 ## Commands
 

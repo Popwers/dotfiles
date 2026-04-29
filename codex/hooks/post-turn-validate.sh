@@ -20,14 +20,18 @@ fi
 AUTO_FORMAT_RESULT=$("$SCRIPT_DIR/auto-format.sh")
 TYPECHECK_RESULT=$("$SCRIPT_DIR/typecheck.sh")
 TEST_RESULT=$("$SCRIPT_DIR/run-tests.sh")
+AS_ANY_RESULT=$("$SCRIPT_DIR/check-as-any.sh")
+IMPECCABLE_RESULT=$("$SCRIPT_DIR/impeccable-check.sh")
 
-python3 - "$AUTO_FORMAT_RESULT" "$TYPECHECK_RESULT" "$TEST_RESULT" <<'PY'
+python3 - "$AUTO_FORMAT_RESULT" "$TYPECHECK_RESULT" "$TEST_RESULT" "$AS_ANY_RESULT" "$IMPECCABLE_RESULT" <<'PY'
 import json
 import sys
 
 auto = json.loads(sys.argv[1])
 typecheck = json.loads(sys.argv[2])
 tests = json.loads(sys.argv[3])
+as_any = json.loads(sys.argv[4])
+impeccable = json.loads(sys.argv[5])
 
 messages = []
 should_continue = False
@@ -43,6 +47,14 @@ if typecheck["status"] == "failed":
 if tests["status"] == "failed":
     should_continue = True
     messages.append(tests["message"])
+
+if as_any["status"] == "failed":
+    should_continue = True
+    messages.append(as_any["message"])
+
+if impeccable["status"] == "failed":
+    should_continue = True
+    messages.append(impeccable["message"])
 
 if should_continue:
     reason = (

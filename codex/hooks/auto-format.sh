@@ -28,6 +28,18 @@ changed_files() {
     git diff --name-only --diff-filter=d 2>/dev/null
 }
 
+file_hashes() {
+    local root=$1
+    local files=$2
+    local file
+
+    while IFS= read -r file; do
+        [ -n "$file" ] || continue
+        [ -f "$root/$file" ] || continue
+        printf '%s:%s\n' "$file" "$(git hash-object "$root/$file")"
+    done <<< "$files"
+}
+
 main() {
     local root
     local biome_root
@@ -55,14 +67,14 @@ main() {
         exit 0
     fi
 
-    before=$(cd "$root" && git status --porcelain)
+    before=$(file_hashes "$root" "$candidates")
 
     while IFS= read -r file; do
         [ -f "$root/$file" ] || continue
         (cd "$biome_root" && bunx @biomejs/biome check --write "$root/$file" --no-errors-on-unmatched >/dev/null 2>&1) || true
     done <<< "$candidates"
 
-    after=$(cd "$root" && git status --porcelain)
+    after=$(file_hashes "$root" "$candidates")
 
     if [ "$before" != "$after" ]; then
         python3 - <<'PY'

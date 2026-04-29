@@ -79,12 +79,20 @@ Claude Code keeps its dedicated instructions in `claude/CLAUDE.md`.
 Codex has its own dedicated global instructions in `codex/AGENTS.md`, copied to `~/.codex/AGENTS.md` during setup.
 Codex configuration is stored in `codex/config.toml` and copied to `~/.codex/config.toml` during setup.
 Codex hooks live in `codex/hooks.json` and `codex/hooks/`, and are synced to `~/.codex/`.
-Because Codex hooks are currently Bash-oriented, the validation hooks are implemented as a best-effort post-Bash pipeline that approximates Claude's `Edit|Write` automation: auto-format, typecheck, targeted tests, and console log scan.
+Because Codex hooks are currently Bash-oriented, the validation hooks are implemented as a best-effort shared pipeline: helper startup, command gates, auto-format, typecheck, targeted tests, `as any` scan, UI anti-pattern scan, stop-quality check, and grepai watcher shutdown.
 Custom subagents live in `codex/agents/` and are synced to `~/.codex/agents/` during setup.
 Codex also falls back to repo-level `CLAUDE.md` files when `AGENTS.md` is missing, which makes older Claude-oriented repos usable without extra migration.
 The Codex agent set now mirrors the Claude setup more closely: `repo-explorer`, `review-auditor`, `test-guardian`, `change-implementer`, `docs-researcher`, `planner`, `performance-optimizer`, and `security-reviewer`.
 Keep shared cross-tool behavior in `opencode/AGENTS.md` when it is genuinely shared; keep Codex-specific runtime behavior in `codex/`.
 Subagents should stay token-efficient: use targeted discovery (`grepai`, `rg`, `fd`), read narrow line ranges, and return concise summaries instead of large raw outputs.
+
+## Pi
+
+Pi keeps shared global behavior in `pi/AGENTS.md`, runtime defaults in `pi/settings.json`, MCP servers in `pi/mcp.json`, and lifecycle validation in `pi/extensions/hooks.ts`.
+
+## Cross-agent instruction alignment
+
+Claude Code, Codex, Pi, and OpenCode should keep the same core instructions, frontend skill order, validation expectations, and response contract unless their runtime requires a tool-specific addendum.
 
 ## Fonts
 
