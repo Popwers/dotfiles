@@ -14,7 +14,8 @@ changed_typescript_files() {
 }
 
 main() {
-    local changed
+    local -a files=()
+    local line
     local found
 
     if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
@@ -22,13 +23,17 @@ main() {
         exit 0
     fi
 
-    changed=$(changed_typescript_files)
-    if [ -z "$changed" ]; then
+    while IFS= read -r line; do
+        [ -n "$line" ] || continue
+        files+=("$line")
+    done < <(changed_typescript_files)
+
+    if [ "${#files[@]}" -eq 0 ]; then
         printf '%s\n' '{"status":"skipped","message":"No changed TypeScript files."}'
         exit 0
     fi
 
-    found=$(printf '%s\n' "$changed" | xargs grep -nE '\bas[[:space:]]+any\b' 2>/dev/null | head -10 || true)
+    found=$(grep -nE '\bas[[:space:]]+any\b' "${files[@]}" 2>/dev/null | head -10 || true)
 
     if [ -n "$found" ]; then
         python3 - "$found" <<'PY'
