@@ -40,7 +40,7 @@ main() {
         [ -f "$file" ] || continue
         result=$(impeccable detect "$file" 2>&1 || true)
         if [ -n "$result" ]; then
-            output="${output}[Impeccable] ${file}:\n${result}\n\n"
+            printf -v output '%s[Impeccable] %s:\n%s\n\n' "$output" "$file" "$result"
         fi
     done <<< "$changed"
 

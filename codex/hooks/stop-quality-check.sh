@@ -32,7 +32,7 @@ for file in "${modified[@]}"; do
     [[ "$file" =~ \.test\.(ts|tsx|js|jsx)$ ]] || continue
     if ! output=$(cd "$repo_root" && bun test "$file" 2>&1); then
         failures=$(printf '%s\n' "$output" | grep -E "(FAIL|Error|✗|×)" | head -5)
-        issues="${issues}[Tests] Failures in $(basename "$file"):\n${failures}\n\n"
+        printf -v issues '%s[Tests] Failures in %s:\n%s\n\n' "$issues" "$(basename "$file")" "$failures"
     fi
 done
 
@@ -40,13 +40,13 @@ if command -v bunx >/dev/null 2>&1; then
     lint_output=$( (cd "$repo_root" && bunx @biomejs/biome check "${modified[@]}" --no-errors-on-unmatched) 2>&1 \
         | grep -E "(error|warning)" | head -5 || true)
     if [ -n "$lint_output" ]; then
-        issues="${issues}[Lint] Fix before completing:\n${lint_output}\n\n"
+        printf -v issues '%s[Lint] Fix before completing:\n%s\n\n' "$issues" "$lint_output"
     fi
 fi
 
 as_any=$(grep -nE '\bas[[:space:]]+any\b' "${modified[@]}" 2>/dev/null | head -10 || true)
 if [ -n "$as_any" ]; then
-    issues="${issues}[Types] Replace \`as any\` with a type guard or typed helper:\n${as_any}\n\n"
+    printf -v issues '%s[Types] Replace `as any` with a type guard or typed helper:\n%s\n\n' "$issues" "$as_any"
 fi
 
 if [ -n "$issues" ]; then
