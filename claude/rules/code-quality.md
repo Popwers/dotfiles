@@ -63,19 +63,47 @@ When renaming, verify call sites, type references, string literals, dynamic impo
 
 ## Comments
 
-- Default to no comments. Most code does not need them — names and types should carry the meaning.
-- When a comment is justified, write **one short line** above the relevant code. Never write multi-line `/** */` JSDoc blocks unless the file already uses JSDoc consistently for public API docs.
-- Only valid reasons to add a comment:
-  - A hidden constraint or invariant a reader cannot see in the code (e.g. `// must run before auth middleware`)
-  - A workaround for a specific upstream bug (link the bug if needed: `// workaround for prisma#1234`)
-  - A non-obvious perf or correctness reason for an unusual pattern
-- Never include in a comment:
-  - Ticket IDs (`NIID-294`, `JIRA-123`) — they belong in the commit message and PR description, not in source. They rot the moment the ticket is closed.
-  - A list of callers (`called by getAllUsers, getManagedMembers`) — IDE call graph does this better and the list goes stale.
-  - A restatement of what the function/variable name already says (`// Get user CA` above `getUserCA`).
-  - A multi-paragraph explanation of how the code works — if it's that complex, the code itself should be simplified or split.
+Comments exist for the next reader. Write them when the code, the types, and the function name don't already convey what the reader needs to know — and skip them when they do. Always in **English**, regardless of the surrounding human-language strings.
 
-**Anti-pattern (do not write):**
+### When a comment helps
+
+- **Exported functions, hooks, and React/Astro components** — write a JSDoc block above the symbol with a one-line description of what it does, plus `@param` for each prop/argument and `@returns` for the return value. This is the entry point for someone using the symbol from elsewhere.
+- **Non-obvious logic inside a function** — write a short `//` line above the statement explaining a business rule, security constraint, edge case, ordering requirement, or workaround. The reader can see *what* the line does; your comment explains *why*.
+- **Multi-line is allowed** when the explanation genuinely needs it — but use a single `/** */` block, not stacked `//` lines. Stacked `//` is an anti-pattern: it signals the comment grew uncontrolled and is harder to maintain.
+
+### Acceptable JSDoc
+
+```ts
+/**
+ * Header component shows information about the current step of the user.
+ * @param {string} props.mode - The mode of the header, either 'qcm' or 'results'
+ * @param {string} props.redirection - The redirection of the header
+ * @returns {React.FC} - The Header component
+ */
+export default ({ mode, redirection }: HeaderProps) => { /* ... */ };
+```
+
+### Acceptable inline comment
+
+```ts
+// If the user must update their profile and is not on the profile page,
+// and tries to access a protected route, redirect them to the profile page.
+if (mustUpdateProfile && !isOnProfilePage && isProtectedRoute) {
+    return redirect('/profile');
+}
+```
+
+### Never write
+
+- **Comments that restate the name** — `/** The consent store */` above `consentStore`, `// Get user CA` above `getUserCA()`. The name already says it. Delete.
+- **Ticket IDs** — `NIID-294`, `JIRA-123`. They rot the moment the ticket closes; that context belongs in the commit message and PR description.
+- **Caller lists** — `// called by getAllUsers, getManagedMembers`, `cf. functionName`, `(voir ...)`. The IDE call graph does this better and the list goes stale.
+- **Decorative section dividers** — `/** --- CONTROLLERS --- */`, `// ===== Section ===== //`, `/** ---REPEATABLE--- */`. If a file needs section markers, the file is too big — split it.
+- **Stacked `//` faking a multi-line block** — three or more `//` lines in a row covering one continuous explanation. Use `/** */` once instead.
+- **Non-English comments** — French, Spanish, etc. in code committed to the repo. Translate to English.
+- **Step-by-step narration of the next 5 lines** — if the code needs that much explanation, simplify the code itself.
+
+### Anti-pattern (do not write)
 
 ```ts
 /**
@@ -86,13 +114,21 @@ When renaming, verify call sites, type references, string literals, dynamic impo
  */
 ```
 
-**Acceptable (one line, only the non-obvious why):**
+Issues: French, ticket ID, caller list, narrative description of the implementation.
+
+### Acceptable rewrite
 
 ```ts
-// Single findMany over 4 statuses — called inside hot loops, two sequential queries were the bottleneck.
+/**
+ * Compute realized and pending CA for a user, aggregated over the four statuses.
+ * @param userId - The user whose CA we are computing.
+ * @returns Aggregated `{ realized, pending }` totals.
+ */
+export async function getUserCA(userId: string) {
+    // Single findMany over the four statuses; two sequential queries were the bottleneck on hot paths.
+    // ...
+}
 ```
-
-Or simply no comment at all if the function name and code make it self-evident.
 
 ## Pre-Completion Checklist
 
