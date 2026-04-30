@@ -61,6 +61,39 @@ When renaming, verify call sites, type references, string literals, dynamic impo
 - When a function is used as a hook dependency, wrap it in `useCallback`
 - Prefer stable references: derive from state/props rather than recreating objects each render
 
+## Comments
+
+- Default to no comments. Most code does not need them — names and types should carry the meaning.
+- When a comment is justified, write **one short line** above the relevant code. Never write multi-line `/** */` JSDoc blocks unless the file already uses JSDoc consistently for public API docs.
+- Only valid reasons to add a comment:
+  - A hidden constraint or invariant a reader cannot see in the code (e.g. `// must run before auth middleware`)
+  - A workaround for a specific upstream bug (link the bug if needed: `// workaround for prisma#1234`)
+  - A non-obvious perf or correctness reason for an unusual pattern
+- Never include in a comment:
+  - Ticket IDs (`NIID-294`, `JIRA-123`) — they belong in the commit message and PR description, not in source. They rot the moment the ticket is closed.
+  - A list of callers (`called by getAllUsers, getManagedMembers`) — IDE call graph does this better and the list goes stale.
+  - A restatement of what the function/variable name already says (`// Get user CA` above `getUserCA`).
+  - A multi-paragraph explanation of how the code works — if it's that complex, the code itself should be simplified or split.
+
+**Anti-pattern (do not write):**
+
+```ts
+/**
+ * Get CA and CA to come of a user.
+ * NIID-294 : une seule findMany sur les 4 statuts puis agrégation en JS, au
+ * lieu de deux queries séquentielles. Réduit le coût quand l'endpoint
+ * appelle getUserCA dans une boucle (cf. getAllUsers / getManagedMembers).
+ */
+```
+
+**Acceptable (one line, only the non-obvious why):**
+
+```ts
+// Single findMany over 4 statuses — called inside hot loops, two sequential queries were the bottleneck.
+```
+
+Or simply no comment at all if the function name and code make it self-evident.
+
 ## Pre-Completion Checklist
 
 - Clear, descriptive naming

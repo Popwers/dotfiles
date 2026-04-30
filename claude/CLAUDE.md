@@ -220,7 +220,7 @@ Naming conventions:
 - Keep argument counts low; no optional args unless truly optional
 - Never use `as any` — write a typed helper or use a type guard instead
 - Bias toward fewer lines, but never at the expense of type safety or readability
-- Write code that reads like a human wrote it — no robotic comments, no corporate boilerplate
+- Comments: default to none; add one short line only when the *why* is non-obvious (hidden constraint, subtle invariant, workaround). Never write multi-line `/** */` blocks, never restate what the name already says, never reference tickets / commits / callers — that rots and belongs in the PR or commit message
 
 ### React and State
 
