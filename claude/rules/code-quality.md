@@ -69,7 +69,13 @@ Comments exist for the next reader. Write them when the code, the types, and the
 
 - **Exported functions, hooks, and React/Astro components** — write a JSDoc block above the symbol with a one-line description of what it does, plus `@param` for each prop/argument and `@returns` for the return value. This is the entry point for someone using the symbol from elsewhere.
 - **Non-obvious logic inside a function** — write a short `//` line above the statement explaining a business rule, security constraint, edge case, ordering requirement, or workaround. The reader can see *what* the line does; your comment explains *why*.
+- **Short navigational labels above logical blocks** — a one-line `//` label above an event handler, an animation step, a conditional branch, or a group of related statements is a useful scanning aid, even when slightly redundant with the code (e.g. `// On click, accept all cookies` above `acceptAllBtn.addEventListener('click', ...)`). Keep them — they help the reader skim a long function.
+- **Section dividers** — `/** --- CONTROLLERS --- */` style dividers separating distinct sections in a file (controllers / policies / routes / helpers, or input / state / handlers / effects in a component) are fine in any file, not just long ones. They aid navigation.
 - **Multi-line is allowed** when the explanation genuinely needs it — but use a single `/** */` block, not stacked `//` lines. Stacked `//` is an anti-pattern: it signals the comment grew uncontrolled and is harder to maintain.
+
+### Compaction over deletion
+
+When you encounter a verbose comment on cleanup, **collapse before you delete**. A 3-line `/** */` block that's just labelling an event handler should become a single-line `//` — the scanning value is the point, the verbosity is the problem. Only delete a comment when it falls into the "Never write" list below.
 
 ### Acceptable JSDoc
 
@@ -98,7 +104,7 @@ if (mustUpdateProfile && !isOnProfilePage && isProtectedRoute) {
 - **Comments that restate the name** — `/** The consent store */` above `consentStore`, `// Get user CA` above `getUserCA()`. The name already says it. Delete.
 - **Ticket IDs** — `NIID-294`, `JIRA-123`. They rot the moment the ticket closes; that context belongs in the commit message and PR description.
 - **Caller lists** — `// called by getAllUsers, getManagedMembers`, `cf. functionName`, `(voir ...)`. The IDE call graph does this better and the list goes stale.
-- **Decorative dividers used as gratuitous decoration** — `/** ===== ===== */` ASCII art on every export, or banners at the top of single-purpose files (the filename already says it). Section dividers *inside* a long multi-section file (e.g. `/** --- CONTROLLERS --- */` separating controllers / policies / routes / helpers in one Strapi extension) are fine and useful for navigation — don't strip them.
+- **Decorative dividers used as gratuitous decoration** — `/** ===== ===== */` ASCII art on every export, or banners at the top of a single-purpose file with no internal sections (the filename already says it). Genuine section dividers (e.g. `/** --- CONTROLLERS --- */` separating controllers / policies / routes / helpers in a Strapi extension, or `/** --- ANIMATE --- */` separating animation calls from event listeners in a component) are fine in any file with multiple distinct sections — don't strip them.
 - **Stacked `//` faking a multi-line block** — three or more `//` lines in a row covering one continuous explanation. Use `/** */` once instead.
 - **Non-English comments** — French, Spanish, etc. in code committed to the repo. Translate to English.
 - **Step-by-step narration of the next 5 lines** — if the code needs that much explanation, simplify the code itself.
@@ -129,6 +135,26 @@ export async function getUserCA(userId: string) {
     // ...
 }
 ```
+
+### Compaction example
+
+A verbose label like this:
+
+```ts
+/**
+ * On click, accept all cookies
+ */
+acceptAllBtn?.addEventListener('click', () => { /* ... */ });
+```
+
+should be collapsed, **not deleted**, into:
+
+```ts
+// On click, accept all cookies
+acceptAllBtn?.addEventListener('click', () => { /* ... */ });
+```
+
+The label still aids scanning when reading a long init function — it just no longer takes 3 lines.
 
 ## Pre-Completion Checklist
 
