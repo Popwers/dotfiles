@@ -67,15 +67,18 @@ Comments exist for the next reader. Write them when the code, the types, and the
 
 ### When a comment helps
 
-- **Exported functions, hooks, and React/Astro components** — write a JSDoc block above the symbol with a one-line description of what it does, plus `@param` for each prop/argument and `@returns` for the return value. This is the entry point for someone using the symbol from elsewhere.
+- **Exported functions, hooks, and React/Astro components** — write a JSDoc block above the symbol with a one-line description of what it does, plus `@param` for each prop/argument and `@returns` for the return value. Multi-sentence JSDoc is fine when the explanation needs it.
 - **Non-obvious logic inside a function** — write a short `//` line above the statement explaining a business rule, security constraint, edge case, ordering requirement, or workaround. The reader can see *what* the line does; your comment explains *why*.
-- **Short navigational labels above logical blocks** — a one-line `//` label above an event handler, an animation step, a conditional branch, or a group of related statements is a useful scanning aid, even when slightly redundant with the code (e.g. `// On click, accept all cookies` above `acceptAllBtn.addEventListener('click', ...)`). Keep them — they help the reader skim a long function.
-- **Section dividers** — `/** --- CONTROLLERS --- */` style dividers separating distinct sections in a file (controllers / policies / routes / helpers, or input / state / handlers / effects in a component) are fine in any file, not just long ones. They aid navigation.
-- **Multi-line is allowed** when the explanation genuinely needs it — but use a single `/** */` block, not stacked `//` lines. Stacked `//` is an anti-pattern: it signals the comment grew uncontrolled and is harder to maintain.
+- **Short navigational labels above logical blocks** — a one-line `//` label above an event handler, an animation step, a conditional branch, or a group of related statements is a useful scanning aid, even when slightly redundant with the code (e.g. `// On click, accept all cookies` above `acceptAllBtn.addEventListener('click', ...)`).
+- **Section dividers** — multi-line ASCII-decorated `/** --- CONTROLLERS --- */` style dividers separating distinct sections in a file (controllers / policies / routes / helpers, or input / state / handlers / effects in a component) are fine in any file. The decoration is intentional — it makes the divider scannable when skimming a long file.
 
-### Compaction over deletion
+### On cleanup, preserve the author's original formatting
 
-When you encounter a verbose comment on cleanup, **collapse before you delete**. A 3-line `/** */` block that's just labelling an event handler should become a single-line `//` — the scanning value is the point, the verbosity is the problem. Only delete a comment when it falls into the "Never write" list below.
+Cleanup is **not** a re-formatting pass. Do not collapse multi-line `/** */` blocks into single-line `//`, do not strip ASCII decoration around labeled section dividers, do not rewrite multi-sentence JSDoc into a one-liner. The author chose the format deliberately; that style call is theirs, not the cleanup pass's.
+
+The only structural rewrite cleanup performs is **3+ stacked `//` lines covering one continuous explanation → single `/** */` block** (because stacked `//` for one explanation is a real anti-pattern, not a stylistic choice).
+
+Cleanup deletes a comment only when it matches the "Never write" list below — name restatement, ticket IDs, caller lists, pure unlabeled decoration, top-of-single-purpose-file banners. Everything else stays in place, with French translated to English in its original block format.
 
 ### Acceptable JSDoc
 
@@ -136,25 +139,23 @@ export async function getUserCA(userId: string) {
 }
 ```
 
-### Compaction example
+### Section divider example
 
-A verbose label like this:
+Both forms are acceptable — preserve whichever the author wrote:
 
 ```ts
 /**
- * On click, accept all cookies
+ * -----------------------------------------------
+ * --------------- CONTROLLERS -------------------
+ * -----------------------------------------------
  */
-acceptAllBtn?.addEventListener('click', () => { /* ... */ });
 ```
-
-should be collapsed, **not deleted**, into:
 
 ```ts
-// On click, accept all cookies
-acceptAllBtn?.addEventListener('click', () => { /* ... */ });
+/** --- CONTROLLERS --- */
 ```
 
-The label still aids scanning when reading a long init function — it just no longer takes 3 lines.
+The ASCII decoration is intentional scanning weight, not noise to be stripped on cleanup.
 
 ## Pre-Completion Checklist
 
