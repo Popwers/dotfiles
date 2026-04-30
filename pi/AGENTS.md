@@ -197,7 +197,7 @@ Naming conventions:
 - Keep argument counts low; no optional args unless truly optional
 - Never use `as any` — write a typed helper or use a type guard instead
 - Bias toward fewer lines, but never at the expense of type safety or readability
-- Comments: written in English only. Add them when they tell the reader something the name and types do not — JSDoc with behavior + `@param`/`@returns` on exported functions, hooks, and components, or a short `//` line above non-obvious logic (security constraint, business rule, edge case, why a pattern is unusual). Never restate the symbol name, never include ticket IDs / commits / caller lists (rots — belongs in PR or commit message), never write decorative dividers (`/** --- SECTION --- */`), and when multi-line is justified use one proper `/** */` block — do not stack `//` lines as a fake multi-line workaround
+- Comments: written in English only. Add them when they tell the reader something the name and types do not — JSDoc with behavior + `@param`/`@returns` on exported functions, hooks, and components, or a short `//` line above non-obvious logic (security constraint, business rule, edge case, why a pattern is unusual). Section dividers (`/** --- ROUTES --- */`) are fine *inside* a long multi-section file; avoid them at the top of a single-purpose file (the filename already says it). Never restate the symbol name, never include ticket IDs / commits / caller lists (rots — belongs in PR or commit message), and when multi-line is justified use one proper `/** */` block — do not stack `//` lines as a fake multi-line workaround
 
 ### React and State
 

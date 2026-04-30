@@ -98,7 +98,7 @@ if (mustUpdateProfile && !isOnProfilePage && isProtectedRoute) {
 - **Comments that restate the name** — `/** The consent store */` above `consentStore`, `// Get user CA` above `getUserCA()`. The name already says it. Delete.
 - **Ticket IDs** — `NIID-294`, `JIRA-123`. They rot the moment the ticket closes; that context belongs in the commit message and PR description.
 - **Caller lists** — `// called by getAllUsers, getManagedMembers`, `cf. functionName`, `(voir ...)`. The IDE call graph does this better and the list goes stale.
-- **Decorative section dividers** — `/** --- CONTROLLERS --- */`, `// ===== Section ===== //`, `/** ---REPEATABLE--- */`. If a file needs section markers, the file is too big — split it.
+- **Decorative dividers used as gratuitous decoration** — `/** ===== ===== */` ASCII art on every export, or banners at the top of single-purpose files (the filename already says it). Section dividers *inside* a long multi-section file (e.g. `/** --- CONTROLLERS --- */` separating controllers / policies / routes / helpers in one Strapi extension) are fine and useful for navigation — don't strip them.
 - **Stacked `//` faking a multi-line block** — three or more `//` lines in a row covering one continuous explanation. Use `/** */` once instead.
 - **Non-English comments** — French, Spanish, etc. in code committed to the repo. Translate to English.
 - **Step-by-step narration of the next 5 lines** — if the code needs that much explanation, simplify the code itself.
