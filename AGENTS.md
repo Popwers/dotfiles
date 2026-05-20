@@ -1,6 +1,6 @@
 # DOTFILES KNOWLEDGE BASE
 
-**Generated:** 2026-04-29 | **Commit:** 51d0cdc | **Branch:** master
+**Generated:** 2026-05-20 | **Commit:** d05f5fd | **Branch:** master
 
 ## OVERVIEW
 
@@ -48,13 +48,13 @@ fish -n config.fish                            # Validate fish syntax
 
 | Task | Location | Notes |
 |------|----------|-------|
-| Add shell alias | `config.fish` L11-26 | alias section |
-| Add brew package | `setup_my_mac.sh` L18 | `brew install` line |
-| Add Fisher plugin | `setup_my_mac.sh` L62-63 | `fisher install` section |
-| Add global npm pkg | `setup_my_mac.sh` L70 | `bun install -g` line |
+| Add shell alias | `config.fish` L9-23 | alias section |
+| Add brew package | `setup_my_mac.sh` L41 | `brew_formulas=(...)` array |
+| Add Fisher plugin | `setup_my_mac.sh` L152-153 | `fisher install` section |
+| Add global npm pkg | `setup_my_mac.sh` L167 | `bun install -g` loop |
 | Change git settings | `.gitconfig` | Edit file directly |
 | Modify vim settings | `init.vim` | Standard vimscript |
-| Add PATH entry | `config.fish` L28-37 | `fish_add_path` section |
+| Add PATH entry | `config.fish` L121-127 | `fish_add_path` section |
 
 ## CODE STYLE
 
@@ -138,7 +138,7 @@ if ! grep -q $(which fish) /etc/shells; then  # Check before modifying
 
 | Alias | Expansion | Purpose |
 |-------|-----------|---------|
-| `upsys` | `brew update && brew upgrade && brew cleanup && brew doctor && bun upgrade && bun -g update` | Full system update |
+| `upsys` | `brew … && bun upgrade && bun -g update && vp env install lts` | Full system update (incl. managed Node LTS) |
 | `ga` | `git add . && git cz` | Stage all + commitizen |
 | `cz` | `git cz` | Commitizen commit |
 | `ls`, `l` | `eza --long --color=always --icons=always --all` | Enhanced listing |
@@ -165,7 +165,9 @@ if ! grep -q $(which fish) /etc/shells; then  # Check before modifying
 
 **Via Cask:** android-platform-tools
 
-**Via Bun (global):** ngrok, npm-check-updates, commitizen, cz-conventional-changelog, @openai/codex, @anthropic-ai/claude-code
+**Via Bun (global):** ngrok, npm-check-updates, commitizen, cz-conventional-changelog, @openai/codex, impeccable
+
+**Via official installer:** Claude Code (`curl -fsSL https://claude.ai/install.sh | bash`)
 
 **Codex fallbacks:** `CLAUDE.md` is accepted as a fallback project instruction file when `AGENTS.md` is missing
 

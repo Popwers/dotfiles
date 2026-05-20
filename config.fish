@@ -20,7 +20,7 @@ alias vim nvim
 alias vi nvim
 alias cz "git cz"
 alias ga "git add . && git cz"
-alias upsys "brew update && brew upgrade && brew cleanup && brew doctor && bun upgrade && bun -g update"
+alias upsys "brew update && brew upgrade && brew cleanup && brew doctor && bun upgrade && bun -g update && vp env install lts"
 
 function opencode
     set -l state_dir /tmp/opencode-state

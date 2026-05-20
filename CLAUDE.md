@@ -36,7 +36,3 @@ Les configs Claude Code et Codex sont stockées dans ce repo et synchronisées p
 - Ne pas modifier `~/.claude.json` via `/config` pour les préférences par défaut : modifier `claude/defaults.json` et relancer le setup
 - Ne pas modifier `~/.codex/` directement : modifier dans `codex/` et relancer le setup
 - Ne pas modifier `~/.config/fish/config.fish` directement : modifier `config.fish` dans le repo
-
-## TODO
-
-- **Évaluer `make` → `vp run`** : les `Makefile` (ex. `LENIID/Makefile`) peuvent migrer vers le bloc `run.tasks` de `vite.config.ts` pour ne garder qu'un seul fichier de config par repo.
