@@ -155,8 +155,10 @@ Hooks handle mechanical verification (`vp check`, tests, `as any`, and UI anti-p
 ## Commands
 
 - Search: `grepai search "<intent>" --json --compact`, then `rg`/`fd`
+- Deps: `vp install` (delegates to detected package manager), `vpx <bin>` (run local/remote binary)
 - Dev: `vp dev`, `vp build`
 - Quality: `vp check` (lint + fmt + typecheck), `vp test`
+- Project: `vp migrate` (adopt Vite+ in existing repo), `vp run <task>` (cached monorepo tasks), `vp pack` (bundle lib / standalone binary)
 - Git: `git status`, `git diff --staged`, `git log --oneline -10`
 
 ## Stack
@@ -171,7 +173,7 @@ Hooks handle mechanical verification (`vp check`, tests, `as any`, and UI anti-p
 | State | Legend State |
 | Animation | Motion |
 | Runtime | Node.js (via `vp env`), Bun |
-| Toolchain | Vite+ (`vp`) — build, dev, lint, fmt, typecheck, test |
+| Toolchain | Vite+ (`vp`) — install, dev, build (Rolldown), lint (Oxlint), fmt (Oxfmt), typecheck (tsgo), test (Vitest), migrate, monorepo run |
 
 ## Project Structure
 

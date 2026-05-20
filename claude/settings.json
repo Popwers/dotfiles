@@ -85,6 +85,12 @@
 						"command": "~/.claude/hooks/ensure-claudeignore.sh",
 						"timeout": 5,
 						"statusMessage": "Ensuring .claudeignore..."
+					},
+					{
+						"type": "command",
+						"command": "~/.claude/hooks/repo-init.sh",
+						"timeout": 15,
+						"statusMessage": "Checking Vite+ repo state..."
 					}
 				]
 			}

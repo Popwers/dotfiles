@@ -25,3 +25,5 @@ if [ -f "$template" ]; then
         done < "$template"
     fi
 fi
+
+[ -x "$HOME/.codex/hooks/repo-init.sh" ] && "$HOME/.codex/hooks/repo-init.sh" || true
