@@ -33,13 +33,15 @@ ISSUES=""
 # Enable the relevant rule in `vite.config.*` to have the lint pass below flag it.
 
 # Run tests on modified test files.
-for f in "${MODIFIED[@]}"; do
-    [[ "$f" =~ \.test\.(ts|tsx|js|jsx)$ ]] || continue
-    if ! output=$(cd "$REPO_ROOT" && vp test run "$f" 2>&1); then
-        failures=$(echo "$output" | grep -E "(FAIL|Error|✗|×)" | head -5)
-        ISSUES+="[Tests] Failures in $(basename "$f"):\n${failures}\n\n"
-    fi
-done
+if command -v vp >/dev/null 2>&1; then
+    for f in "${MODIFIED[@]}"; do
+        [[ "$f" =~ \.test\.(ts|tsx|js|jsx)$ ]] || continue
+        if ! output=$(cd "$REPO_ROOT" && vp test run "$f" 2>&1); then
+            failures=$(echo "$output" | grep -E "(FAIL|Error|✗|×)" | head -5)
+            ISSUES+="[Tests] Failures in $(basename "$f"):\n${failures}\n\n"
+        fi
+    done
+fi
 
 # Full quality gate on all modified files: fmt + lint + typecheck.
 if command -v vp &>/dev/null; then

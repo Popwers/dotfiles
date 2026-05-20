@@ -11,11 +11,13 @@ if [[ "$FILE" =~ \.(ts|tsx|js|jsx|mjs|cjs|json|css)$ ]] && [ -f "$FILE" ]; then
     while [ "$DIR" != "/" ]; do
         if [ -f "$DIR/vite.config.ts" ] || [ -f "$DIR/vite.config.js" ] \
             || [ -f "$DIR/vite.config.mjs" ] || [ -f "$DIR/vite.config.cjs" ]; then
-            OUTPUT=$(cd "$DIR" && vp check --fix --no-error-on-unmatched-pattern "$FILE" 2>&1)
-            EXIT=$?
-            if [ "$EXIT" -ne 0 ]; then
-                echo "[vp check] Errors remain in $(basename "$FILE"):" >&2
-                echo "$OUTPUT" | tail -5 >&2
+            if command -v vp >/dev/null 2>&1; then
+                OUTPUT=$(cd "$DIR" && vp check --fix --no-error-on-unmatched-pattern "$FILE" 2>&1)
+                EXIT=$?
+                if [ "$EXIT" -ne 0 ]; then
+                    echo "[vp check] Errors remain in $(basename "$FILE"):" >&2
+                    echo "$OUTPUT" | tail -5 >&2
+                fi
             fi
             break
         fi
