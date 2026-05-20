@@ -126,8 +126,8 @@ fish_add_path ~/.local/bin
 fish_add_path ~/.orbstack/bin
 fish_add_path ~/.opencode/bin
 
-# NodeJS
-set -q nvm_default_version; or set --universal nvm_default_version lts
+# NodeJS — managed by Vite+ (`vp env`). The vite-plus.fish snippet in conf.d
+# adds ~/.vite-plus/bin to PATH; no NVM needed.
 
 #VSCODE AND CURSOR
 if test "$TERM_PROGRAM" = "vscode" -o "$TERM_PROGRAM" = "cursor"

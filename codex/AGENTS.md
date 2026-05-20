@@ -117,7 +117,7 @@ Sequential pattern for complex tasks: Research → Plan → Implement → Review
 You'll know you're done when you can look at the change and feel confident about it: Requirements satisfied, edge cases considered, repo style followed, tests added/updated, validations run, no secrets introduced.
 
 Type checking and unit tests verify code correctness, not feature correctness. Before reporting done, exercise the feature with real input:
-- UI: run `bun run dev`, click through the golden path and at least one edge case (use `chrome-devtools-mcp` when available).
+- UI: run `vp dev`, click through the golden path and at least one edge case (use `chrome-devtools-mcp` when available).
 - API or scripts: invoke with realistic input and inspect the actual output, not just the exit code.
 - Backend: hit the endpoint with curl or a test client; check the response body and observable side effects (DB rows, logs, queues).
 
@@ -150,13 +150,13 @@ Ask first for: `sudo`, auth/billing/security changes, deleting files outside sco
 - UI: browser automation or available local UI tooling
 - Security: auth/permission paths
 
-Hooks handle mechanical verification (biome, tsc, tests, `as any`, and UI anti-pattern checks where supported). Focus on behavioral and logical correctness.
+Hooks handle mechanical verification (`vp check`, tests, `as any`, and UI anti-pattern checks where supported). Focus on behavioral and logical correctness.
 
 ## Commands
 
 - Search: `grepai search "<intent>" --json --compact`, then `rg`/`fd`
-- Dev: `bun run dev`, `bun run build`
-- Quality: `bun test`, `bunx biome check --write .`
+- Dev: `vp dev`, `vp build`
+- Quality: `vp check` (lint + fmt + typecheck), `vp test`
 - Git: `git status`, `git diff --staged`, `git log --oneline -10`
 
 ## Stack
@@ -164,14 +164,14 @@ Hooks handle mechanical verification (biome, tsc, tests, `as any`, and UI anti-p
 | Layer | Technologies |
 |-------|-------------|
 | Frontend | Astro, React, Tanstack Start, TypeScript |
-| Backend | Strapi |
-| UI | Tailwind, shadcn/ui, Base UI |
+| Backend | Strapi, BetterAuth |
+| Validation | Zod |
+| Database | Drizzle ORM |
+| UI | Tailwind CSS, shadcn/ui, Base UI |
 | State | Legend State |
 | Animation | Motion |
-| Runtime | Bun, Node.js |
-| Build | Vite |
-| Test | Bun test |
-| Format | Biome |
+| Runtime | Node.js (via `vp env`), Bun |
+| Toolchain | Vite+ (`vp`) — build, dev, lint, fmt, typecheck, test |
 
 ## Project Structure
 
@@ -209,12 +209,24 @@ Naming conventions:
 - Tailwind: prefer semantic tokens and CSS variables over `@apply`
 - Astro: static-first, hydrate only when needed
 
-### Formatting (Biome)
+### Formatting (Vite+ / Oxfmt)
 
-- Indentation: tabs (width 4)
-- Quotes: single
-- Semicolons: always
-- Line width: 110
+- Indentation: tabs (width 4), LF line endings
+- Quotes: single (JS + JSX)
+- Semicolons: always; trailing commas `all`; arrow parens always
+- JSX closing bracket on same line as last attribute
+- Line width: 110; `proseWrap: preserve` for markdown
+- Imports sorted: `builtin → external → [internal, subpath] → [parent, sibling, index] → style → unknown`, internal paths matched by `~/`, `@/`, `#`
+- Tailwind classes auto-sorted via Oxfmt's `sortTailwindcss`
+- Run via `vp fmt` (format only) or `vp check` (fmt + lint + typecheck)
+- Reference config: [gist `e112d96a…`](https://gist.github.com/Popwers/e112d96aea101e5aa35311048644d9cf)
+
+### Commit hooks (Vite+ `staged`)
+
+- One-time install per repo: `vp config` writes Git hooks into `.vite-hooks/`
+- Staged checks declared in `vite.config.ts` under `staged:` — patterns map to commands
+- Default pattern: `*.{js,jsx,ts,tsx,vue,svelte,astro,json,css,scss,html,md}` → `vp check --fix`
+- Conventional-commit format comes from `cz` / `ga` at authoring time; no `commit-msg` hook needed
 
 ## Operating Rules
 
@@ -300,7 +312,7 @@ Naming conventions:
 - Keep tests in the root `tests/` directory when the repo follows that structure.
 - Use `.test.ts` / `.test.tsx`; arrange, act, assert; one behavior per test.
 - When tests fail, fix the implementation unless the test itself is wrong.
-- Validate with `bun test`, `bunx biome check .`, and `bun run build` when applicable.
+- Validate with `vp test`, `vp check`, and `vp build` when applicable.
 
 ### Growth
 
@@ -332,6 +344,6 @@ If blocked:
 - Prefer CLI tools over MCPs when both achieve the same result with lower context cost.
 - Run independent subagents in parallel when their work is genuinely independent.
 - Use `rtk` for shell-output reduction when the hook or command path supports it.
-- Codex hooks provide a best-effort lifecycle: session helper startup, command gates, formatting, typecheck, targeted tests, `as any` scan, UI anti-pattern scan, and grepai watcher shutdown.
+- Codex hooks provide a best-effort lifecycle: session helper startup, command gates, `vp check` (fmt + lint + typecheck), targeted tests, `as any` scan, UI anti-pattern scan, and grepai watcher shutdown.
 
 @/Users/lionel/.codex/RTK.md

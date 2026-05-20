@@ -4,7 +4,7 @@
 
 ## OVERVIEW
 
-macOS dev environment bootstrap. Fish shell, Neovim, Bun, Node.js (NVM). Automated setup via single script.
+macOS dev environment bootstrap. Fish shell, Neovim, Bun, Node.js (via Vite+ `vp env`). Automated setup via single script.
 
 ## STRUCTURE
 
@@ -26,16 +26,9 @@ dotfiles/
 │   ├── hooks.json      # Codex lifecycle hooks config
 │   ├── hooks/          # Hook scripts
 │   └── agents/         # Custom subagents
-├── pi/                 # Pi coding agent config (synced to ~/.pi/agent/)
-│   ├── AGENTS.md       # Global agent instructions
-│   ├── settings.json   # Global settings (model, compaction, packages)
-│   ├── mcp.json        # MCP servers config
-│   ├── extensions/     # TypeScript extensions (hooks, tools)
-│   └── auth.example.json # Auth template (copy to auth.json)
-├── opencode/           # OpenCode AI agent config
-│   ├── opencode.json   # Plugin list
-│   ├── AGENTS.md       # Global coding guidelines
-│   └── command/        # Custom slash commands
+├── .vscode/            # Project-level VS Code / Cursor config (Vite+ / Oxc)
+│   ├── extensions.json # Recommended extensions
+│   └── settings.json   # Default formatter, code actions, npm.scriptRunner
 └── .cursor/rules/      # Editor AI rules (Snyk)
 ```
 
@@ -82,7 +75,7 @@ set -gx TERM xterm-256color            # Variables: set not export
 fish_add_path /opt/homebrew/bin        # Path: fish_add_path, not export PATH
 alias ls "eza --long --icons --all"    # Aliases: use alias keyword
 if test "$TERM_PROGRAM" = "vscode"     # Conditionals: use test
-set --universal nvm_default_version lts # Universal for persistent settings
+set --universal fish_greeting ""        # Universal for persistent settings
 ```
 
 ### Vimscript (init.vim)
@@ -100,7 +93,7 @@ highlight Normal guibg=NONE ctermbg=NONE
 | Bash functions | `snake_case` | `install_font` |
 | Bash variables | `snake_case` | `font_name`, `cask_name` |
 | Fish aliases | `lowercase` | `upsys`, `ga`, `cz` |
-| Fish env vars | `UPPER_SNAKE` | `TERM`, `NVM_DIR` |
+| Fish env vars | `UPPER_SNAKE` | `TERM`, `VP_HOME` |
 
 ## ERROR HANDLING
 
@@ -124,8 +117,9 @@ if ! grep -q $(which fish) /etc/shells; then  # Check before modifying
 - **Fish shell primary** — not bash/zsh for interactive use
 - **GPG commit signing** — requires key `AD871AD3647CE96D`
 - **master branch** — default is `master`, not `main`
-- **NVM via Fish plugin** — uses `jorgebucaran/nvm.fish`
-- **Commitizen required** — use `cz` or `ga` for commits
+- **Node + JS toolchain via Vite+** — `vp env` manages Node; `vp check` / `vp test` / `vp build` cover lint, fmt, typecheck, test, build
+- **Commit hooks via Vite+** — `vp config` installs Git hooks into `.vite-hooks/`; staged checks declared in `vite.config.ts` under `staged:`
+- **Commitizen required** — use `cz` or `ga` for commits (conventional-commit format comes from authoring, not from a `commit-msg` hook)
 - **Idempotent setup** — script safe to re-run
 
 ## ANTI-PATTERNS
@@ -134,7 +128,9 @@ if ! grep -q $(which fish) /etc/shells; then  # Check before modifying
 |-------|------------|
 | Edit `~/.config/fish/config.fish` directly | Edit `config.fish` in repo, re-run setup |
 | Use `export PATH` in fish | Use `fish_add_path` |
-| Use standard `nvm` commands | Use fish nvm: `nvm install lts` |
+| Use `nvm` / standalone Node installers | Use `vp env use lts` to switch the managed Node |
+| Install `husky` / `lint-staged` / `@biomejs/biome` / `@commitlint/*` per project | Use `vp config` + `staged:` block in `vite.config.ts` |
+| Wire `.husky/pre-commit` and `.husky/commit-msg` manually | Let `vp config` write Git hooks into `.vite-hooks/`; author via `cz`/`ga` |
 | Commit without GPG key | Set up key or disable `commit.gpgsign` |
 | Use backticks for command substitution | Use `$()` syntax |
 
@@ -169,20 +165,13 @@ if ! grep -q $(which fish) /etc/shells; then  # Check before modifying
 
 **Via Cask:** android-platform-tools
 
-**Via Bun (global):** ngrok, npm-check-updates, typescript, commitizen, cz-conventional-changelog, @openai/codex, @anthropic-ai/claude-code, @mariozechner/pi-coding-agent
+**Via Bun (global):** ngrok, npm-check-updates, commitizen, cz-conventional-changelog, @openai/codex, @anthropic-ai/claude-code
 
-**Pi packages:** pi-subagents, pi-mcp-adapter
-**Pi extensions:** hooks.ts (session start, tool gates, post-edit format/typecheck, quality check)
-**Pi model:** zai/glm-5.1 (thinking: medium)
-
-**OpenCode plugins:** opencode-supermemory, @tarquinen/opencode-dcp@latest, @franlol/opencode-md-table-formatter@0.0.3
-**OpenCode MCPs:** context7, gh_grep, exa
 **Codex fallbacks:** `CLAUDE.md` is accepted as a fallback project instruction file when `AGENTS.md` is missing
-**Pi MCPs:** context7, gh_grep (via pi-mcp-adapter)
 
 **Fonts:** JetBrains Mono Nerd Font, Symbols Only Nerd Font
 
-**Fisher plugins:** `jorgebucaran/nvm.fish`
+**Fisher plugins:** none (legacy `jorgebucaran/nvm.fish` removed in favour of Vite+ managed Node)
 
 ## NOTES
 

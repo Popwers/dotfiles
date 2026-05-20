@@ -6,11 +6,12 @@ git_root() {
     git rev-parse --show-toplevel 2>/dev/null || pwd
 }
 
-find_biome_root() {
+find_vite_root() {
     local dir=$1
 
     while [ "$dir" != "/" ]; do
-        if [ -f "$dir/biome.json" ] || [ -f "$dir/biome.jsonc" ]; then
+        if [ -f "$dir/vite.config.ts" ] || [ -f "$dir/vite.config.js" ] \
+            || [ -f "$dir/vite.config.mjs" ] || [ -f "$dir/vite.config.cjs" ]; then
             printf '%s\n' "$dir"
             return 0
         fi
@@ -42,7 +43,7 @@ file_hashes() {
 
 main() {
     local root
-    local biome_root
+    local vite_root
     local before
     local after
     local candidates
@@ -53,14 +54,14 @@ main() {
     fi
 
     root=$(git_root)
-    biome_root=$(find_biome_root "$root" || true)
+    vite_root=$(find_vite_root "$root" || true)
 
-    if [ -z "$biome_root" ]; then
-        printf '%s\n' '{"status":"skipped","message":"No biome config found."}'
+    if [ -z "$vite_root" ]; then
+        printf '%s\n' '{"status":"skipped","message":"No vite.config.* found."}'
         exit 0
     fi
 
-    candidates=$(changed_files | sort -u | grep -E '\.(ts|tsx|js|jsx|json|css)$' || true)
+    candidates=$(changed_files | sort -u | grep -E '\.(ts|tsx|js|jsx|mjs|cjs|json|css)$' || true)
 
     if [ -z "$candidates" ]; then
         printf '%s\n' '{"status":"skipped","message":"No formatable changed files."}'
@@ -71,7 +72,7 @@ main() {
 
     while IFS= read -r file; do
         [ -f "$root/$file" ] || continue
-        (cd "$biome_root" && bunx @biomejs/biome check --write "$root/$file" --no-errors-on-unmatched >/dev/null 2>&1) || true
+        (cd "$vite_root" && vp check --fix --no-error-on-unmatched-pattern "$root/$file" >/dev/null 2>&1) || true
     done <<< "$candidates"
 
     after=$(file_hashes "$root" "$candidates")
@@ -81,7 +82,7 @@ main() {
 import json
 print(json.dumps({
     "status": "changed",
-    "message": "Biome rewrote one or more changed files."
+    "message": "vp check --fix rewrote one or more changed files."
 }))
 PY
         exit 0

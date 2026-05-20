@@ -8,10 +8,16 @@ if [ -z "$repo_root" ]; then
     exit 0
 fi
 
+has_vp_project=0
+if [ -f "$repo_root/vite.config.ts" ] || [ -f "$repo_root/vite.config.js" ] \
+    || [ -f "$repo_root/vite.config.mjs" ] || [ -f "$repo_root/vite.config.cjs" ]; then
+    has_vp_project=1
+fi
+
 modified=()
 while IFS= read -r -d '' rel; do
     case "$rel" in
-        *.ts|*.tsx|*.js|*.jsx)
+        *.ts|*.tsx|*.js|*.jsx|*.mjs|*.cjs)
             abs="$repo_root/$rel"
             [ -f "$abs" ] && modified+=("$abs")
             ;;
@@ -30,7 +36,12 @@ issues=''
 
 for file in "${modified[@]}"; do
     [[ "$file" =~ \.test\.(ts|tsx|js|jsx)$ ]] || continue
-    if ! output=$(cd "$repo_root" && bun test "$file" 2>&1); then
+    if [ "$has_vp_project" -eq 1 ] && command -v vp >/dev/null 2>&1; then
+        output_cmd=(vp test run "$file")
+    else
+        output_cmd=(bun test "$file")
+    fi
+    if ! output=$(cd "$repo_root" && "${output_cmd[@]}" 2>&1); then
         failures=$(printf '%s\n' "$output" | grep -E "(FAIL|Error|✗|×)" | head -5)
         if [ -n "$failures" ]; then
             printf -v issues '%s[Tests] Failures in %s:\n%s\n\n' "$issues" "$(basename "$file")" "$failures"
@@ -38,11 +49,11 @@ for file in "${modified[@]}"; do
     fi
 done
 
-if command -v bunx >/dev/null 2>&1; then
-    lint_output=$( (cd "$repo_root" && bunx @biomejs/biome check "${modified[@]}" --no-errors-on-unmatched) 2>&1 \
+if [ "$has_vp_project" -eq 1 ] && command -v vp >/dev/null 2>&1; then
+    lint_output=$( (cd "$repo_root" && vp check --no-error-on-unmatched-pattern "${modified[@]}") 2>&1 \
         | grep -E "(error|warning)" | head -5 || true)
     if [ -n "$lint_output" ]; then
-        printf -v issues '%s[Lint] Fix before completing:\n%s\n\n' "$issues" "$lint_output"
+        printf -v issues '%s[vp check] Fix before completing:\n%s\n\n' "$issues" "$lint_output"
     fi
 fi
 

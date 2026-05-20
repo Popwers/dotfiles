@@ -66,7 +66,13 @@ main() {
     fi
 
     status=0
-    output=$(cd "$root" && bun test $test_files 2>&1) || status=$?
+    if { [ -f "$root/vite.config.ts" ] || [ -f "$root/vite.config.js" ] \
+        || [ -f "$root/vite.config.mjs" ] || [ -f "$root/vite.config.cjs" ]; } \
+        && command -v vp >/dev/null 2>&1; then
+        output=$(cd "$root" && vp test run $test_files 2>&1) || status=$?
+    else
+        output=$(cd "$root" && bun test $test_files 2>&1) || status=$?
+    fi
 
     if [ "$status" -ne 0 ]; then
         python3 - "$output" <<'PY'

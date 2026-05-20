@@ -56,7 +56,12 @@ main() {
         exit 0
     fi
 
-    output=$(cd "$ts_root" && bunx tsc --noEmit --pretty false 2>&1) || true
+    if [ -f "$ts_root/vite.config.ts" ] || [ -f "$ts_root/vite.config.js" ] \
+        || [ -f "$ts_root/vite.config.mjs" ] || [ -f "$ts_root/vite.config.cjs" ]; then
+        output=$(cd "$ts_root" && vp check --no-fmt --no-lint --no-error-on-unmatched-pattern 2>&1) || true
+    else
+        output=$(cd "$ts_root" && bunx tsc --noEmit --pretty false 2>&1) || true
+    fi
 
     if printf '%s' "$output" | grep -q 'error TS'; then
         python3 - "$output" <<'PY'

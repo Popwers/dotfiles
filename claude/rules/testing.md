@@ -41,6 +41,6 @@ When tests fail: **fix the implementation, not the tests** — unless the tests 
 
 ## Validation
 
-- `bun test` passes
-- `bunx biome check .` passes
-- `bun run build` passes (when applicable)
+- `vp test` passes
+- `vp check` passes (lint + fmt + typecheck)
+- `vp build` passes (when applicable)

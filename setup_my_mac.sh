@@ -155,29 +155,16 @@ else
     skip "Fisher"
 end
 
-# Install plugins
-if fisher list | string match -q 'jorgebucaran/nvm.fish'
-    skip "nvm.fish plugin"
-else
-    fisher install jorgebucaran/nvm.fish
-end
-
-# Install NVM and use LTS version
-if type -q nvm
-    if nvm ls lts 2>/dev/null | string match -rq 'v[0-9]+\.[0-9]+\.[0-9]+'
-        skip "Node.js LTS"
-    else
-        nvm install lts
-    end
-    nvm use lts
-else
-    warn "nvm not found — skipping Node.js LTS setup"
+# Remove obsolete nvm.fish plugin — Node is now managed by Vite+ (`vp env`).
+if fisher list 2>/dev/null | string match -q 'jorgebucaran/nvm.fish'
+    fisher remove jorgebucaran/nvm.fish
+    ok "Removed legacy nvm.fish plugin"
 end
 
 # Install global packages
 set -l bun_global_listing (bun pm ls -g 2>/dev/null | string collect)
 set -l missing_bun_globals
-for pkg in ngrok npm-check-updates typescript commitizen cz-conventional-changelog @openai/codex impeccable
+for pkg in ngrok npm-check-updates commitizen cz-conventional-changelog @openai/codex impeccable
     if string match -rq "(^|\\s)$pkg@" -- $bun_global_listing
         skip "$pkg"
     else
@@ -206,6 +193,26 @@ else
 end
 FISH
 
+section "Vite+"
+
+# Install Vite+ (managed Node.js + unified Vite/Vitest/Oxlint/Oxfmt/tsgo toolchain).
+# VP_NODE_MANAGER=yes skips the interactive prompt so the script stays idempotent.
+if [ -x "$HOME/.vite-plus/bin/vp" ]; then
+    skip "Vite+"
+else
+    VP_NODE_MANAGER=yes curl -fsSL https://vite.plus | bash
+fi
+
+# Make sure the user-level Fish conf.d snippet exists so `vp` is on PATH next shell.
+if [ -f "$HOME/.vite-plus/env.fish" ] && [ ! -f "$HOME/.config/fish/conf.d/vite-plus.fish" ]; then
+    mkdir -p "$HOME/.config/fish/conf.d"
+    {
+        echo "# Added by setup_my_mac.sh — load Vite+ environment for interactive shells."
+        echo "source \$HOME/.vite-plus/env.fish"
+    } > "$HOME/.config/fish/conf.d/vite-plus.fish"
+    ok "Vite+ Fish integration"
+fi
+
 section "Claude Code"
 
 # Install Claude Code via official installer
@@ -224,29 +231,12 @@ copy_file_with_status "$SCRIPT_DIR/.gitconfig" "$HOME/.gitconfig"
 copy_file_with_status "$SCRIPT_DIR/config.fish" "$HOME/.config/fish/config.fish"
 copy_file_with_status "$SCRIPT_DIR/init.vim" "$HOME/.config/nvim/init.vim"
 
-# Install OpenCode via official installer (not brew - avoids node dependency conflict with nvm.fish)
-if [ -x "$HOME/.opencode/bin/opencode" ] || command -v opencode >/dev/null 2>&1; then
-    skip "OpenCode"
-else
-    curl -fsSL https://opencode.ai/install | bash
-fi
-
 # Install grepai
 if command -v grepai >/dev/null 2>&1; then
     skip "GrepAI"
 else
     curl -sSL https://raw.githubusercontent.com/yoanbernabeu/grepai/main/install.sh | sh
 fi
-
-# Install OpenCode plugins
-if [ -f "$HOME/.config/opencode/supermemory.jsonc" ] && [ -f "$HOME/.config/opencode/opencode.json" ]; then
-    skip "OpenCode supermemory plugin"
-else
-    bunx opencode-supermemory@latest install --no-tui
-fi
-
-# Copy OpenCode configuration directory (clean sync)
-sync_dir_with_status "$SCRIPT_DIR/opencode" "$HOME/.config/opencode"
 
 # Copy Codex configuration
 copy_file_with_status "$SCRIPT_DIR/codex/AGENTS.md" "$HOME/.codex/AGENTS.md"
@@ -297,53 +287,22 @@ sync_dir_with_status "$SCRIPT_DIR/claude/agents" "$HOME/.claude/agents"
 sync_dir_with_status "$SCRIPT_DIR/claude/hooks" "$HOME/.claude/hooks"
 sync_dir_with_status "$SCRIPT_DIR/claude/rules" "$HOME/.claude/rules"
 
-section "Pi"
-
-# Install Pi coding agent
-if command -v pi >/dev/null 2>&1; then
-    skip "Pi"
-else
-    bun install -g @mariozechner/pi-coding-agent
-fi
-
-# Copy Pi configuration
-copy_file_with_status "$SCRIPT_DIR/pi/AGENTS.md" "$HOME/.pi/agent/AGENTS.md"
-copy_file_with_status "$SCRIPT_DIR/pi/settings.json" "$HOME/.pi/agent/settings.json"
-copy_file_with_status "$SCRIPT_DIR/pi/mcp.json" "$HOME/.pi/agent/mcp.json"
-sync_dir_with_status "$SCRIPT_DIR/pi/extensions" "$HOME/.pi/agent/extensions"
-sync_dir_with_status "$SCRIPT_DIR/pi/agents" "$HOME/.pi/agent/agents"
-
-# Install Pi packages (idempotent — pi install skips if already present)
-for pkg in pi-subagents pi-mcp-adapter; do
-    if pi list 2>/dev/null | grep -q "$pkg"; then
-        skip "Pi package $pkg"
-    else
-        pi install "npm:$pkg" 2>/dev/null && ok "Pi package $pkg"
-    fi
-done
-
 # Ensure bun globals are on PATH for fresh bootstraps
 export PATH="$HOME/.bun/bin:$PATH"
 
 # Setup brew
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
-# Check if a skill is already available for OpenCode, Codex, and Claude Code.
+# Check if a skill is already available for Codex and Claude Code.
 skill_agent_dir() {
     local agent_name=$1
 
     case "$agent_name" in
-        opencode)
-            printf '%s\n' "$HOME/.config/opencode/skills"
-            ;;
         codex)
             printf '%s\n' "$HOME/.codex/skills"
             ;;
         claude-code)
             printf '%s\n' "$HOME/.claude/skills"
-            ;;
-        pi)
-            printf '%s\n' "$HOME/.pi/agent/skills"
             ;;
         *)
             return 1
@@ -364,7 +323,7 @@ is_skill_installed_everywhere() {
     local skill_name=$1
     local agent_name
 
-    for agent_name in opencode codex claude-code pi; do
+    for agent_name in codex claude-code; do
         if ! is_skill_installed_for_agent "$skill_name" "$agent_name"; then
             return 1
         fi
@@ -380,7 +339,7 @@ ensure_skill_symlinks() {
     [ -d "$global_dir" ] || return 0
 
     local agent_name agent_dir
-    for agent_name in opencode codex claude-code pi; do
+    for agent_name in codex claude-code; do
         agent_dir=$(skill_agent_dir "$agent_name") || continue
         if [ ! -e "$agent_dir/$skill_name" ]; then
             mkdir -p "$agent_dir"
@@ -401,7 +360,7 @@ install_skill_if_missing() {
     fi
 
     echo "  Installing $skill_name..."
-    bunx --bun skills add "$skill_source" "$@" -g -a claude-code codex opencode pi -y
+    bunx --bun skills add "$skill_source" "$@" -g -a claude-code codex -y
     ensure_skill_symlinks "$skill_name"
 }
 
@@ -427,7 +386,7 @@ install_skill_bundle_if_missing() {
     fi
 
     echo "  Installing bundle $skill_source..."
-    bunx --bun skills add "$skill_source" -g -a claude-code codex opencode pi -y
+    bunx --bun skills add "$skill_source" -g -a claude-code codex -y
     local skill_name
     for skill_name in "${required_skills[@]}"; do
         ensure_skill_symlinks "$skill_name"
@@ -437,8 +396,8 @@ install_skill_bundle_if_missing() {
 section "Skills"
 
 # Sync all existing skills as symlinks for every agent before checking.
-# The skills CLI only creates symlinks for claude-code; codex and opencode
-# need them too so the idempotency check passes.
+# The skills CLI only creates symlinks for claude-code; codex needs them
+# too so the idempotency check passes.
 if [ -d "$HOME/.agents/skills" ]; then
     for _skill_dir in "$HOME/.agents/skills"/*/; do
         ensure_skill_symlinks "$(basename "$_skill_dir")"
@@ -493,12 +452,6 @@ if is_skill_installed_everywhere "emil-design-engineering"; then
 else
     curl -s "https://animations.dev/api/activate-design-engineering?email=lionel.bataille%40hotmail.com" | bash
 fi
-# The curl installer only targets claude-code and codex — symlink for opencode too.
-if [ -d "$HOME/.claude/skills/emil-design-engineering" ] && [ ! -e "$HOME/.config/opencode/skills/emil-design-engineering" ]; then
-    mkdir -p "$HOME/.config/opencode/skills"
-    ln -s "$HOME/.claude/skills/emil-design-engineering" "$HOME/.config/opencode/skills/emil-design-engineering"
-fi
-
 section "Finalization"
 
 # Initialize RTK hooks for all agents (runs last so it can patch copied configs)
@@ -507,7 +460,6 @@ if command -v rtk >/dev/null 2>&1; then
     rtk init -g --auto-patch
     rtk init -g --codex
     rtk init -g --agent cursor
-    rtk init -g --opencode
 fi
 
 printf '\n\033[1;32m  Mac setup is complete!\033[0m\n'

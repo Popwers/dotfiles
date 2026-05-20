@@ -10,6 +10,6 @@ COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
 STRIPPED=$(echo "$COMMAND" | sed -E 's/(-m|--message)[[:space:]]+(("[^"]*")|('\''[^'\'']*'\'')|[^[:space:]]+)//g')
 
 if echo "$STRIPPED" | grep -qE '^\s*git\s+.*\b(commit|push)\b.*--no-verify|^\s*git\s+.*--no-verify\b.*\b(commit|push)\b'; then
-    echo "Blocked: --no-verify bypasses husky hooks (tests, biome, commitlint). Remove the flag and fix the underlying issue." >&2
+    echo "Blocked: --no-verify bypasses husky hooks (tests, vp check, commitlint). Remove the flag and fix the underlying issue." >&2
     exit 2
 fi

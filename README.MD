@@ -11,7 +11,7 @@ The `setup_my_mac.sh` script automates the installation and configuration of var
 3. Sets up fonts (JetBrains Mono Nerd Font and Symbols Only Nerd Font)
 4. Configures Fish shell as the default shell
 5. Installs Fisher (plugin manager for Fish)
-6. Sets up Node Version Manager (NVM) and installs the latest LTS version of Node.js
+6. Installs Vite+ (`vp`) — manages Node.js (`vp env`) and unifies build, dev, lint, fmt, typecheck, and test
 7. Installs global npm packages using Bun
 8. Installs GrepAI and sets up Ollama embeddings (`nomic-embed-text`)
 9. Creates and configures `.profile`, `config.fish`, `.czrc`, and `init.vim` files
@@ -37,7 +37,7 @@ For more details, see the `config.fish` file
 
 ## Profile Configuration
 
-The `.profile` file is set up with environment variables for Homebrew, NVM, and npm. It ensures that these tools are properly loaded and configured in the shell environment.
+The `.profile` file is set up with environment variables for Homebrew, Vite+ (`~/.vite-plus`), and npm. It ensures that these tools are properly loaded and configured in the shell environment.
 
 ## Installed Tools and Utilities
 
@@ -54,25 +54,17 @@ The setup includes various tools and utilities to enhance the development experi
 - FFmpeg (video/audio processing)
 - Scrcpy (Android screen mirroring)
 - Mole (SSH tunnel manager)
-- OpenCode (AI coding agent for terminal)
 - Claude Code (AI coding agent for terminal)
 - GrepAI (semantic code search)
 - Ollama (local embeddings for GrepAI)
 - Android Platform Tools (ADB, fastboot)
-- Node.js (via NVM)
-- Global npm packages: ngrok, npm-check-updates, typescript, commitizen, cz-conventional-changelog, @openai/codex
+- Node.js (via Vite+ `vp env`)
+- Vite+ (`vp`) — unified Vite/Vitest/Oxlint/Oxfmt/tsgo toolchain
+- Global npm packages: ngrok, npm-check-updates, commitizen, cz-conventional-changelog, @openai/codex
 
-## OpenCode
+## Claude Code
 
-OpenCode is an AI coding agent for the terminal. Installed with the following plugins:
-
-- `opencode-supermemory` - Persistent memory system that remembers context across sessions and projects
-- `@tarquinen/opencode-dcp@latest` - Automatically reduces token usage in OpenCode by removing obsolete tool outputs from conversation history.
-- `@franlol/opencode-md-table-formatter@latest` - Markdown table formatter plugin for Opencode with concealment mode support.
-- MCPs: context7, gh_grep, exa
-Claude Code is installed globally through Bun as `@anthropic-ai/claude-code`.
-The shared skills installer now links the same skills into Claude Code, OpenCode, and Codex.
-Claude Code keeps its dedicated instructions in `claude/CLAUDE.md`.
+Claude Code is installed globally through Bun as `@anthropic-ai/claude-code`. The shared skills installer links the same skills into Claude Code and Codex. Claude Code keeps its dedicated instructions in `claude/CLAUDE.md`.
 
 ## Codex
 
@@ -82,17 +74,12 @@ Codex hooks live in `codex/hooks.json` and `codex/hooks/`, and are synced to `~/
 Because Codex hooks are currently Bash-oriented, the validation hooks are implemented as a best-effort shared pipeline: helper startup, command gates, auto-format, typecheck, targeted tests, `as any` scan, UI anti-pattern scan, stop-quality check, and grepai watcher shutdown.
 Custom subagents live in `codex/agents/` and are synced to `~/.codex/agents/` during setup.
 Codex also falls back to repo-level `CLAUDE.md` files when `AGENTS.md` is missing, which makes older Claude-oriented repos usable without extra migration.
-The Codex agent set now mirrors the Claude setup more closely: `repo-explorer`, `review-auditor`, `test-guardian`, `change-implementer`, `docs-researcher`, `planner`, `performance-optimizer`, and `security-reviewer`.
-Keep shared cross-tool behavior in `opencode/AGENTS.md` when it is genuinely shared; keep Codex-specific runtime behavior in `codex/`.
+The Codex agent set mirrors the Claude setup closely: `repo-explorer`, `review-auditor`, `test-guardian`, `change-implementer`, `docs-researcher`, `planner`, `performance-optimizer`, and `security-reviewer`.
 Subagents should stay token-efficient: use targeted discovery (`grepai`, `rg`, `fd`), read narrow line ranges, and return concise summaries instead of large raw outputs.
-
-## Pi
-
-Pi keeps shared global behavior in `pi/AGENTS.md`, runtime defaults in `pi/settings.json`, MCP servers in `pi/mcp.json`, and lifecycle validation in `pi/extensions/hooks.ts`.
 
 ## Cross-agent instruction alignment
 
-Claude Code, Codex, Pi, and OpenCode should keep the same core instructions, frontend skill order, validation expectations, and response contract unless their runtime requires a tool-specific addendum.
+Claude Code and Codex should keep the same core instructions, frontend skill order, validation expectations, and response contract unless their runtime requires a tool-specific addendum.
 
 ## Fonts
 

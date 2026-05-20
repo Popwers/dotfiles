@@ -38,7 +38,12 @@ else
 fi
 
 if [ -n "$TEST_FILE" ] && [ -f "$TEST_FILE" ]; then
-    OUTPUT=$(bun test "$TEST_FILE" 2>&1)
+    if [ -f "$DIR/vite.config.ts" ] || [ -f "$DIR/vite.config.js" ] \
+        || [ -f "$DIR/vite.config.mjs" ] || [ -f "$DIR/vite.config.cjs" ]; then
+        OUTPUT=$(vp test run "$TEST_FILE" 2>&1)
+    else
+        OUTPUT=$(bun test "$TEST_FILE" 2>&1)
+    fi
     if [ $? -ne 0 ]; then
         FAILURES=$(echo "$OUTPUT" | grep -E "(FAIL|Error|✗|×)" | head -10)
         echo "[Tests] Failures in $(basename "$TEST_FILE"):" >&2
