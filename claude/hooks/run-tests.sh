@@ -39,7 +39,8 @@ fi
 
 if [ -n "$TEST_FILE" ] && [ -f "$TEST_FILE" ]; then
     if { [ -f "$DIR/vite.config.ts" ] || [ -f "$DIR/vite.config.js" ] \
-        || [ -f "$DIR/vite.config.mjs" ] || [ -f "$DIR/vite.config.cjs" ]; } \
+        || [ -f "$DIR/vite.config.mts" ] || [ -f "$DIR/vite.config.mjs" ] \
+        || [ -f "$DIR/vite.config.cjs" ]; } \
         && command -v vp >/dev/null 2>&1; then
         OUTPUT=$(vp test run "$TEST_FILE" 2>&1)
     else

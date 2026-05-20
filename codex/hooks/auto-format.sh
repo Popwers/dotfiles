@@ -11,7 +11,8 @@ find_vite_root() {
 
     while [ "$dir" != "/" ]; do
         if [ -f "$dir/vite.config.ts" ] || [ -f "$dir/vite.config.js" ] \
-            || [ -f "$dir/vite.config.mjs" ] || [ -f "$dir/vite.config.cjs" ]; then
+            || [ -f "$dir/vite.config.mts" ] || [ -f "$dir/vite.config.mjs" ] \
+            || [ -f "$dir/vite.config.cjs" ]; then
             printf '%s\n' "$dir"
             return 0
         fi

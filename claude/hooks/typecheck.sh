@@ -11,7 +11,8 @@ if [[ "$FILE" =~ \.(ts|tsx)$ ]] && [ -f "$FILE" ]; then
     while [ "$DIR" != "/" ]; do
         if [ -f "$DIR/tsconfig.json" ]; then
             if { [ -f "$DIR/vite.config.ts" ] || [ -f "$DIR/vite.config.js" ] \
-                || [ -f "$DIR/vite.config.mjs" ] || [ -f "$DIR/vite.config.cjs" ]; } \
+                || [ -f "$DIR/vite.config.mts" ] || [ -f "$DIR/vite.config.mjs" ] \
+                || [ -f "$DIR/vite.config.cjs" ]; } \
                 && command -v vp >/dev/null 2>&1; then
                 ERRORS=$(cd "$DIR" && vp check --no-fmt --no-lint --no-error-on-unmatched-pattern 2>&1 \
                     | grep -E "error TS" | head -10)

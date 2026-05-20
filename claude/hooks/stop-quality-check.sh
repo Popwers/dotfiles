@@ -7,7 +7,8 @@ REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
 
 # Skip if the repo isn't a Vite+ project.
 if ! { [ -f "$REPO_ROOT/vite.config.ts" ] || [ -f "$REPO_ROOT/vite.config.js" ] \
-    || [ -f "$REPO_ROOT/vite.config.mjs" ] || [ -f "$REPO_ROOT/vite.config.cjs" ]; }; then
+    || [ -f "$REPO_ROOT/vite.config.mts" ] || [ -f "$REPO_ROOT/vite.config.mjs" ] \
+    || [ -f "$REPO_ROOT/vite.config.cjs" ]; }; then
     exit 0
 fi
 

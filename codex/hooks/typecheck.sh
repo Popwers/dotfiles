@@ -57,7 +57,8 @@ main() {
     fi
 
     if [ -f "$ts_root/vite.config.ts" ] || [ -f "$ts_root/vite.config.js" ] \
-        || [ -f "$ts_root/vite.config.mjs" ] || [ -f "$ts_root/vite.config.cjs" ]; then
+        || [ -f "$ts_root/vite.config.mts" ] || [ -f "$ts_root/vite.config.mjs" ] \
+        || [ -f "$ts_root/vite.config.cjs" ]; then
         output=$(cd "$ts_root" && vp check --no-fmt --no-lint --no-error-on-unmatched-pattern 2>&1) || true
     else
         output=$(cd "$ts_root" && bunx tsc --noEmit --pretty false 2>&1) || true

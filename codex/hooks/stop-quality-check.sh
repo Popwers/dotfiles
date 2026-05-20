@@ -10,7 +10,8 @@ fi
 
 has_vp_project=0
 if [ -f "$repo_root/vite.config.ts" ] || [ -f "$repo_root/vite.config.js" ] \
-    || [ -f "$repo_root/vite.config.mjs" ] || [ -f "$repo_root/vite.config.cjs" ]; then
+    || [ -f "$repo_root/vite.config.mts" ] || [ -f "$repo_root/vite.config.mjs" ] \
+    || [ -f "$repo_root/vite.config.cjs" ]; then
     has_vp_project=1
 fi
 

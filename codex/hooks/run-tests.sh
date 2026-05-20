@@ -67,7 +67,8 @@ main() {
 
     status=0
     if { [ -f "$root/vite.config.ts" ] || [ -f "$root/vite.config.js" ] \
-        || [ -f "$root/vite.config.mjs" ] || [ -f "$root/vite.config.cjs" ]; } \
+        || [ -f "$root/vite.config.mts" ] || [ -f "$root/vite.config.mjs" ] \
+        || [ -f "$root/vite.config.cjs" ]; } \
         && command -v vp >/dev/null 2>&1; then
         output=$(cd "$root" && vp test run $test_files 2>&1) || status=$?
     else

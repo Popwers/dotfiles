@@ -21,7 +21,8 @@ has_vp_dep() {
 }
 
 has_vite_config() {
-    [ -f vite.config.ts ] || [ -f vite.config.js ] || [ -f vite.config.mjs ] || [ -f vite.config.cjs ]
+    [ -f vite.config.ts ] || [ -f vite.config.js ] \
+        || [ -f vite.config.mts ] || [ -f vite.config.mjs ] || [ -f vite.config.cjs ]
 }
 
 detect_legacy() {

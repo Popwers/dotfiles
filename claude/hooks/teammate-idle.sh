@@ -16,7 +16,8 @@ if [ -n "$MODIFIED_TESTS" ]; then
     REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
     HAS_VP=0
     if [ -n "$REPO_ROOT" ] && { [ -f "$REPO_ROOT/vite.config.ts" ] || [ -f "$REPO_ROOT/vite.config.js" ] \
-        || [ -f "$REPO_ROOT/vite.config.mjs" ] || [ -f "$REPO_ROOT/vite.config.cjs" ]; }; then
+        || [ -f "$REPO_ROOT/vite.config.mts" ] || [ -f "$REPO_ROOT/vite.config.mjs" ] \
+        || [ -f "$REPO_ROOT/vite.config.cjs" ]; }; then
         HAS_VP=1
     fi
     for TEST_FILE in $MODIFIED_TESTS; do
