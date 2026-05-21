@@ -286,6 +286,7 @@ fi
 sync_dir_with_status "$SCRIPT_DIR/claude/agents" "$HOME/.claude/agents"
 sync_dir_with_status "$SCRIPT_DIR/claude/hooks" "$HOME/.claude/hooks"
 sync_dir_with_status "$SCRIPT_DIR/claude/rules" "$HOME/.claude/rules"
+sync_dir_with_status "$SCRIPT_DIR/claude/commands" "$HOME/.claude/commands"
 
 # Ensure bun globals are on PATH for fresh bootstraps
 export PATH="$HOME/.bun/bin:$PATH"

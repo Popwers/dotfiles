@@ -24,6 +24,7 @@ Les configs Claude Code et Codex sont stockées dans ce repo et synchronisées p
 | `claude/agents/`      | `~/.claude/agents/`          | sync   |
 | `claude/rules/`       | `~/.claude/rules/`           | sync   |
 | `claude/hooks/`       | `~/.claude/hooks/`           | sync   |
+| `claude/commands/`    | `~/.claude/commands/`        | sync   |
 | `codex/AGENTS.md`     | `~/.codex/AGENTS.md`         |
 | `codex/config.toml`   | `~/.codex/config.toml`       |
 | `codex/hooks.json`    | `~/.codex/hooks.json`        |

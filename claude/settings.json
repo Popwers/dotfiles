@@ -19,9 +19,6 @@
 			"mcp__plugin_chrome-devtools-mcp_chrome-devtools"
 		],
 		"deny": [
-			"Bash(rm -rf:*)",
-			"Bash(rm -r:*)",
-			"Bash(rm -f:*)",
 			"Bash(sudo:*)",
 			"Bash(su :*)",
 			"Bash(doas :*)",
