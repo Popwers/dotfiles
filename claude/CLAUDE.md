@@ -180,11 +180,15 @@ Hooks handle mechanical verification (`vp check`, tests, `as any`, and UI anti-p
 
 ## Commands
 
+Default to Vite+ (`vp`) for everything it covers — scaffolding, install, dev, build, lint, fmt, typecheck, test, hooks. Reach for a non-`vp` tool only when `vp` genuinely doesn't ship that capability (e.g. `bun` as the runtime, `git`/`gh` for VCS, framework CLIs that own their own Vite instance — see `/migrate-vite`).
+
 - Search: `grepai search "<intent>" --json --compact`, then `rg`/`fd`
-- Deps: `vp install` (delegates to detected package manager), `vpx <bin>` (run local/remote binary)
-- Dev: `vp dev`, `vp build`
-- Quality: `vp check` (lint + fmt + typecheck), `vp test`
-- Project: `vp migrate` (adopt Vite+ in existing repo), `vp run <task>` (cached monorepo tasks), `vp pack` (bundle lib / standalone binary)
+- Scaffold: `vp create` (new project; templates: `react`, `@tanstack/start`, `vue`, `svelte`, `vite:library`, `vite:monorepo`, etc.)
+- Deps: `vp install`, `vp add <pkg>`, `vp remove <pkg>` (delegate to declared `packageManager`); `vpx <bin>` (run local/remote binary)
+- Dev: `vp dev`, `vp build`, `vp preview`
+- Quality: `vp check` (lint + fmt + typecheck — preferred for validation loops); `vp lint`, `vp fmt` for granular runs; `vp test` for the built-in Vitest
+- Scripts: `vp run <script>` runs a `package.json` script (equivalent to `bun run <script>`, with workspace/cache orchestration in monorepos). **Distinct from `vp test`** — `vp test` = built-in Vitest, `vp run test` = the `test` script declared in `package.json`
+- Project: `vp migrate` (adopt Vite+ in existing repo — see `/migrate-vite`), `vp pack` (bundle lib / standalone binary), `vp implode` (remove Vite+ from repo)
 - Git: `git status`, `git diff --staged`, `git log --oneline -10`
 
 ## Stack

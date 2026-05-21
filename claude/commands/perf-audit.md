@@ -1,85 +1,66 @@
 ---
-description: Audit the current repo against the Linear performance playbook (esnext target, per-package chunks, modulePreload, animation tokens, render-first-auth) and apply fixes.
+description: Audit perf du repo (render-first-auth, optimistic mutations, asset loading) et applique les fixes sans casser le build.
 ---
 
-Audit performance du repo courant contre le **Linear playbook** (https://performance.dev/how-is-linear-so-fast-a-technical-breakdown). Identifie les écarts et applique les fixes — sans casser le build.
+Audit performance du repo courant. Identifie les écarts sur les trois axes ci-dessous et applique les fixes — sans toucher au runtime métier.
 
 ## Pré-requis
 
-- Repo Vite+ (sinon, lance `/migrate-vite` d'abord).
-- Stack frontale présente (React, Astro, Tanstack Start, ou équivalent). Sinon skip avec une note.
+- Stack frontale (React, Astro, TanStack Start, SvelteKit, ou équivalent). Sinon skip avec une note.
+- Le repo build (`vp build` ou la CLI framework). Sinon, signale-le et reste en audit-only.
 
-## Audit en 5 axes
+## Axes d'audit
 
-### 1. Build target & bundling (vite.config.ts)
+### 1. Render-first-auth (apps avec login)
 
-Vérifie dans `vite.config.ts` :
+Le premier paint **ne doit jamais bloquer** sur un appel réseau. Un marker local décide si on render le shell cached avant d'appeler le réseau.
 
-- [ ] `build.target: "esnext"` — pas de polyfills ES5, pas de nomodule fallback. Bundle ~50% plus léger.
-- [ ] `build.modulePreload.polyfill: false` — confiance dans le `<link rel="modulepreload">` natif (tous les navigateurs >= 2022).
-- [ ] `build.rollupOptions.output.manualChunks` avec stratégie **par package** (un chunk par dep top-level >~3 KB). Cache invalidation indépendante entre deploys.
+Si le repo a un flow d'auth (BetterAuth, NextAuth, TanStack auth, JWT custom) :
 
-Si absents, ajoute le bloc `build:` complet en t'inspirant du gist de référence :
-```
-curl -fsSL https://gist.githubusercontent.com/Popwers/e112d96aea101e5aa35311048644d9cf/raw/vite.config.ts | grep -A 25 'build:'
-```
+- [ ] Détection synchrone d'un marker local (`localStorage`, IndexedDB key, ou cookie hint) avant le premier render.
+- [ ] Shell + layout cached rendus immédiatement quand le marker existe (theme, sidebar, dernière route, derniers tokens UI).
+- [ ] Validation du token en background — déclenchée **après** la première frame, pas avant.
+- [ ] Redirect `401` async, jamais bloquant. L'utilisateur voit le shell puis le redirect, jamais un full-screen spinner d'auth.
+- [ ] Aucun `await fetchUser()` / `await getSession()` au-dessus du premier `<Suspense>` / `+layout` / `root.tsx`.
 
-### 2. Animation tokens (CSS)
+Si absent, propose un patch du root (`root.tsx`, `+layout.svelte`, `app/layout.tsx`, `src/main.tsx`) avec le pattern marker → shell → background-validate → async-redirect.
 
-Cherche `transition`, `animation-duration`, `--speed-` dans le repo.
+### 2. Optimistic mutations
 
-- [ ] Existe un fichier de tokens (`tokens.css`, `app.css`, `globals.css`) avec les 4 tokens `--speed-*` ? Sinon, propose le bloc :
-  ```css
-  --speed-highlightFadeIn: 0s;
-  --speed-quickTransition: 0.1s;
-  --speed-regularTransition: 0.25s;
-  --speed-slowTransition: 0.35s;
-  ```
-- [ ] Aucune transition > 350 ms en dehors d'animations décoratives explicitement nommées.
-- [ ] Aucun `transition: all` (interdit — toujours nommer la prop).
-- [ ] Animations sur `transform` / `opacity` uniquement. Flag tout `transition: width|height|top|left|margin|padding` (force layout reflow).
+Si TanStack Query, SWR, Legend State, ou une couche de mutation custom sont présents :
 
-### 3. Render-first-auth (pour apps avec login)
+- [ ] Toutes les mutations à feedback immédiat (toggle, rename, reorder, status change, like) utilisent `onMutate` / `optimisticUpdate` / écriture locale avant le réseau.
+- [ ] Aucun spinner pour les actions locales courtes. Si un état "saving" est nécessaire, il est inline (subtil), pas bloquant.
+- [ ] Rollback explicite sur erreur serveur — l'état local revient à la valeur pré-mutation et un toast surface l'échec.
+- [ ] Pas de `await mutate()` qui bloque la fermeture d'un dialog ou la navigation. La nav part en parallèle de la requête.
 
-Si le repo a un flow d'auth (BetterAuth, NextAuth, Tanstack auth, custom JWT) :
+Si des mutations critiques ne sont pas optimistes, liste les fichiers et propose la conversion (sans appliquer si >20 lignes par mutation — surface-le en reco).
 
-- [ ] Le premier paint ne bloque pas sur `fetchUser()` / `getSession()`.
-- [ ] Un marker localStorage (ou cookie léger) détermine si on render le shell cached avant validation.
-- [ ] Le 401 redirect est async, pas bloquant.
+### 3. Asset loading
 
-Si non, propose un patch du `root.tsx` / `+layout.svelte` / équivalent.
-
-### 4. Optimistic mutations
-
-Si TanStack Query, SWR, ou Legend State sont présents :
-
-- [ ] Les mutations critiques (update title, toggle status, etc.) utilisent `optimisticUpdate` / `onMutate`.
-- [ ] Pas de spinner > 100 ms pour des actions locales.
-- [ ] Rollback explicite sur erreur serveur.
-
-### 5. Asset loading
-
-- [ ] Fonts : variables (un seul fichier woff2 pour toute l'axis weight) avec `font-display: swap` et `<link rel="preload">` + `crossorigin="anonymous"`.
-- [ ] Pas de Google Fonts en runtime (self-host).
-- [ ] Images critiques (above-the-fold) en `<img loading="eager" fetchpriority="high">`, le reste en `loading="lazy"`.
-- [ ] Service worker pour précache des assets hashés (optionnel, mais bonus si app installable).
+- [ ] **Fonts** : variables (un seul woff2 pour tout l'axis weight), `font-display: swap`, `<link rel="preload">` + `crossorigin="anonymous"` sur les fonts above-the-fold.
+- [ ] Aucune Google Fonts en runtime — self-host (via `@fontsource-variable/*` ou copie locale).
+- [ ] **Images critiques** (above-the-fold, LCP candidate) : `<img loading="eager" fetchpriority="high" decoding="async">` + dimensions explicites pour éviter CLS.
+- [ ] Reste des images : `loading="lazy"` + dimensions explicites.
+- [ ] Pas de `<img>` non dimensionnée dans un layout fluide (CLS garanti).
+- [ ] Icônes : sprite SVG ou composants inline, pas de requête par icône.
+- [ ] Service worker pour précache des assets hashés (bonus si app installable / offline-friendly).
 
 ## Format de sortie
 
 Pour chaque axe :
-1. **Status** (PASS / PARTIAL / FAIL / SKIP)
-2. **Findings** (fichier:ligne pour chaque écart)
-3. **Fix appliqué** (diff résumé) ou **Fix recommandé** (si invasif)
+1. **Status** : PASS / PARTIAL / FAIL / SKIP
+2. **Findings** : `fichier:ligne` pour chaque écart
+3. **Action** : diff résumé du fix appliqué, ou patch recommandé si invasif
 
 À la fin :
-- **Avant / après** : taille du bundle (`vp build && du -sh dist/`), nombre de chunks, taille du chunk principal.
+- **Avant / après** : taille bundle + nombre de requêtes au premier paint (si `vp build` ou équivalent fonctionne).
 - **Commits** suggérés (un par axe touché), via `cz` ou `ga`.
 
 ## Garde-fous
 
-- Ne touche **pas** au runtime metier — uniquement build config, CSS tokens, et patterns de loading.
-- Si un fix demande de refactorer du code applicatif (>20 lignes), surface-le en recommandation, ne l'applique pas.
-- Si le repo est un monorepo, audite chaque package séparément et résume en tableau.
-- Bench réel avant/après uniquement si le repo a un `vp build` qui marche.
+- Pas de refactor du runtime métier — uniquement boot order, mutation wiring, et asset loading.
+- Si un fix demande >20 lignes de refactor applicatif sur un même endroit, surface-le en reco — ne l'applique pas.
+- Monorepo : audite chaque package séparément, résume en tableau.
 
 Procède.
