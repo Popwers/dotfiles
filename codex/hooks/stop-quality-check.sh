@@ -51,8 +51,12 @@ for file in "${modified[@]}"; do
 done
 
 if [ "$has_vp_project" -eq 1 ] && command -v vp >/dev/null 2>&1; then
+    # Strip ANSI escapes, then keep only lines that look like an actual issue label
+    # (`error:`, `warn:`, `warning:`) — not the `pass: Found no warnings or lint errors`
+    # success line, which previously triggered a false positive on the substring match.
     lint_output=$( (cd "$repo_root" && vp check --no-error-on-unmatched-pattern "${modified[@]}") 2>&1 \
-        | grep -E "(error|warning)" | head -5 || true)
+        | sed -E 's/\x1b\[[0-9;]*m//g' \
+        | grep -E "^(error|warn(ing)?):" | head -5 || true)
     if [ -n "$lint_output" ]; then
         printf -v issues '%s[vp check] Fix before completing:\n%s\n\n' "$issues" "$lint_output"
     fi

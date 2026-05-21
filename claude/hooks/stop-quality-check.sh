@@ -46,8 +46,12 @@ fi
 
 # Full quality gate on all modified files: fmt + lint + typecheck.
 if command -v vp &>/dev/null; then
+    # Strip ANSI escapes, then keep only lines that look like an actual issue label
+    # (`error:`, `warn:`, `warning:`) — not the `pass: Found no warnings or lint errors`
+    # success line, which previously triggered a false positive on the substring match.
     lint_output=$( (cd "$REPO_ROOT" && vp check --no-error-on-unmatched-pattern "${MODIFIED[@]}") 2>&1 \
-        | grep -E "(error|warning)" | head -5)
+        | sed -E 's/\x1b\[[0-9;]*m//g' \
+        | grep -E "^(error|warn(ing)?):" | head -5)
     if [ -n "$lint_output" ]; then
         ISSUES+="[vp check] Fix before completing:\n${lint_output}\n\n"
     fi
