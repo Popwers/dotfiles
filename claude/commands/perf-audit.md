@@ -67,14 +67,50 @@ Si des mutations critiques ne sont pas optimistes, liste les fichiers et propose
 
 ## Format de sortie
 
-Pour chaque axe :
-1. **Status** : PASS / PARTIAL / FAIL / SKIP
-2. **Findings** : `fichier:ligne` pour chaque écart
-3. **Action** : diff résumé du fix appliqué, ou patch recommandé si invasif
+**Tout le rapport est en français. Sois bref — pas de paragraphes, pas de redite des critères.**
 
-À la fin :
-- **Avant / après** : taille bundle + nombre de requêtes au premier paint (si `vp build` ou équivalent fonctionne).
-- **Commits** suggérés (un par axe touché), via `cz` ou `ga`.
+### 1. Tableau récap (toujours en premier)
+
+Une ligne par axe. Pas de détail ici, juste le scan.
+
+| Axe | Statut | Écarts | Fixés | Reste |
+|-----|--------|--------|-------|-------|
+| Render-first-auth | ✅/⚠️/❌/— | 0 | 0 | 0 |
+| Mutations optimistes | … | … | … | … |
+| Asset loading | … | … | … | … |
+| Build & bundler | … | … | … | … |
+| Rendering granulaire | … | … | … | … |
+
+Légende statut : ✅ PASS · ⚠️ PARTIAL · ❌ FAIL · — SKIP.
+
+### 2. Détails (uniquement si écarts)
+
+Pour chaque axe ⚠️/❌, une sous-section ultra-courte :
+
+```
+### Axe N — <nom>
+- <fichier:ligne> — <constat en 1 ligne>  → fixé / reco
+```
+
+Pas de citation de code, pas de re-explication du critère. Si fix appliqué, mentionne le fichier touché, c'est tout.
+
+### 3. Bundle (si build dispo)
+
+Une ligne : `Bundle gzip : <avant> → <après> · Requêtes 1er paint : <avant> → <après>`. Sinon : `Build indisponible — audit-only`.
+
+### 4. Recommandations à exécuter (toujours en dernier)
+
+Liste numérotée des actions **non appliquées** que l'utilisateur doit lancer lui-même. Une ligne par reco, format :
+
+```
+1. <action impérative courte> — <fichier ou commande> — <impact attendu>
+```
+
+Si rien à exécuter : `Aucune reco — tout est appliqué.`
+
+### 5. Commits suggérés
+
+Une ligne par axe touché, format `cz`/`ga` prêt à coller. Skip si aucun fix appliqué.
 
 ## Garde-fous
 
