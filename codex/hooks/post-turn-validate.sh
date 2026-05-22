@@ -17,32 +17,26 @@ if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
     exit 0
 fi
 
-AUTO_FORMAT_RESULT=$("$SCRIPT_DIR/auto-format.sh")
-TYPECHECK_RESULT=$("$SCRIPT_DIR/typecheck.sh")
+QUALITY_RESULT=$("$SCRIPT_DIR/quality-check.sh")
 TEST_RESULT=$("$SCRIPT_DIR/run-tests.sh")
 AS_ANY_RESULT=$("$SCRIPT_DIR/check-as-any.sh")
 IMPECCABLE_RESULT=$("$SCRIPT_DIR/impeccable-check.sh")
 
-python3 - "$AUTO_FORMAT_RESULT" "$TYPECHECK_RESULT" "$TEST_RESULT" "$AS_ANY_RESULT" "$IMPECCABLE_RESULT" <<'PY'
+python3 - "$QUALITY_RESULT" "$TEST_RESULT" "$AS_ANY_RESULT" "$IMPECCABLE_RESULT" <<'PY'
 import json
 import sys
 
-auto = json.loads(sys.argv[1])
-typecheck = json.loads(sys.argv[2])
-tests = json.loads(sys.argv[3])
-as_any = json.loads(sys.argv[4])
-impeccable = json.loads(sys.argv[5])
+quality = json.loads(sys.argv[1])
+tests = json.loads(sys.argv[2])
+as_any = json.loads(sys.argv[3])
+impeccable = json.loads(sys.argv[4])
 
 messages = []
 should_continue = False
 
-if auto["status"] == "changed":
+if quality["status"] in ("changed", "failed"):
     should_continue = True
-    messages.append(auto["message"])
-
-if typecheck["status"] == "failed":
-    should_continue = True
-    messages.append(typecheck["message"])
+    messages.append(quality["message"])
 
 if tests["status"] == "failed":
     should_continue = True

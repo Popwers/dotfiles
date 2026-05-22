@@ -116,19 +116,43 @@ Si un `Makefile` existe à la racine, aligne les targets qui wrappent l'outillag
 
 10. **Patch les targets concernées** dans le `Makefile`, en gardant les targets qui orchestrent du non-vp (`docker`, `migrate db`, scripts shell custom). Si une target dépendait d'un script `package.json` retiré au step C, redirige-la directement vers la commande `vp` équivalente plutôt que via `vp run <script>`.
 
-### F. Polish & validation
+### F. Docs projet (README, CLAUDE.md, AGENTS.md)
 
-11. **Fix tsconfig pour tsgolint** (résout les soucis `baseUrl` que tsgo refuse) :
+Les docs racine référencent probablement encore l'ancien outillage — commandes citées dans le README, instructions dans `CLAUDE.md` / `AGENTS.md` / `CONTRIBUTING.md`. Mapping courant :
+
+| Avant                                  | Après                                  |
+|----------------------------------------|----------------------------------------|
+| `bun install` / `npm install`          | `vp install`                           |
+| `bun run dev`                          | `vp dev` (ou CLI meta-framework)       |
+| `bun run build`                        | `vp build` (ou CLI meta-framework)     |
+| `bun test` / `vitest` / `jest`         | `vp test`                              |
+| `eslint .` / `biome lint .`            | `vp lint` (ou `vp check`)              |
+| `prettier --write .` / `biome fmt .`   | `vp fmt`                               |
+| `tsc --noEmit`                         | inclus dans `vp check`                 |
+| chaîne `lint && test && build`         | `vp check && vp test && vp build`      |
+| sections `husky` / `lefthook` / `lint-staged` | `vp config` + bloc `staged:` |
+
+11. **Détecte les docs à patcher** :
+    ```sh
+    rg -l '\b(bun run|npm run|yarn|pnpm run)\s+(dev|build|lint|fmt|format|typecheck|test|check)\b' README.md CLAUDE.md AGENTS.md CONTRIBUTING.md docs/ 2>/dev/null
+    rg -l '\b(eslint|prettier|husky|lefthook|lint-staged|@biomejs|biome|vitest|jest|tsc --noEmit|tsx |ts-node)\b' README.md CLAUDE.md AGENTS.md CONTRIBUTING.md docs/ 2>/dev/null
+    ```
+
+12. **Patch les références** vers leurs équivalents `vp` dans les fichiers détectés. Garde les CLI meta-framework si présentes (Astro `astro dev`, Next `next dev`, Nuxt `nuxt dev`, SvelteKit, TanStack **Start**). Met aussi à jour les badges (`shields.io`) qui référencent l'outillage legacy.
+
+### G. Polish & validation
+
+13. **Fix tsconfig pour tsgolint** (résout les soucis `baseUrl` que tsgo refuse) :
     ```sh
     bunx @andrewbranch/ts5to6 --fixBaseUrl .
     ```
 
-12. **Nettoyage global du code** (Oxfmt + auto-fix Oxlint sur tout le repo) :
+14. **Nettoyage global du code** (Oxfmt + auto-fix Oxlint sur tout le repo) :
     ```sh
     vp check --fix
     ```
 
-13. **Valide la chaîne complète** :
+15. **Valide la chaîne complète** :
     ```sh
     vp install
     vp check    # lint + fmt + typecheck (sans --fix)
@@ -136,11 +160,12 @@ Si un `Makefile` existe à la racine, aligne les targets qui wrappent l'outillag
     vp build    # si applicable
     ```
 
-### G. Commits (via `cz` ou `ga`)
+### H. Commits (via `cz` ou `ga`)
 
-14. **Découpe en commits cohérents** :
+16. **Découpe en commits cohérents** :
     - `chore: drop legacy stack (husky, biome, commitlint, prettier, eslint, ...)` — suppressions de deps + configs
     - `feat(toolchain): adopt Vite+ (vp) for lint/fmt/typecheck/hooks` — `vite.config.ts` + `.vite-hooks/` + imports `vite-plus`
+    - `docs: realign README / CLAUDE.md / AGENTS.md with vp` — réécriture des commandes citées dans les docs
 
 ## Garde-fous
 
@@ -157,6 +182,7 @@ Pour chaque sous-projet migré :
 - Fichiers supprimés (liste)
 - Deps supprimées (liste)
 - Diff du `package.json` scripts
+- Docs patchées (README, CLAUDE.md, AGENTS.md — liste + nb de refs réécrites)
 - Résultat de `vp check` (PASS / liste d'issues si FAIL)
 - Manual follow-up restant (si applicable)
 
