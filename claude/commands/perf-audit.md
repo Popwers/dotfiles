@@ -45,6 +45,25 @@ Si des mutations critiques ne sont pas optimistes, liste les fichiers et propose
 - [ ] Pas de `<img>` non dimensionnée dans un layout fluide (CLS garanti).
 - [ ] Icônes : sprite SVG ou composants inline, pas de requête par icône.
 - [ ] Service worker pour précache des assets hashés (bonus si app installable / offline-friendly).
+- [ ] **Critical CSS inliné** dans `<head>` (shell, theme tokens) — pas de stylesheet externe bloquante avant le premier paint.
+- [ ] **Boot script inliné** (lecture `localStorage`, theme, marker auth) avant que les bundles JS soient parsés.
+- [ ] **Modulepreload + `crossorigin`** sur les chunks critiques dans `<head>` pour paralléliser les downloads.
+
+### 4. Build & bundler config (Linear-style)
+
+- [ ] `target: "esnext"` dans la config Vite/build — aucune transpile ES5, aucun polyfill legacy.
+- [ ] **Per-package vendoring** : chaque dépendance npm >~3KB a son propre chunk (`manualChunks` par package) pour cache invalidation indépendante.
+- [ ] Tree-shaking agressif activé, dead code éliminé (vérifier qu'aucune lib n'est importée en barrel-import qui défait le shaking).
+- [ ] Code splitting route-level — un chunk par route, chargé on-demand (pas un bundle monolithique).
+
+### 5. Rendering granulaire (apps avec state lourd)
+
+- [ ] **Observables par propriété**, pas par modèle — Legend State / MobX : une mutation d'un champ ne re-render que les cellules qui le lisent, pas la liste entière.
+- [ ] Liste de N items + mutation locale = N petits re-renders ciblés, jamais un re-render global de la liste.
+- [ ] **Lazy hydration** des collections lourdes (Issues, Comments, ce qui équivaut chez nous) — chargées à la demande, pas au boot.
+- [ ] **Animations compositor-only** : préférer `transform` / `opacity` à `width`/`height`/`top`/`left` (qui déclenchent layout/paint). Avec **Motion** : privilégier `x`, `y`, `scale`, `rotate`, `opacity`. Éviter le prop `layout` sur des listes longues ou des éléments above-the-fold — il déclenche du reflow (acceptable ponctuellement, pas en boucle).
+- [ ] Durées 100-250ms (sous le seuil de perception 300ms). Asymétrie OK : apparition instantanée, fade-out 150ms pour popovers. Avec Motion, des `easing` custom courts (`[0.22, 1, 0.36, 1]` style) > durées longues.
+- [ ] **Command palette local** si présent : recherche dans le store client (Legend State / IndexedDB), pas de requête serveur par frappe.
 
 ## Format de sortie
 
@@ -59,8 +78,9 @@ Pour chaque axe :
 
 ## Garde-fous
 
-- Pas de refactor du runtime métier — uniquement boot order, mutation wiring, et asset loading.
+- Pas de refactor du runtime métier — uniquement boot order, mutation wiring, asset loading, bundler config et animation primitives.
 - Si un fix demande >20 lignes de refactor applicatif sur un même endroit, surface-le en reco — ne l'applique pas.
+- Migration vers observables granulaires (axe 5) : ne JAMAIS l'appliquer en masse — surface en reco avec liste des composants impactés.
 - Monorepo : audite chaque package séparément, résume en tableau.
 
 Procède.
