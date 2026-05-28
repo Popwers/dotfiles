@@ -32,7 +32,14 @@ function opencode
 
     command mkdir -p $state_dir
 
+    # Acquire the lock; treat a lock held for >~5s as stale (crashed session) and reclaim it.
+    set -l lock_attempts 0
     while not command mkdir $lock_dir 2>/dev/null
+        set lock_attempts (math $lock_attempts + 1)
+        if test $lock_attempts -ge 100
+            command rmdir $lock_dir 2>/dev/null
+            set lock_attempts 0
+        end
         sleep 0.05
     end
 
@@ -69,7 +76,14 @@ function opencode
 
     command opencode $argv
 
+    # Acquire the lock; treat a lock held for >~5s as stale (crashed session) and reclaim it.
+    set -l lock_attempts 0
     while not command mkdir $lock_dir 2>/dev/null
+        set lock_attempts (math $lock_attempts + 1)
+        if test $lock_attempts -ge 100
+            command rmdir $lock_dir 2>/dev/null
+            set lock_attempts 0
+        end
         sleep 0.05
     end
 
