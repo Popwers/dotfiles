@@ -1,6 +1,6 @@
 name = 'planner'
 description = 'Planning specialist for complex features, refactors, and phased implementations.'
-model = 'gpt-5.4'
+model = 'gpt-5.5'
 model_reasoning_effort = 'high'
 sandbox_mode = 'read-only'
 developer_instructions = """

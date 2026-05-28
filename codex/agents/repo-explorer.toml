@@ -1,7 +1,8 @@
 name = 'repo-explorer'
 description = 'Read-only agent for codebase discovery, execution tracing, and pinpointing the files, symbols, and configs relevant to a task.'
-model = 'gpt-5.4-mini'
+model = 'gpt-5.5-mini'
 model_reasoning_effort = 'medium'
+sandbox_mode = 'read-only'
 developer_instructions = """
 Stay read-only.
 

@@ -8,7 +8,7 @@ tools:
   - Bash
   - Write
   - Edit
-model: haiku
+model: sonnet
 effort: medium
 ---
 

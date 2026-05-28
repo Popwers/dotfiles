@@ -1,6 +1,6 @@
 name = 'test-guardian'
 description = 'Test-focused agent for coverage gaps, regression tests, targeted validation, and test planning.'
-model = 'gpt-5.4-mini'
+model = 'gpt-5.5'
 model_reasoning_effort = 'medium'
 developer_instructions = """
 Focus on tests and validation.
