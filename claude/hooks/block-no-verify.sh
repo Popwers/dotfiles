@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Block --no-verify on git commits/push to preserve husky hooks pipeline.
+# Block --no-verify on git commits/push to preserve the Vite+ commit hooks pipeline.
 # PreToolUse/Bash — exit 2 to block, stderr shown as reason.
 
 INPUT=$(cat)
@@ -10,6 +10,6 @@ COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
 STRIPPED=$(echo "$COMMAND" | sed -E 's/(-m|--message)[[:space:]]+(("[^"]*")|('\''[^'\'']*'\'')|[^[:space:]]+)//g')
 
 if echo "$STRIPPED" | grep -qE '^\s*git\s+.*\b(commit|push)\b.*--no-verify|^\s*git\s+.*--no-verify\b.*\b(commit|push)\b'; then
-    echo "Blocked: --no-verify bypasses husky hooks (tests, vp check, commitlint). Remove the flag and fix the underlying issue." >&2
+    echo "Blocked: --no-verify bypasses the Vite+ commit hooks in .vite-hooks/ (vp check + tests). Remove the flag and fix the underlying issue." >&2
     exit 2
 fi
