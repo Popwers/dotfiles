@@ -25,11 +25,12 @@ Les configs Claude Code et Codex sont stockées dans ce repo et synchronisées p
 | `claude/rules/`       | `~/.claude/rules/`           | sync   |
 | `claude/hooks/`       | `~/.claude/hooks/`           | sync   |
 | `claude/commands/`    | `~/.claude/commands/`        | sync   |
-| `codex/AGENTS.md`     | `~/.codex/AGENTS.md`         |
-| `codex/config.toml`   | `~/.codex/config.toml`       |
-| `codex/hooks.json`    | `~/.codex/hooks.json`        |
-| `codex/agents/`       | `~/.codex/agents/`           |
-| `codex/hooks/`        | `~/.codex/hooks/`            |
+| `claude/claudeignore.template` | `~/.claude/claudeignore.template` | copy |
+| `codex/AGENTS.md`     | `~/.codex/AGENTS.md`         | copy   |
+| `codex/config.toml`   | `~/.codex/config.toml`       | copy   |
+| `codex/hooks.json`    | `~/.codex/hooks.json`        | copy   |
+| `codex/agents/`       | `~/.codex/agents/`           | sync   |
+| `codex/hooks/`        | `~/.codex/hooks/`            | sync   |
 
 ## Anti-patterns
 

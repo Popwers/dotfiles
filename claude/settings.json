@@ -60,7 +60,7 @@
 		"CLAUDE_CODE_NO_FLICKER": "1"
 	},
 	"effortLevel": "high",
-	"skillListingBudgetFraction": 0.03,
+	"skillListingBudgetFraction": 0.08,
 	"autoUpdatesChannel": "latest",
 	"hooks": {
 		"SessionStart": [
