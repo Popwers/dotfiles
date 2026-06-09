@@ -54,7 +54,7 @@ Never volunteer dev-time estimates or warn that a task is "long", "complex", or 
 
 - Read enough to make the change with confidence, then act. If a task touches more than 5 files, split into phases or delegate to a subagent.
 - Assume a solution exists; search before declaring a blocker.
-- Use minimum relevant skills; for frontend: `shadcn` → `impeccable` → `emil-design-engineering` → `motion`.
+- Use minimum relevant skills; for frontend: `shadcn` → `impeccable` → `emil-design-engineering`. Animations use Motion.dev — fetch current docs via context7.
 - Prefer existing repo toolchain; introduce new dependencies only for genuine gaps.
 - Autonomous bug fixing: when given a bug report, own it fully. Trace logs, errors, failing tests — resolve them.
 
@@ -75,7 +75,7 @@ Examples:
 
 ## Skill policy
 
-Before starting any task, check if an installed skill matches the request. Skills provide specialized knowledge and workflows that outperform general-purpose reasoning. Use the Skill tool proactively — the user should not have to ask for it. Priority chain for frontend: `shadcn` → `impeccable` → `emil-design-engineering` → `motion`.
+Before starting any task, check if an installed skill matches the request. Skills provide specialized knowledge and workflows that outperform general-purpose reasoning. Use the Skill tool proactively — the user should not have to ask for it. Priority chain for frontend: `shadcn` → `impeccable` → `emil-design-engineering`. For animations, use Motion.dev (no dedicated skill — pull current docs via context7).
 
 ## Execution workflow
 
@@ -89,12 +89,7 @@ Break multi-file refactors into phases. Complete, verify, get approval before ne
 
 ### Subagent Delegation
 
-Delegate to subagents to keep the main context clean. Types: `Explore` (read-only scanning), `Plan` (architecture), `general-purpose` (full-capability).
-
-Delegate when: read-heavy parallel work, codebase discovery, multi-angle review. One task per subagent with narrow scope. Use `run_in_background: true` for independent work.
-Keep in main context: decisions, synthesis, final implementation, simple single-file changes.
-
-Sequential pattern for complex tasks: Research (Explore) → Plan → Implement → Review → Verify. Use `/compact` between phases.
+Delegate to subagents to keep the main context clean — model tiers, delegation criteria, token discipline, and swarming rules live in `rules/agents.md`.
 
 ## Failure Recovery
 
@@ -147,7 +142,6 @@ Hooks handle mechanical verification (`vp check`, tests, `as any`, and UI anti-p
 
 Default to Vite+ (`vp`) for everything it covers — scaffolding, install, dev, build, lint, fmt, typecheck, test, hooks. Reach for a non-`vp` tool only when `vp` genuinely doesn't ship that capability (e.g. `bun` as the runtime, `git`/`gh` for VCS, framework CLIs that own their own Vite instance — see `/migrate-vite`).
 
-- Search: `grepai search "<intent>" --json --compact`, then `rg`/`fd`
 - Scaffold: `vp create` (new project; templates: `react`, `@tanstack/start`, `vue`, `svelte`, `vite:library`, `vite:monorepo`, etc.)
 - Deps: `vp install`, `vp add <pkg>`, `vp remove <pkg>` (delegate to declared `packageManager`); `vpx <bin>` (run local/remote binary)
 - Dev: `vp dev`, `vp build`, `vp preview`
@@ -193,7 +187,7 @@ Naming conventions:
 - Keep argument counts low; no optional args unless truly optional
 - Never use `as any` — write a typed helper or use a type guard instead
 - Bias toward fewer lines, but never at the expense of type safety or readability
-- Comments: written in English only. Use them when they help the reader — JSDoc with behavior + `@param`/`@returns` on exported functions, hooks, and components; short `//` labels above logical blocks (event handlers, animation steps, conditional branches) as scanning aids, even when slightly redundant; short `//` lines above non-obvious logic (security constraint, business rule, edge case, workaround). Section dividers (multi-line ASCII-art `/** --- CONTROLLERS --- */` style or single-line variants) are fine in any file. **Preserve the author's original formatting on cleanup** — do not auto-collapse multi-line `/** */` blocks into single-line `//`, do not strip ASCII decoration from labeled dividers; multi-line JSDoc with multiple sentences is intentional documentation, leave it. Cleanup deletes only clear anti-patterns: comments that restate the symbol name verbatim, standalone ticket IDs / commit refs / caller lists (rot — belongs in PR), pure ASCII decoration with no label, banners at the top of a single-purpose file with no internal sections. Cleanup also translates French → English (preserve the original block format) and converts 3+ stacked `//` lines for one continuous explanation into a single `/** */` block
+- Comments: full policy in `rules/code-quality.md` § Comments — English only, JSDoc on exports, preserve the author's original formatting on cleanup
 
 ### React and State
 

@@ -48,7 +48,7 @@
 		"padding": 0
 	},
 	"autoConnectIde": true,
-	"model": "claude-opus-4-8",
+	"model": "claude-fable-5[1m]",
 	"env": {
 		"ENABLE_TOOL_SEARCH": "1",
 		"CLAUDE_ENABLE_STREAM_WATCHDOG": "1",

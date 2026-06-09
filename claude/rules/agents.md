@@ -7,7 +7,22 @@ globs: "**"
 
 - `model: haiku` — read-only agents, repetitive tasks, clear instructions, worker subagents
 - `model: sonnet` — implementation, testing, review, most coding tasks
-- `model: opus` — complex debugging, security analysis, architectural decisions, multi-file reasoning, planning after first attempt failed
+- `model: opus` — complex debugging, multi-file reasoning, planning after first attempt failed
+- `model: fable` — top tier: security analysis, architectural decisions, hardest debugging, high-stakes planning (2× opus cost — reserve for work where correctness matters most)
+
+# Subagent Delegation
+
+Delegate to subagents to keep the main context clean. Types: `Explore` (read-only scanning), `Plan` (architecture), `general-purpose` (full-capability).
+
+Delegate when: read-heavy parallel work, codebase discovery, multi-angle review. Keep in main context: decisions, synthesis, final implementation, simple single-file changes.
+
+Sequential pattern for complex tasks: Research (Explore) → Plan → Implement → Review → Verify. Use `/compact` between phases.
+
+# Subagent Token Discipline
+
+- Return summaries with file paths and line numbers, not large pasted excerpts
+- One task per subagent with narrow scope and concrete deliverable
+- Use haiku-model subagents for read-only exploration and search
 
 # Parallel Execution
 

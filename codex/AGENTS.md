@@ -54,7 +54,7 @@ Never volunteer dev-time estimates or warn that a task is "long", "complex", or 
 
 - Read enough to make the change with confidence, then act. If a task touches more than 5 files, split into phases or delegate to a subagent.
 - Assume a solution exists; search before declaring a blocker.
-- Use minimum relevant skills; for frontend: `shadcn` → `impeccable` → `emil-design-engineering` → `motion`.
+- Use minimum relevant skills; for frontend: `shadcn` → `impeccable` → `emil-design-engineering`. Animations use Motion.dev — fetch current docs via context7.
 - Prefer existing repo toolchain; introduce new dependencies only for genuine gaps.
 - Autonomous bug fixing: when given a bug report, own it fully. Trace logs, errors, failing tests — resolve them.
 
@@ -75,7 +75,7 @@ Examples:
 
 ## Skill policy
 
-Before starting any task, check if an installed skill matches the request. Skills provide specialized knowledge and workflows that outperform general-purpose reasoning. Use the Skill tool proactively — the user should not have to ask for it. Priority chain for frontend: `shadcn` → `impeccable` → `emil-design-engineering` → `motion`.
+Before starting any task, check if an installed skill matches the request. Skills provide specialized knowledge and workflows that outperform general-purpose reasoning. Use the Skill tool proactively — the user should not have to ask for it. Priority chain for frontend: `shadcn` → `impeccable` → `emil-design-engineering`. For animations, use Motion.dev (no dedicated skill — pull current docs via context7).
 
 ## Execution workflow
 

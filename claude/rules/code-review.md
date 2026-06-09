@@ -29,3 +29,7 @@ When evaluating your own work, present two opposing views: what a perfectionist 
 ## Fresh Eyes Pass
 
 When asked to test your own output, adopt a new-user persona. Walk through the feature as if you've never seen the project. Flag anything confusing, friction-heavy, or unclear.
+
+## Bug Autopsy
+
+After fixing a bug, reflect on why it happened and whether anything could prevent that category of bug in the future. Understanding the root cause is as valuable as the fix itself.

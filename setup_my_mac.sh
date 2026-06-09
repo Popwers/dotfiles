@@ -436,6 +436,37 @@ done
 
 install_skill_bundle_if_missing "shadcn/ui" "shadcn"
 
+# Prune skills dropped from the loadout (redundant with CLAUDE.md policy, hooks, or other skills).
+# Keeps re-runs and fresh machines consistent with the curated set.
+declare -a pruned_skills=(
+    "agent-browser"
+    "playwright"
+    "grepai-init"
+    "grepai-mcp-claude"
+    "grepai-search-basics"
+    "grepai-search-tips"
+    "grepai-trace-callees"
+    "grepai-trace-callers"
+    "grepai-watch-daemon"
+    "grepai-workspaces"
+)
+
+prunable=""
+for skill_name in "${pruned_skills[@]}"; do
+    if [ -e "$HOME/.agents/skills/$skill_name" ]; then
+        prunable="$prunable $skill_name"
+    fi
+done
+
+if [ -n "$prunable" ]; then
+    echo "  Pruning:$prunable..."
+    # shellcheck disable=SC2086 — intentional word splitting on skill names
+    bunx --bun skills remove $prunable -g -y
+    ok "Pruned skills"
+else
+    skip "Pruned skills (none present)"
+fi
+
 # Activate the design-engineering skill for frontend work.
 if is_skill_installed_everywhere "emil-design-engineering"; then
     skip "emil-design-engineering"

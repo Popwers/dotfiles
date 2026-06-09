@@ -20,6 +20,7 @@ eval "$(echo "$input" | jq -r '
 
 # ── Model icon (nerd font) ────────────────────────────────────
 case "$MODEL" in
+    *Fable*)  MODEL_ICON="󰂺";;
     *Opus*)   MODEL_ICON="󰧑";;
     *Sonnet*) MODEL_ICON="󰖙";;
     *Haiku*)  MODEL_ICON="󰌪";;
