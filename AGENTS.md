@@ -161,7 +161,9 @@ if ! grep -q $(which fish) /etc/shells; then  # Check before modifying
 
 ## INSTALLED TOOLS
 
-**Via Homebrew:** curl, wget, bash, git, vim, neovim, bun, fish, oh-my-posh, bat, eza, fd, ripgrep, ffmpeg, scrcpy, mole, rtk
+**Via Homebrew:** curl, wget, bash, git, vim, neovim, bun, fish, oh-my-posh, bat, eza, fd, ripgrep, ffmpeg, scrcpy, mole, rtk, uv
+
+**Via uv (tools):** serena-agent (Serena — LSP-based symbolic navigation MCP for Claude Code + Codex), graphifyy (Graphify — one-shot knowledge-graph maps, `/graphify` skill in Claude Code)
 
 **Via Cask:** android-platform-tools
 

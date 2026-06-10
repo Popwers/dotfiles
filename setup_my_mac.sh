@@ -38,7 +38,7 @@ fi
 brew update && brew upgrade
 
 # Install formulas (only missing ones to avoid noise)
-brew_formulas=(curl wget bash git gh vim neovim oven-sh/bun/bun fish jandedobbeleer/oh-my-posh/oh-my-posh bat eza fd ripgrep ffmpeg scrcpy tw93/tap/mole rtk)
+brew_formulas=(curl wget bash git gh vim neovim oven-sh/bun/bun fish jandedobbeleer/oh-my-posh/oh-my-posh bat eza fd ripgrep ffmpeg scrcpy tw93/tap/mole rtk uv)
 installed_formulas=$(brew list --formula -1 2>/dev/null)
 missing_formulas=()
 for f in "${brew_formulas[@]}"; do
@@ -56,11 +56,15 @@ fi
 
 section "Ollama"
 
-# Install Ollama only when missing
-if command -v ollama >/dev/null 2>&1 || brew list --formula ollama >/dev/null 2>&1; then
+# The Homebrew formula ships Ollama without the llama-server runner (embeddings fail with HTTP 500).
+# Use the official app cask instead, and migrate away from the broken formula if present.
+if brew list --formula ollama >/dev/null 2>&1; then
+    brew uninstall --formula ollama
+fi
+if brew list --cask ollama-app >/dev/null 2>&1; then
     skip "Ollama"
 else
-    brew install ollama
+    brew install --cask ollama-app
 fi
 
 # Start Ollama (if not already running) and pull default embeddings model
@@ -238,6 +242,27 @@ else
     curl -sSL https://raw.githubusercontent.com/yoanbernabeu/grepai/main/install.sh | sh
 fi
 
+# uv installs CLI tools into ~/.local/bin — make sure it's reachable for the rest of the script.
+export PATH="$HOME/.local/bin:$PATH"
+
+# Install Serena (LSP-based symbolic code navigation MCP — https://github.com/oraios/serena)
+if command -v serena >/dev/null 2>&1; then
+    skip "Serena"
+else
+    uv tool install -p 3.13 serena-agent
+    serena init
+    ok "Serena"
+fi
+
+# Install Graphify CLI (one-shot knowledge-graph maps — https://github.com/safishamsi/graphify)
+# PyPI package is temporarily named graphifyy; the CLI and skill are still `graphify`.
+if command -v graphify >/dev/null 2>&1; then
+    skip "Graphify"
+else
+    uv tool install graphifyy
+    ok "Graphify"
+fi
+
 # Copy Codex configuration
 copy_file_with_status "$SCRIPT_DIR/codex/AGENTS.md" "$HOME/.codex/AGENTS.md"
 copy_file_with_status "$SCRIPT_DIR/codex/config.toml" "$HOME/.codex/config.toml"
@@ -278,6 +303,12 @@ if command -v claude &>/dev/null; then
     }
     register_mcp_if_missing "context7" --transport http --scope user context7 https://mcp.context7.com/mcp --header "CONTEXT7_API_KEY:ctx7sk-1c3efdc8-aec6-417e-9cca-e36ed9696664"
     register_mcp_if_missing "gh_grep" --transport http --scope user gh_grep https://mcp.grep.app
+    # Serena — official Claude Code global setup (per-workspace project via --project-from-cwd)
+    if command -v serena >/dev/null 2>&1; then
+        register_mcp_if_missing "serena" --scope user serena -- serena start-mcp-server --context claude-code --project-from-cwd
+    else
+        warn "serena CLI not found, skipping Serena MCP registration"
+    fi
     # register_mcp_if_missing "exa" --transport http --scope user exa https://mcp.exa.ai --header "x-api-key:469853ea-7c4e-499e-8113-621615e8ebd2"
     unset -f register_mcp_if_missing
 else
@@ -287,6 +318,15 @@ sync_dir_with_status "$SCRIPT_DIR/claude/agents" "$HOME/.claude/agents"
 sync_dir_with_status "$SCRIPT_DIR/claude/hooks" "$HOME/.claude/hooks"
 sync_dir_with_status "$SCRIPT_DIR/claude/rules" "$HOME/.claude/rules"
 sync_dir_with_status "$SCRIPT_DIR/claude/commands" "$HOME/.claude/commands"
+
+# Install the Graphify skill (/graphify) — manages itself under ~/.claude/skills/graphify
+if [ -e "$HOME/.claude/skills/graphify" ]; then
+    skip "Graphify skill"
+elif command -v graphify >/dev/null 2>&1; then
+    graphify install && ok "Graphify skill"
+else
+    warn "graphify CLI not found, skipping Graphify skill install"
+fi
 
 # Ensure bun globals are on PATH for fresh bootstraps
 export PATH="$HOME/.bun/bin:$PATH"

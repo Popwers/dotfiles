@@ -55,3 +55,10 @@ url = "https://mcp.exa.ai"
 
 [mcp_servers.exa.http_headers]
 x-api-key = "469853ea-7c4e-499e-8113-621615e8ebd2"
+
+# Serena — LSP-based symbolic code navigation (official Codex setup block).
+[mcp_servers.serena]
+enabled = true
+startup_timeout_sec = 15
+command = "serena"
+args = ["start-mcp-server", "--project-from-cwd", "--context=codex"]

@@ -58,18 +58,24 @@ Never volunteer dev-time estimates or warn that a task is "long", "complex", or 
 - Prefer existing repo toolchain; introduce new dependencies only for genuine gaps.
 - Autonomous bug fixing: when given a bug report, own it fully. Trace logs, errors, failing tests — resolve them.
 
-## Search policy
+## Search & code navigation policy
 
 For exploratory/discovery searches (intent-based, conceptual, "how does X work"):
 → Use `grepai search "<intent>" --json --compact` via Bash first, then narrow with Grep/rg if needed.
 
+For symbol-level work (definition, callers/references, reading one function, rename impact):
+→ Use Serena MCP tools (`get_symbols_overview`, `find_symbol`, `find_referencing_symbols`) instead of reading whole files. Read a full file only when you actually need the whole file.
+
 For exact pattern searches (known symbol, import, specific string):
 → Built-in Grep tool or `rg` directly is fine.
 
-This overrides the default "always use Grep" behavior. Fall back to Grep silently if grepai is unavailable.
+Before broad exploration of an unfamiliar codebase: if `graphify-out/GRAPH_REPORT.md` exists, read it first — it replaces several discovery rounds. Generate one via `/graphify .` only when explicitly asked or starting deep work on an unknown repo.
+
+This overrides the default "always use Grep" behavior. Fall back silently to grepai/Grep if Serena is unavailable. Never ask two tools the same question "to be sure". Full policy: `rules/code-navigation.md`.
 
 Examples:
 - `grepai search "authentication flow" --json --compact`
+- Serena `find_referencing_symbols` on `getUserCA` before changing its signature
 - `rg "validateToken" --type ts`
 - `fd "*.tsx" src/`
 

@@ -16,6 +16,7 @@
 			"mcp__claude_ai_Figma",
 			"mcp__claude_ai_Linear",
 			"mcp__gh_grep",
+			"mcp__serena",
 			"mcp__claude_ai_Exa",
 			"mcp__plugin_chrome-devtools-mcp_chrome-devtools"
 		],
@@ -68,8 +69,8 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "pgrep -x ollama > /dev/null || nohup ollama serve > /dev/null 2>&1 &",
-						"timeout": 10,
+						"command": "pgrep -x ollama > /dev/null || nohup ollama serve > /dev/null 2>&1 & for i in $(seq 1 16); do ollama list >/dev/null 2>&1 && break; sleep 0.5; done; exit 0",
+						"timeout": 15,
 						"statusMessage": "Starting ollama..."
 					},
 					{
@@ -89,6 +90,23 @@
 						"command": "~/.claude/hooks/repo-init.sh",
 						"timeout": 15,
 						"statusMessage": "Checking Vite+ repo state..."
+					},
+					{
+						"type": "command",
+						"command": "command -v serena-hooks >/dev/null 2>&1 && serena-hooks activate --client=claude-code; exit 0",
+						"timeout": 15,
+						"statusMessage": "Activating Serena project..."
+					}
+				]
+			}
+		],
+		"SessionEnd": [
+			{
+				"hooks": [
+					{
+						"type": "command",
+						"command": "command -v serena-hooks >/dev/null 2>&1 && serena-hooks cleanup --client=claude-code; exit 0",
+						"timeout": 10
 					}
 				]
 			}
@@ -101,6 +119,26 @@
 						"type": "command",
 						"command": "~/.claude/hooks/block-no-verify.sh",
 						"timeout": 5
+					}
+				]
+			},
+			{
+				"matcher": "Read|Grep|Glob",
+				"hooks": [
+					{
+						"type": "command",
+						"command": "command -v serena-hooks >/dev/null 2>&1 && serena-hooks remind --client=claude-code; exit 0",
+						"timeout": 10
+					}
+				]
+			},
+			{
+				"matcher": "mcp__serena__*",
+				"hooks": [
+					{
+						"type": "command",
+						"command": "command -v serena-hooks >/dev/null 2>&1 && serena-hooks auto-approve --client=claude-code; exit 0",
+						"timeout": 10
 					}
 				]
 			},
