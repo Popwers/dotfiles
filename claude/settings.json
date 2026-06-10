@@ -49,7 +49,7 @@
 		"padding": 0
 	},
 	"autoConnectIde": true,
-	"model": "claude-fable-5[1m]",
+	"model": "claude-fable-5",
 	"env": {
 		"ENABLE_TOOL_SEARCH": "1",
 		"CLAUDE_ENABLE_STREAM_WATCHDOG": "1",
