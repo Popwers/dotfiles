@@ -254,6 +254,13 @@ else
     ok "Serena"
 fi
 
+# Keep the Serena dashboard available but stop it from opening a browser tab on every session start.
+SERENA_CONFIG="$HOME/.serena/serena_config.yml"
+if [ -f "$SERENA_CONFIG" ] && grep -q "^web_dashboard_open_on_launch: true" "$SERENA_CONFIG"; then
+    sed -i '' 's/^web_dashboard_open_on_launch: true/web_dashboard_open_on_launch: false/' "$SERENA_CONFIG"
+    ok "Serena dashboard auto-open disabled"
+fi
+
 # Install Graphify CLI (one-shot knowledge-graph maps — https://github.com/safishamsi/graphify)
 # PyPI package is temporarily named graphifyy; the CLI and skill are still `graphify`.
 if command -v graphify >/dev/null 2>&1; then
