@@ -254,11 +254,12 @@ else
     ok "Serena"
 fi
 
-# Keep the Serena dashboard available but stop it from opening a browser tab on every session start.
+# The Serena web dashboard is unused — disable it entirely (no local server, no browser tab on launch).
 SERENA_CONFIG="$HOME/.serena/serena_config.yml"
-if [ -f "$SERENA_CONFIG" ] && grep -q "^web_dashboard_open_on_launch: true" "$SERENA_CONFIG"; then
-    sed -i '' 's/^web_dashboard_open_on_launch: true/web_dashboard_open_on_launch: false/' "$SERENA_CONFIG"
-    ok "Serena dashboard auto-open disabled"
+if [ -f "$SERENA_CONFIG" ] && grep -qE "^(web_dashboard|web_dashboard_open_on_launch): true" "$SERENA_CONFIG"; then
+    sed -i '' -e 's/^web_dashboard: true/web_dashboard: false/' \
+        -e 's/^web_dashboard_open_on_launch: true/web_dashboard_open_on_launch: false/' "$SERENA_CONFIG"
+    ok "Serena dashboard disabled"
 fi
 
 # Install Graphify CLI (one-shot knowledge-graph maps — https://github.com/safishamsi/graphify)
