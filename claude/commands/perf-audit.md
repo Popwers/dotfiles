@@ -1,13 +1,24 @@
 ---
 description: Audit perf du repo (render-first-auth, optimistic mutations, asset loading) et applique les fixes sans casser le build.
+allowed-tools: Bash(ls:*), Bash(grep:*)
 ---
 
 Audit performance du repo courant. Identifie les écarts sur les trois axes ci-dessous et applique les fixes — sans toucher au runtime métier.
 
+## Contexte injecté
+
+- Manifests : !`ls package.json bun.lock* vite.config.* astro.config.* svelte.config.* next.config.* 2>/dev/null || echo "aucun"`
+- Frameworks détectés : !`grep -oE '"(react|react-dom|astro|@tanstack/react-start|@sveltejs/kit|svelte|next|@legendapp/state|@tanstack/react-query|swr|motion|better-auth|next-auth)"' package.json 2>/dev/null | sort -u`
+
 ## Pré-requis
 
-- Stack frontale (React, Astro, TanStack Start, SvelteKit, ou équivalent). Sinon skip avec une note.
+- Stack frontale (React, Astro, TanStack Start, SvelteKit, ou équivalent — voir contexte injecté). Sinon skip avec une note.
 - Le repo build (`vp build` ou la CLI framework). Sinon, signale-le et reste en audit-only.
+
+## Délégation
+
+- **Scan** : audite les axes en parallèle via des subagents read-only (`repo-explorer`, un par axe ou par paire d'axes proches). Chacun retourne `fichier:ligne — constat`, pas d'extraits longs.
+- **Fixes** : les fixes ponctuels s'appliquent dans le contexte principal. Quand un axe entier demande correction (ex. bundler config + vendoring, conversion d'un lot de mutations), délègue à `performance-optimizer` avec un scope de fichiers explicite et les garde-fous ci-dessous.
 
 ## Axes d'audit
 

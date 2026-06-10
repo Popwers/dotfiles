@@ -1,5 +1,7 @@
 ---
-description: Optimise le Dockerfile de n'importe quelle app (Node, Bun, Deno, Go, Rust, Python, statique…) en image runtime minimale — multi-stage, base minimale adaptée au runtime, artefact runtime-only quand le bundle/binaire est auto-suffisant — avec vérification runtime avant commit. Un schéma complet Bun + Nitro (TanStack Start) est fourni en annexe.
+description: Optimise le Dockerfile du repo en image runtime minimale — multi-stage, base adaptée au runtime, Tier 1/2 selon l'auto-suffisance de l'artefact — avec vérification runtime avant commit.
+allowed-tools: Bash(ls:*), Bash(grep:*)
+disable-model-invocation: true
 ---
 
 Optimise le Dockerfile du repo courant pour produire l'image de prod la plus petite possible **sans rien casser**. La recette est **générale** — elle vaut pour Node, Bun, Deno, Go, Rust, Python, ou un front statique. Le principe directeur ne change pas d'une stack à l'autre ; seuls l'artefact de build et la base runtime changent.
@@ -28,11 +30,14 @@ Le Tier 1 est l'objectif. **On ne descend au Tier 2 que si l'étape B le prouve*
 ## Procédure générique
 
 ### A. Détecter la stack & le runtime
-```sh
-ls package.json bun.lock* go.mod Cargo.toml pyproject.toml requirements.txt 2>/dev/null
-grep -E '"packageManager"|"scripts"' package.json 2>/dev/null
-```
-Identifie : runtime (node/bun/deno/go/rust/python/statique), gestionnaire de paquets, commande de build, et le **chemin de l'artefact** produit (`.output/`, `dist/`, `build/`, un binaire, etc.).
+
+Contexte pré-injecté à l'invocation :
+
+- Manifests : !`ls package.json bun.lock* go.mod Cargo.toml pyproject.toml requirements.txt 2>/dev/null || echo "aucun"`
+- Docker existant : !`ls Dockerfile* .dockerignore docker-entrypoint.sh 2>/dev/null || echo "aucun"`
+- Package manager & build : !`grep -E '"packageManager"|"build"' package.json 2>/dev/null || echo "n/a"`
+
+À partir de ça, identifie : runtime (node/bun/deno/go/rust/python/statique), gestionnaire de paquets, commande de build, et le **chemin de l'artefact** produit (`.output/`, `dist/`, `build/`, un binaire, etc.).
 
 ### B. Prouver l'auto-suffisance de l'artefact (décide Tier 1 vs Tier 2)
 - **Binaire compilé** (Go/Rust) → Tier 1 d'office ; la seule question est `scratch` vs `distroless/static` (certif TLS, timezone).

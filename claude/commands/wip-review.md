@@ -1,16 +1,25 @@
 ---
 description: Self-review du travail en cours (WIP) — scope, anti-régression, audit, /code-review, fix. S'arrête avant commit pour laisser place aux tests manuels.
+allowed-tools: Bash(git status:*), Bash(git branch:*), Bash(git rev-parse:*), Bash(git diff:*), Bash(git log:*)
 ---
 
 Review du diff local avant que je le valide moi-même. Pas de push, pas de commit, pas de PR — juste s'assurer que ce que je viens de faire est solide et identifier ce que je dois tester manuellement.
 
+## Contexte injecté
+
+- Branche : !`git branch --show-current`
+- Upstream : !`git rev-parse --abbrev-ref @{u} 2>/dev/null || echo "aucun"`
+- Status : !`git status --short`
+- Diff local (stat) : !`git diff HEAD --stat`
+- Commits non-pushés : !`git log @{u}..HEAD --oneline 2>/dev/null || git log master..HEAD --oneline 2>/dev/null | head -15`
+
 ## 1. Détecter le scope
 
-Identifie ce qui doit être review, par ordre de priorité :
+À partir du contexte injecté ci-dessus, par ordre de priorité :
 
-1. Unstaged + staged : `git diff HEAD`
-2. Commits non-pushés, si la branche suit un upstream : `git log @{u}..HEAD` puis `git diff @{u}...HEAD` (si pas d'upstream, passe au point 3)
-3. Sinon : `git diff master...HEAD` (depuis la divergence avec master)
+1. Diff local (stat) non vide → le scope est `git diff HEAD`
+2. Sinon, commits non-pushés avec upstream → `git diff @{u}...HEAD`
+3. Sinon → `git diff master...HEAD` (depuis la divergence avec master)
 
 Si tout est vide, demande à l'utilisateur ce qu'il veut review puis stoppe.
 
@@ -37,13 +46,18 @@ Pour chaque écran/feature touchée :
 
 Cette liste sera rappelée dans le rapport final sous "À tester manuellement".
 
-## 3. Audit ciblé
+## 3. Audit ciblé (subagents en parallèle)
 
-- **Sécurité** : auth + ownership sur les routes mutantes (create / update / delete), inputs validés à la frontière, secrets non commités, pas de stack trace leak côté client, pas de bypass de policy
-- **Type safety** : 0 `as any`, 0 `@ts-ignore`, 0 cast non justifié. Si la lib force un typage loose (Strapi document API), `as never` est OK
-- **Seeds & valeurs par défaut** : tout nouveau champ obligatoire doit avoir une valeur par défaut dans le seed, et ne doit pas casser les rows existantes en prod
-- **Perf** : pas de N+1 query, pas de re-render en cascade sur Legend State (callbacks recréés, sélecteurs trop larges), pas de fetch dans une boucle
-- **Robustesse serveur** : validation produit toujours un feedback observable (throw, log warn, ou message user) — jamais de silent skip. Mutations multi-étapes transactionnelles
+Lance les deux subagents **en parallèle dans un seul message**, chacun avec la liste exacte des fichiers du scope :
+
+- **`security-reviewer`** — auth + ownership sur les routes mutantes (create / update / delete), inputs validés à la frontière, secrets non commités, pas de stack trace leak côté client, pas de bypass de policy
+- **`review-auditor`** — les quatre axes restants :
+  - Type safety : 0 `as any`, 0 `@ts-ignore`, 0 cast non justifié. Si la lib force un typage loose (Strapi document API), `as never` est OK
+  - Seeds & valeurs par défaut : tout nouveau champ obligatoire doit avoir une valeur par défaut dans le seed, et ne doit pas casser les rows existantes en prod
+  - Perf : pas de N+1 query, pas de re-render en cascade sur Legend State (callbacks recréés, sélecteurs trop larges), pas de fetch dans une boucle
+  - Robustesse serveur : validation produit toujours un feedback observable (throw, log warn, ou message user) — jamais de silent skip. Mutations multi-étapes transactionnelles
+
+Exige des deux un retour compact au format `fichier:ligne — constat — sévérité`, sans extraits de code longs. Synthèse et fixes restent dans le contexte principal — les subagents ne modifient rien.
 
 ## 4. /code-review high + fix
 

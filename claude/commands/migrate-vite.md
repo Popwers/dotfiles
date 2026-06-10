@@ -1,8 +1,15 @@
 ---
-description: Migrate the current repo to Vite+ (vp) via `vp migrate --no-interactive`, then layer Lionel's config + verify imports + clean residual legacy deps.
+description: Migre le repo courant vers Vite+ (vp) via `vp migrate --no-interactive`, puis overlay la config Lionel, vérifie les imports et nettoie les deps legacy.
+allowed-tools: Bash(bun pm ls:*), Bash(ls:*)
+disable-model-invocation: true
 ---
 
 Migre ce projet vers Vite+ (`vp`). Le flow : on laisse `vp migrate` faire le gros du boulot (réécriture imports, génération `vite.config.ts`, hooks), puis on overlay les overrides Lionel + on nettoie ce que l'outil ne touche pas.
+
+## Contexte injecté
+
+- Versions vite/vitest : !`bun pm ls vite vitest 2>/dev/null || echo "indéterminé — vérifier à l'étape A"`
+- Configs legacy présentes : !`ls -d .eslintrc* .eslintignore .prettierrc* .prettierignore biome.json rome.json dprint.json lefthook.yml .pre-commit-config.yaml .lintstagedrc* commitlint.config.* jest.config.* .husky 2>/dev/null || echo "aucune"`
 
 ## Ce que Vite+ remplace
 
@@ -42,7 +49,7 @@ curl -fsSL https://gist.githubusercontent.com/Popwers/e112d96aea101e5aa353110486
    vp help migrate
    ```
 
-2. **Vérifie les versions** (`vp migrate` exige Vite ≥ 8 et Vitest ≥ 4.1) :
+2. **Vérifie les versions** (`vp migrate` exige Vite ≥ 8 et Vitest ≥ 4.1) — déjà dans le contexte injecté ; si indéterminé :
    ```sh
    bun pm ls vite vitest 2>/dev/null || bunx --bun list vite vitest
    ```
