@@ -305,8 +305,11 @@ if command -v claude &>/dev/null; then
         if echo "$registered_mcps" | grep -q "$name"; then
             skip "MCP $name"
         else
-            claude mcp add "$@" >/dev/null 2>&1 || true
-            ok "MCP $name"
+            if claude mcp add "$@" >/dev/null 2>&1; then
+                ok "MCP $name"
+            else
+                warn "MCP $name registration failed — run manually: claude mcp add $*"
+            fi
         fi
     }
     register_mcp_if_missing "context7" --transport http --scope user context7 https://mcp.context7.com/mcp --header "CONTEXT7_API_KEY:ctx7sk-1c3efdc8-aec6-417e-9cca-e36ed9696664"
