@@ -39,7 +39,9 @@ battery_icon() {
 }
 
 # ── Git (cached 5s) ────────────────────────────────────────────
-CACHE_FILE="/tmp/claude-statusline-git"
+[ -d "$DIR" ] && cd "$DIR" 2>/dev/null
+DIR_KEY=$(printf '%s' "$DIR" | cksum | cut -d' ' -f1)
+CACHE_FILE="/tmp/claude-statusline-git-$DIR_KEY"
 CACHE_MAX_AGE=5
 
 cache_is_stale() {
