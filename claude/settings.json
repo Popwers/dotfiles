@@ -60,7 +60,7 @@
 		"CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "85",
 		"CLAUDE_CODE_NO_FLICKER": "1"
 	},
-	"effortLevel": "high",
+	"effortLevel": "medium",
 	"skillListingBudgetFraction": 0.08,
 	"autoUpdatesChannel": "latest",
 	"hooks": {
