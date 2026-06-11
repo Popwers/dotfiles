@@ -1,6 +1,6 @@
 # DOTFILES KNOWLEDGE BASE
 
-**Generated:** 2026-05-20 | **Commit:** d05f5fd | **Branch:** master
+**Generated:** 2026-06-11 | **Commit:** 0b09386 | **Branch:** master
 
 ## OVERVIEW
 
@@ -19,7 +19,13 @@ dotfiles/
 ├── claude/             # Claude Code config (synced to ~/.claude/)
 │   ├── CLAUDE.md       # Global agent instructions
 │   ├── settings.json   # Global settings
-│   └── agents/         # Custom subagents
+│   ├── defaults.json   # Merged into ~/.claude.json (model defaults etc.)
+│   ├── statusline.sh   # Status line script for Claude Code
+│   ├── claudeignore.template  # Template for per-project .claudeignore
+│   ├── agents/         # Custom subagents
+│   ├── commands/       # Custom slash commands
+│   ├── hooks/          # Lifecycle hook scripts
+│   └── rules/          # Reusable rule files (code quality, git, etc.)
 ├── codex/              # Codex config (synced to ~/.codex/)
 │   ├── AGENTS.md       # Global Codex instructions
 │   ├── config.toml     # Central config
@@ -40,6 +46,7 @@ upsys                                          # System update (after setup)
 fish -c "source ~/.config/fish/config.fish"   # Apply fish config changes
 bash -n setup_my_mac.sh                        # Validate bash syntax
 fish -n config.fish                            # Validate fish syntax
+./verify.sh                                    # One-command validation (syntax checks + quick sanity)
 ```
 
 **No test suite** — config repo. Validation via shell syntax check.
@@ -50,11 +57,11 @@ fish -n config.fish                            # Validate fish syntax
 |------|----------|-------|
 | Add shell alias | `config.fish` L9-23 | alias section |
 | Add brew package | `setup_my_mac.sh` L41 | `brew_formulas=(...)` array |
-| Add Fisher plugin | `setup_my_mac.sh` L152-153 | `fisher install` section |
-| Add global npm pkg | `setup_my_mac.sh` L167 | `bun install -g` loop |
+| Add Fisher plugin | `setup_my_mac.sh` L156-157 | `fisher install` section |
+| Add global npm pkg | `setup_my_mac.sh` L171-180 | `for pkg in` loop, `bun install -g` at L180 |
 | Change git settings | `.gitconfig` | Edit file directly |
 | Modify vim settings | `init.vim` | Standard vimscript |
-| Add PATH entry | `config.fish` L121-127 | `fish_add_path` section |
+| Add PATH entry | `config.fish` L135-141 | `fish_add_path` section (includes `~/.opencode/bin`) |
 
 ## CODE STYLE
 
@@ -161,15 +168,15 @@ if ! grep -q $(which fish) /etc/shells; then  # Check before modifying
 
 ## INSTALLED TOOLS
 
-**Via Homebrew:** curl, wget, bash, git, vim, neovim, bun, fish, oh-my-posh, bat, eza, fd, ripgrep, ffmpeg, scrcpy, mole, rtk, uv
+**Via Homebrew:** curl, wget, bash, git, gh, vim, neovim, bun, fish, oh-my-posh, bat, eza, fd, ripgrep, ffmpeg, scrcpy, mole, rtk, uv
 
 **Via uv (tools):** serena-agent (Serena — LSP-based symbolic navigation MCP for Claude Code + Codex), graphifyy (Graphify — one-shot knowledge-graph maps, `/graphify` skill in Claude Code)
 
-**Via Cask:** android-platform-tools
+**Via Cask:** android-platform-tools, ollama-app (replaces broken `ollama` formula; also pulls the `nomic-embed-text` embedding model via `ollama pull`)
 
 **Via Bun (global):** ngrok, npm-check-updates, commitizen, cz-conventional-changelog, @openai/codex, impeccable
 
-**Via official installer:** Claude Code (`curl -fsSL https://claude.ai/install.sh | bash`)
+**Via official installer:** Claude Code (`curl -fsSL https://claude.ai/install.sh | bash`), grepai (`curl -sSL https://raw.githubusercontent.com/yoanbernabeu/grepai/main/install.sh | sh`)
 
 **Codex fallbacks:** `CLAUDE.md` is accepted as a fallback project instruction file when `AGENTS.md` is missing
 
