@@ -22,8 +22,8 @@
 		],
 		"deny": [
 			"Bash(sudo:*)",
-			"Bash(su :*)",
-			"Bash(doas :*)",
+			"Bash(su:*)",
+			"Bash(doas:*)",
 			"Bash(chmod 777:*)",
 			"Bash(git push --force:*)",
 			"Bash(git push -f:*)",
