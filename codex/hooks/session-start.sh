@@ -8,7 +8,6 @@ fi
 
 if command -v grepai >/dev/null 2>&1; then
     grepai status >/dev/null 2>&1 || grepai init --yes >/dev/null 2>&1 || true
-    grep -qsx '.grepai/' .gitignore 2>/dev/null || printf '%s\n' '.grepai/' >> .gitignore
     grepai watch --background >/dev/null 2>&1 || true
 fi
 

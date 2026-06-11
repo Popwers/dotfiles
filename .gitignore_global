@@ -1,0 +1,5 @@
+# Global gitignore (core.excludesfile) — tool artifacts ignored in every repo.
+# Synced to ~/.gitignore_global by setup_my_mac.sh.
+.serena/
+.grepai/
+graphify-out/

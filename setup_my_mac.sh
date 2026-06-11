@@ -232,6 +232,7 @@ section "Configuration"
 copy_file_with_status "$SCRIPT_DIR/.profile" "$HOME/.profile"
 copy_file_with_status "$SCRIPT_DIR/.czrc" "$HOME/.czrc"
 copy_file_with_status "$SCRIPT_DIR/.gitconfig" "$HOME/.gitconfig"
+copy_file_with_status "$SCRIPT_DIR/.gitignore_global" "$HOME/.gitignore_global"
 copy_file_with_status "$SCRIPT_DIR/config.fish" "$HOME/.config/fish/config.fish"
 copy_file_with_status "$SCRIPT_DIR/init.vim" "$HOME/.config/nvim/init.vim"
 
