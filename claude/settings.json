@@ -107,6 +107,12 @@
 						"type": "command",
 						"command": "command -v serena-hooks >/dev/null 2>&1 && serena-hooks cleanup --client=claude-code; exit 0",
 						"timeout": 10
+					},
+					{
+						"type": "command",
+						"command": "command -v grepai >/dev/null 2>&1 && grepai watch --stop >/dev/null 2>&1; exit 0",
+						"timeout": 10,
+						"statusMessage": "Stopping grepai watcher..."
 					}
 				]
 			}
@@ -199,12 +205,6 @@
 						"command": "~/.claude/hooks/stop-quality-check.sh",
 						"timeout": 60,
 						"statusMessage": "Verifying task quality..."
-					},
-					{
-						"type": "command",
-						"command": "command -v grepai >/dev/null 2>&1 && grepai watch --stop >/dev/null 2>&1; exit 0",
-						"timeout": 10,
-						"statusMessage": "Stopping grepai watcher..."
 					}
 				]
 			}
