@@ -2,6 +2,10 @@
 # Stop hook — verify quality before ending the turn.
 # Exit 0 = allow stop, Exit 2 = block stop + send feedback so Claude fixes issues.
 
+INPUT=$(cat)
+SESSION_ID=$(echo "$INPUT" | jq -r '.session_id // empty' 2>/dev/null)
+MARKER="/tmp/claude-session-markers/$SESSION_ID"
+
 REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
 [ -z "$REPO_ROOT" ] && exit 0
 
@@ -18,7 +22,11 @@ while IFS= read -r -d '' rel; do
     case "$rel" in
         *.ts|*.tsx|*.js|*.jsx|*.mjs|*.cjs)
             abs="$REPO_ROOT/$rel"
-            [ -f "$abs" ] && MODIFIED+=("$abs")
+            [ -f "$abs" ] || continue
+            if [ -n "$SESSION_ID" ] && [ -f "$MARKER" ] && [ ! "$abs" -nt "$MARKER" ]; then
+                continue
+            fi
+            MODIFIED+=("$abs")
             ;;
     esac
 done < <(

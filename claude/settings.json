@@ -96,6 +96,12 @@
 						"command": "command -v serena-hooks >/dev/null 2>&1 && serena-hooks activate --client=claude-code; exit 0",
 						"timeout": 15,
 						"statusMessage": "Activating Serena project..."
+					},
+					{
+						"type": "command",
+						"command": "jq -r '.session_id // empty' | { read -r sid; [ -n \"$sid\" ] && mkdir -p /tmp/claude-session-markers && touch \"/tmp/claude-session-markers/$sid\"; }; exit 0",
+						"timeout": 5,
+						"statusMessage": "Marking session start..."
 					}
 				]
 			}
