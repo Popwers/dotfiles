@@ -11,7 +11,10 @@
 			"Write",
 			"Glob",
 			"Grep",
-			"Bash(*)",
+			"Bash",
+			"WebFetch",
+			"WebSearch",
+			"Skill",
 			"mcp__context7",
 			"mcp__claude_ai_Figma",
 			"mcp__claude_ai_Linear",
@@ -61,6 +64,8 @@
 		"CLAUDE_CODE_NO_FLICKER": "1"
 	},
 	"effortLevel": "medium",
+	"spinnerTipsEnabled": false,
+	"prefersReducedMotion": false,
 	"skillListingBudgetFraction": 0.08,
 	"autoUpdatesChannel": "latest",
 	"hooks": {
