@@ -7,8 +7,7 @@ globs: "**"
 
 - `model: haiku` — read-only agents, repetitive tasks, clear instructions, worker subagents
 - `model: sonnet` — implementation, testing, review, most coding tasks
-- `model: opus` — complex debugging, multi-file reasoning, planning after first attempt failed
-- `model: fable` — top tier: security analysis, architectural decisions, hardest debugging, high-stakes planning (2× opus cost — reserve for work where correctness matters most)
+- `model: opus` — top tier: complex debugging, multi-file reasoning, security analysis, architectural decisions, high-stakes planning
 
 # Subagent Delegation
 
