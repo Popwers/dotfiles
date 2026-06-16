@@ -1,9 +1,11 @@
 ---
 description: Met à jour les dépendances du repo courant — upgrade natif du framework, puis ncu (mineures groupées, majeures une par une avec lecture de la doc de migration), validation réelle derrière chaque étape, commit conventionnel.
-allowed-tools: Bash(ls:*), Bash(grep:*), Bash(git status:*), Bash(git rev-parse:*), Bash(ncu:*), Bash(cat:*)
+allowed-tools: Bash(ls:*), Bash(grep:*), Bash(git status:*), Bash(git rev-parse:*), Bash(ncu:*)
 ---
 
 Met à jour les dépendances du repo courant **avec prudence et validation réelle**. Jamais un `ncu -u` aveugle : on sépare le sûr du cassant, on lit la doc des majeures, et on prouve que ça marche avant de committer.
+
+> **Modèle de permissions.** Seule l'inspection en lecture du préflight (`ls`, `grep`, `git status/rev-parse`, listing `ncu`) est auto-autorisée. **Toute mutation** — install, `ncu -u`, upgrade natif, commit, revert — est lancée explicitement et déclenchera un prompt : c'est voulu, la commande ne modifie jamais le repo en silence.
 
 ## Contexte injecté
 
@@ -24,8 +26,10 @@ Met à jour les dépendances du repo courant **avec prudence et validation réel
 
 Détecte et utilise l'outillage réel du repo (ne présume pas) :
 
-- **Package manager** : `packageManager` dans `package.json`, sinon le lockfile (`bun.lock`→bun, `pnpm-lock.yaml`→pnpm, `package-lock.json`→npm, `yarn.lock`→yarn).
-- **Install** : `bun install` / `pnpm install` / `npm install`. ⚠️ Pour bun, le prune prod est `--production` (ou `--omit=dev`) — `--no-dev` est **silencieusement ignoré**.
+- **Package manager** (noté `<pm>`) : `packageManager` dans `package.json`, sinon le lockfile (`bun.lock`→bun, `pnpm-lock.yaml`→pnpm, `package-lock.json`→npm, `yarn.lock`→yarn).
+- **Lockfile** (noté `<lock>`, pour les reverts) : `bun.lock` / `pnpm-lock.yaml` / `package-lock.json` / `yarn.lock` selon le PM détecté.
+- **Runner one-shot** (noté `<dlx>`, pour les binaires d'upgrade) : bun→`bunx`, pnpm→`pnpm dlx`, npm→`npx`, yarn→`yarn dlx`.
+- **Install** : `<pm> install`. ⚠️ Pour bun, le prune prod est `--production` (ou `--omit=dev`) — `--no-dev` est **silencieusement ignoré**.
 - **Validation** : si `vp` (Vite+) est présent → `vp check` (lint+fmt+typecheck) ; sinon les scripts du repo (`lint`, `typecheck`, `build`) ou la CLI framework (`astro check`, `svelte-check`, `tsc --noEmit`).
 - **Tests** : exécute *tous* les runners présents (un repo peut avoir `bun test` ET `vitest run` — lance les deux).
 
@@ -35,15 +39,15 @@ Détecte et utilise l'outillage réel du repo (ne présume pas) :
 
 Si le framework expose un upgrade officiel, lance-le **avant** ncu — il aligne le core + ses intégrations sur des versions compatibles et applique les codemods :
 
-| Framework | Commande |
-|---|---|
-| Astro | `bunx @astrojs/upgrade` (≈ `bun run upgrade` si le script existe) |
-| Next.js | `bunx @next/codemod@latest upgrade latest` |
-| Nuxt | `bunx nuxi upgrade` |
-| SvelteKit | `bunx sv migrate` |
-| Strapi | `bunx @strapi/upgrade latest` |
+| Framework | Commande | Flag non-interactif |
+|---|---|---|
+| Astro | `<dlx> @astrojs/upgrade` (≈ `<pm> run upgrade` si le script existe) | — (interactif) |
+| Next.js | `<dlx> @next/codemod@latest upgrade latest` | — (interactif) |
+| Nuxt | `<dlx> nuxi upgrade` | `--force` |
+| SvelteKit | `<dlx> sv migrate` | — (interactif) |
+| Strapi | `<dlx> @strapi/upgrade latest` | `-y` |
 
-Ces outils sont parfois interactifs : lance-les non-interactivement si un flag existe, sinon préviens l'utilisateur qu'une confirmation TTY peut être requise. Après l'upgrade natif → **install + gate de validation complète**. Si rouge, lis la sortie, corrige (codemod manquant, breaking change), revalide. Commit `chore(deps): <framework> upgrade` une fois vert.
+⚠️ **Une commande slash n'a pas de TTY interactif** : un outil qui attend une confirmation au clavier va bloquer. Si un flag non-interactif existe (colonne ci-dessus), utilise-le. Sinon, **arrête-toi et demande à l'utilisateur de lancer l'upgrade lui-même via le préfixe `!`** dans son prompt, puis reprends une fois fait. Après l'upgrade natif → **install + gate de validation complète**. Si rouge, lis la sortie, corrige (codemod manquant, breaking change), revalide. Commit `chore(deps): <framework> upgrade` une fois vert.
 
 ### 2. Énumérer le reste avec ncu, trier sûr vs majeur
 
@@ -67,7 +71,7 @@ Pour chaque paquet majeur, dans cet ordre :
 3. **Appliquer** (`ncu -u --filter <paquet>` + install) et exécuter les codemods éventuels documentés.
 4. **Gate de validation complète.**
    - Vert → garde, commit `chore(deps): upgrade <paquet> v1→v2` (corps = breaking changes traités).
-   - Rouge → applique les correctifs de migration *si* bornés et sûrs, revalide. Si la migration est lourde/incertaine → **revert ce paquet** (`git checkout package.json bun.lock && bun install`) et signale-le à l'utilisateur avec le lien de migration et l'effort estimé. On ne force pas une majeure cassante.
+   - Rouge → applique les correctifs de migration *si* bornés et sûrs, revalide. Si la migration est lourde/incertaine → **revert ce paquet** (`git checkout package.json <lock> && <pm> install`) et signale-le à l'utilisateur avec le lien de migration et l'effort estimé. On ne force pas une majeure cassante.
 
 ### 5. Validation — réelle, pas seulement le typecheck
 
