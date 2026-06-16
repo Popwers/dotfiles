@@ -1,11 +1,11 @@
 ---
-description: Met à jour les dépendances du repo courant — upgrade natif du framework, puis ncu (mineures groupées, majeures une par une avec lecture de la doc de migration), validation réelle derrière chaque étape, commit conventionnel.
+description: Met à jour les dépendances du repo courant en autonomie (aucune question) — upgrade natif du framework, puis ncu (mineures groupées, majeures une par une avec lecture de la doc de migration), validation réelle derrière chaque étape, le tout commité sur une branche dédiée locale (ni push, ni PR) à merger quand tu veux.
 allowed-tools: Bash(ls:*), Bash(grep:*), Bash(git status:*), Bash(git rev-parse:*), Bash(ncu:*)
 ---
 
 Met à jour les dépendances du repo courant **avec prudence et validation réelle**. Jamais un `ncu -u` aveugle : on sépare le sûr du cassant, on lit la doc des majeures, et on prouve que ça marche avant de committer.
 
-> **Modèle de permissions.** Seule l'inspection en lecture du préflight (`ls`, `grep`, `git status/rev-parse`, listing `ncu`) est auto-autorisée. **Toute mutation** — install, `ncu -u`, upgrade natif, commit, revert — est lancée explicitement et déclenchera un prompt : c'est voulu, la commande ne modifie jamais le repo en silence.
+> **Contrat autonome.** Cette commande ne pose **aucune question** et n'attend **aucune action manuelle** — pas de `!`, pas de prompt TTY. Chaque point de décision est une règle automatique : soit *avancer sans risque*, soit *sauter + consigner au rapport*. Conçue pour tourner sans surveillance (routine Claude Code locale). Elle ne touche **jamais** la branche par défaut : tout le travail va sur une branche dédiée **locale** (ni push, ni PR) que tu revois et merges quand tu veux. En headless les permissions sont pré-accordées par le lanceur ; la commande, elle, ne réclame jamais d'intervention humaine.
 
 ## Contexte injecté
 
@@ -16,11 +16,12 @@ Met à jour les dépendances du repo courant **avec prudence et validation réel
 - Frameworks détectés : !`grep -oE '"(astro|next|nuxt|@sveltejs/kit|svelte|vue|@tanstack/react-start|@tanstack/start|react|react-dom|@strapi/strapi|strapi|@legendapp/state|better-auth|drizzle-orm)"' package.json 2>/dev/null | sort -u || echo "(aucun)"`
 - Mises à jour disponibles : !`ncu 2>/dev/null | grep '→' || echo "(ncu indisponible ou rien à jour — utiliser 'bunx npm-check-updates')"`
 
-## Pré-requis (vérifier avant de toucher quoi que ce soit)
+## Pré-requis (règles automatiques, aucune question)
 
-1. **Arbre git propre.** Si des changements traînent (voir contexte injecté), demande à l'utilisateur de committer/stash d'abord — la diff des dépendances doit rester isolée. Ne stash jamais son travail sans accord.
+0. **Branche dédiée.** Crée/bascule sur `chore/deps-upgrade-<YYYY-MM-DD>` depuis le HEAD courant. Tout le travail y reste ; la branche par défaut n'est jamais modifiée.
+1. **Arbre git propre.** Si de **vrais** changements non commités traînent (voir contexte injecté), **saute ce repo** et consigne-le au rapport — impossible d'isoler proprement la diff des deps. Ne stash jamais, ne commit jamais le travail en cours. **Exception bruit** : ignore les chemins outillage non suivis (`.claude/`, `.claude/settings.local.json`) — leur seule présence ne fait pas sauter le repo.
 2. **Monorepo ?** Si la racine git est au-dessus du dossier courant (workspaces, plusieurs sous-projets), ne mets à jour QUE le `package.json` du projet courant et ne stage que ses fichiers au commit. Ne touche pas aux projets voisins.
-3. **Le repo build et teste à l'état actuel.** Lance la gate de validation (§ Validation) une fois *avant* tout changement pour avoir une baseline verte. Si c'est déjà rouge, signale-le et arrête — on ne mélange pas un repo cassé avec une montée de version.
+3. **Baseline verte.** Lance la gate de validation (§ Validation) une fois *avant* tout changement. Si c'est déjà rouge à l'état actuel, **saute ce repo** et consigne-le — on ne mélange pas un repo cassé avec une montée de version.
 
 ## Toolchain
 
@@ -47,14 +48,19 @@ Si le framework expose un upgrade officiel, lance-le **avant** ncu — il aligne
 | SvelteKit | `<dlx> sv migrate` | — (interactif) |
 | Strapi | `<dlx> @strapi/upgrade latest` | `-y` |
 
-⚠️ **Une commande slash n'a pas de TTY interactif** : un outil qui attend une confirmation au clavier va bloquer. Si un flag non-interactif existe (colonne ci-dessus), utilise-le. Sinon, **arrête-toi et demande à l'utilisateur de lancer l'upgrade lui-même via le préfixe `!`** dans son prompt, puis reprends une fois fait. Après l'upgrade natif → **install + gate de validation complète**. Si rouge, lis la sortie, corrige (codemod manquant, breaking change), revalide. Commit `chore(deps): <framework> upgrade` une fois vert.
+⚠️ **Aucune interaction TTY** (contrat autonome). Pour chaque upgrade natif :
+
+1. **Flag non-interactif disponible** (colonne ci-dessus, ou `CI=1`/`CI=true` que la plupart des CLI respectent) → utilise-le, lance, valide.
+2. **Outil interactif-only, aucun moyen de le rendre silencieux** → **ne le lance pas**. Bascule ce framework dans le **lot majeur** (§4) : bump des paquets (`<framework>` + intégrations) via `ncu -u --filter`, codemods exécutés explicitement par nom (`<dlx> @next/codemod@latest <transform> . --force`, etc.), puis validation. Si aucun codemod non-interactif ne couvre la migration → **saute ce framework** et consigne-le (version cible + lien doc) au rapport.
+
+Après l'upgrade natif → **install + gate de validation complète**. Si rouge, lis la sortie, corrige (codemod manquant, breaking change), revalide. Vert → commit `chore(deps): <framework> upgrade`. Toujours rouge / migration non bornée → **revert** (`git checkout package.json <lock> && <pm> install`) + consigne au rapport. Jamais de blocage en attente d'un humain.
 
 ### 2. Énumérer le reste avec ncu, trier sûr vs majeur
 
 - `ncu` (read-only) pour lister. Sépare en deux lots :
   - **Sûr** = patch/minor sur une même majeure ≥ 1.0 (`^1.2.x → ^1.5.x`).
   - **Majeur / risqué** = bump de majeure (`1.x → 2.0`) **ET** tout bump de `0.x` minor (`0.34 → 0.35`), car en semver `0.x` un minor peut casser.
-- Annonce le tri à l'utilisateur avant d'appliquer.
+- Consigne le tri (sûr vs majeur) dans le rapport — sans attendre de validation.
 
 ### 3. Lot sûr — groupé
 
@@ -86,11 +92,12 @@ Le typecheck et les tests unitaires prouvent la *correction du code*, pas que *l
    - Si tu ne peux pas exercer le runtime (pas de serveur, creds manquantes), **dis-le explicitement** — ne déclare pas succès sur le seul typecheck.
 5. **Docker** (si `Dockerfile` présent et que la montée touche le build/runtime) : `docker build` + boot conteneur + curl. Vérifie aussi que l'image runtime reste lean (pas de devDeps qui fuient).
 
-### 6. Commit & rapport
+### 6. Commit (local, branche dédiée)
 
 - Commits **conventionnels**, scopés par étape (natif / mineures / chaque majeure) — ou un seul `chore(deps): update dependencies` si tout est passé d'un bloc sans incident. Mentionne explicitement les majeures dans le corps.
-- **Pas de push** sauf demande explicite.
 - Hooks staged (`vp`/lint-staged) : laisse-les tourner, ne les bypasse pas.
+- **Ni push, ni PR.** Les commits restent sur la branche `chore/deps-upgrade-<date>` locale — c'est ta surface de review. Jamais sur la branche par défaut, jamais de merge.
+- **Rien à monter** (aucune mise à jour dispo, ou tout a été revert/sauté) → pas de branche fantôme : reviens sur la branche d'origine et supprime la branche dédiée vide. Consigne « rien à faire ».
 
 ## Rapport final (concis, point par point)
 
@@ -98,7 +105,8 @@ Le typecheck et les tests unitaires prouvent la *correction du code*, pas que *l
 - **Majeures** : pour chacune → version, verdict (gardée / revert), breaking changes traités, lien doc
 - **Validation** : résultat de chaque gate (check / tests / build / smoke runtime / docker)
 - **Reverts & risques restants** : ce qui n'a pas été monté et pourquoi
-- **Commits créés** (hash + sujet), push : non (sauf demande)
+- **Commits créés** (hash + sujet) sur la branche `chore/deps-upgrade-<date>` (locale, à merger quand tu veux)
+- **Repos sautés** (arbre sale / baseline rouge / framework interactif) avec la raison
 
 ## Principes non négociables
 
@@ -107,3 +115,5 @@ Le typecheck et les tests unitaires prouvent la *correction du code*, pas que *l
 - Valider = exercer l'app pour de vrai, pas juste compiler.
 - Repo cassant après une majeure et migration non triviale → revert + rapport, pas de hack pour faire passer.
 - Monorepo → périmètre strict au projet courant.
+- **Jamais bloquer en attente d'un humain** : pas d'étape interactive, on saute + consigne plutôt que d'attendre.
+- **Jamais** la branche par défaut, **jamais** de merge : tout reste sur une branche dédiée locale, à toi de merger.
