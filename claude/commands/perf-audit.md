@@ -17,7 +17,7 @@ Audit performance du repo courant. Identifie les écarts sur les trois axes ci-d
 
 ## Délégation
 
-- **Scan** : audite les axes en parallèle via des subagents read-only (`repo-explorer`, un par axe ou par paire d'axes proches). Chacun retourne `fichier:ligne — constat`, pas d'extraits longs.
+- **Scan** : lance les subagents read-only **en parallèle dans un seul message** via le Agent tool (`repo-explorer`, un par axe ou par paire d'axes proches). Chacun retourne `fichier:ligne — constat`, pas d'extraits longs.
 - **Fixes** : les fixes ponctuels s'appliquent dans le contexte principal. Quand un axe entier demande correction (ex. bundler config + vendoring, conversion d'un lot de mutations), délègue à `performance-optimizer` avec un scope de fichiers explicite et les garde-fous ci-dessous.
 
 ## Axes d'audit

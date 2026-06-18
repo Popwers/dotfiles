@@ -48,7 +48,7 @@ Cette liste sera rappelée dans le rapport final sous "À tester manuellement".
 
 ## 3. Audit ciblé (subagents en parallèle)
 
-Lance les deux subagents **en parallèle dans un seul message**, chacun avec la liste exacte des fichiers du scope :
+Lance les deux subagents **en parallèle dans un seul message** via le Agent tool, chacun avec la liste exacte des fichiers du scope :
 
 - **`security-reviewer`** — auth + ownership sur les routes mutantes (create / update / delete), inputs validés à la frontière, secrets non commités, pas de stack trace leak côté client, pas de bypass de policy
 - **`review-auditor`** — les quatre axes restants :

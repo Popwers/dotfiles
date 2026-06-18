@@ -1,7 +1,6 @@
 ---
 description: Optimise le Dockerfile du repo en image runtime minimale — multi-stage, base adaptée au runtime, Tier 1/2 selon l'auto-suffisance de l'artefact — avec vérification runtime avant commit.
 allowed-tools: Bash(ls:*), Bash(grep:*)
-disable-model-invocation: true
 ---
 
 Optimise le Dockerfile du repo courant pour produire l'image de prod la plus petite possible **sans rien casser**. La recette est **générale** — elle vaut pour Node, Bun, Deno, Go, Rust, Python, ou un front statique. Le principe directeur ne change pas d'une stack à l'autre ; seuls l'artefact de build et la base runtime changent.

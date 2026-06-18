@@ -1,7 +1,6 @@
 ---
 description: Migre le repo courant vers Vite+ (vp) via `vp migrate --no-interactive`, puis overlay la config Lionel, vérifie les imports et nettoie les deps legacy.
 allowed-tools: Bash(bun pm ls:*), Bash(ls:*)
-disable-model-invocation: true
 ---
 
 Migre ce projet vers Vite+ (`vp`). Le flow : on laisse `vp migrate` faire le gros du boulot (réécriture imports, génération `vite.config.ts`, hooks), puis on overlay les overrides Lionel + on nettoie ce que l'outil ne touche pas.
