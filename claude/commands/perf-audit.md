@@ -1,5 +1,5 @@
 ---
-description: Audit perf du repo (render-first-auth, optimistic mutations, asset loading) et applique les fixes sans casser le build.
+description: Audit perf du repo (render-first-auth, mutations optimistes, asset loading, bundler, rendering granulaire, prerendering/SSG, prefetch & données) et applique les fixes sans casser le build.
 allowed-tools: Bash(ls:*), Bash(grep:*)
 ---
 
@@ -59,6 +59,8 @@ Si des mutations critiques ne sont pas optimistes, liste les fichiers et propose
 - [ ] **Critical CSS inliné** dans `<head>` (shell, theme tokens) — pas de stylesheet externe bloquante avant le premier paint.
 - [ ] **Boot script inliné** (lecture `localStorage`, theme, marker auth) avant que les bundles JS soient parsés.
 - [ ] **Modulepreload + `crossorigin`** sur les chunks critiques dans `<head>` pour paralléliser les downloads.
+- [ ] **Cache HTTP & CDN** : assets hashés en `Cache-Control: public, max-age=31536000, immutable` ; pages prérenderées en `stale-while-revalidate` ; compression Brotli (fallback gzip) active ; `<link rel="preconnect">` (+ `dns-prefetch` fallback) vers l'origine API et le CDN de fonts above-the-fold.
+- [ ] **Scripts tiers** (analytics, widgets, tags) en `async`/`defer` ou déportés (Partytown / web worker) — jamais un `<script>` bloquant dans le `<head>`.
 
 ### 4. Build & bundler config (Linear-style)
 
@@ -76,6 +78,39 @@ Si des mutations critiques ne sont pas optimistes, liste les fichiers et propose
 - [ ] Durées 100-250ms (sous le seuil de perception 300ms). Asymétrie OK : apparition instantanée, fade-out 150ms pour popovers. Avec Motion, des `easing` custom courts (`[0.22, 1, 0.36, 1]` style) > durées longues.
 - [ ] **Command palette local** si présent : recherche dans le store client (Legend State / IndexedDB), pas de requête serveur par frappe.
 
+### 6. Prerendering / SSG / streaming
+
+Le rendu le moins cher est celui qui n'a pas lieu à la requête. Tout ce qui est statique ou cache-friendly doit être prérenderé au build ; le reste doit streamer, jamais bloquer le TTFB.
+
+Selon le framework détecté :
+
+- **TanStack Start** :
+  - [ ] `prerender: { enabled: true, crawlLinks: true }` dans le plugin `tanstackStart()` de `vite.config.*` — les routes statiques (landing, docs, marketing, pages légales) émises en HTML au build.
+  - [ ] `filter` pour exclure explicitement les routes authentifiées / dynamiques du crawl, plutôt que de les laisser échouer (`failOnError` est `true` par défaut).
+  - [ ] Routes purement client (dashboard derrière auth) : `ssr: false` sur la route plutôt qu'un SSR runtime inutile qui alourdit le TTFB.
+  - [ ] Route paramétrée (`/users/$id`) jamais prérenderée sans entrée `pages` explicite ou lien crawlé — sinon skip silencieux à surfacer.
+- **Astro** :
+  - [ ] Static par défaut (`output: 'static'`) ; passer en `server`/`hybrid` uniquement pour les routes qui en ont besoin, `export const prerender = true` sur tout le reste.
+  - [ ] Contenu éditorial via **content collections** (build-time), pas de fetch runtime pour des données qui ne varient pas par requête.
+  - [ ] `client:visible` / `client:idle` plutôt que `client:load` pour les îlots sous la ligne de flottaison.
+- **SvelteKit** : `export const prerender = true` sur les routes statiques + `adapter-static` (ou `prerender.entries` pour les routes non liées).
+- **Next** : `generateStaticParams` pour les routes dynamiques connues, `export const dynamic = 'force-static'` quand applicable, PPR pour le mix statique/dynamique.
+- **Toutes stacks** — routes non prérenderables : shell + above-the-fold streament immédiatement (Suspense streaming, `defer`/`Await` TanStack, RSC), les données lentes arrivent après. Jamais un `await` data-fetch qui retient le document complet.
+
+Si le repo sert en SSR runtime ce qui est déjà statique, ou laisse des landing/docs en client-render, propose la bascule prerender (config + flag par route). Ne convertis JAMAIS une route authentifiée en statique — surface-le en reco si ambigu.
+
+### 7. Prefetch & cascades de données
+
+La donnée doit arriver avant le clic, et en parallèle — jamais en chaîne. Cible les loaders, le préchargement à l'intention, et les waterfalls réseau.
+
+- [ ] **Préchargement à l'intention** : navigation préchargée sur hover/focus/viewport. TanStack Router → `defaultPreload: 'intent'` (+ `defaultPreloadStaleTime`) ; `<Link prefetch>` côté Next/Astro pour les liens above-the-fold.
+- [ ] **Loaders parallèles, pas séquentiels** : les données d'une route partent en même temps, jamais `await a()` puis `await b()` quand b ne dépend pas de a. Repérer les waterfalls (un fetch qui attend le résultat d'un fetch parent sans dépendance réelle).
+- [ ] **Pas de waterfall client après le mount** : la donnée critique est chargée par le loader de route (serveur/router), pas par un `useEffect(() => fetch())` qui ne part qu'après l'hydratation.
+- [ ] **Dédup & cache des requêtes** : une même clé de données n'est pas fetchée N fois sur un paint (TanStack Query `staleTime` correct, Router loader deduping, pas de fetch dupliqué entre layout et page).
+- [ ] **Pagination / infinite** : `prefetchNextPage` au survol du dernier item visible, pas un spinner plein écran à chaque page.
+
+Si des données critiques arrivent en cascade ou via `useEffect` post-mount, liste les fichiers et propose le passage en loader de route (sans appliquer si le refactor dépasse 20 lignes par route — surface en reco).
+
 ## Format de sortie
 
 **Tout le rapport est en français. Sois bref — pas de paragraphes, pas de redite des critères.**
@@ -91,6 +126,8 @@ Une ligne par axe. Pas de détail ici, juste le scan.
 | Asset loading | … | … | … | … |
 | Build & bundler | … | … | … | … |
 | Rendering granulaire | … | … | … | … |
+| Prerendering / SSG | … | … | … | … |
+| Prefetch & données | … | … | … | … |
 
 Légende statut : ✅ PASS · ⚠️ PARTIAL · ❌ FAIL · — SKIP.
 
@@ -125,9 +162,11 @@ Une ligne par axe touché, format `cz`/`ga` prêt à coller. Skip si aucun fix a
 
 ## Garde-fous
 
-- Pas de refactor du runtime métier — uniquement boot order, mutation wiring, asset loading, bundler config et animation primitives.
+- Pas de refactor du runtime métier — uniquement boot order, mutation wiring, asset loading, bundler config, render strategy, data wiring et animation primitives.
 - Si un fix demande >20 lignes de refactor applicatif sur un même endroit, surface-le en reco — ne l'applique pas.
 - Migration vers observables granulaires (axe 5) : ne JAMAIS l'appliquer en masse — surface en reco avec liste des composants impactés.
+- Prerendering (axe 6) : ne JAMAIS convertir une route authentifiée ou data-dynamique en statique — la bascule prerender ne s'applique qu'aux routes sûres (landing, docs, légal) ; le reste en reco.
+- Passage en loader de route (axe 7) : si le refactor dépasse 20 lignes par route, surface en reco — ne l'applique pas.
 - Monorepo : audite chaque package séparément, résume en tableau.
 
 Procède.

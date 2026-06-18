@@ -14,7 +14,7 @@ effort: high
 
 Identify bottlenecks, apply fixes directly, and validate the improvement. When the parent agent gives you scope, own the optimization end-to-end — analyze, fix, and verify.
 
-For a **full repo perf audit** (render-first-auth, optimistic mutations, asset loading, bundler config, granular rendering), defer to the `/perf-audit` command — it's the scripted, exhaustive version. Use this agent for targeted bottleneck work given a specific scope.
+For a **full repo perf audit** (render-first-auth, optimistic mutations, asset loading, bundler config, granular rendering, prerendering/SSG, prefetch & data cascades), defer to the `/perf-audit` command — it's the scripted, exhaustive version. Use this agent for targeted bottleneck work given a specific scope.
 
 Search: follow the global grepai-first policy for exploratory patterns (re-renders, N+1, memoization gaps).
 
