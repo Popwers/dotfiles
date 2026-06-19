@@ -9,6 +9,7 @@ RESET='\033[0m'
 # ── Extract all fields (single jq call) ────────────────────────
 eval "$(echo "$input" | jq -r '
   @sh "MODEL=\(.model.display_name)",
+  @sh "EFFORT=\(.effort.level // empty)",
   @sh "DIR=\(.workspace.current_dir)",
   @sh "PCT=\(.context_window.used_percentage // 0 | floor)",
   @sh "LINES_ADD=\(.cost.total_lines_added // 0)",
@@ -26,6 +27,20 @@ case "$MODEL" in
     *Haiku*)  MODEL_ICON="󰌪";;
     *)        MODEL_ICON="󰚩";;
 esac
+
+# ── Effort level (icon + graduated color) ─────────────────────
+EFFORT_INFO=""
+if [ -n "$EFFORT" ]; then
+    case "$EFFORT" in
+        low)    EFFORT_COLOR="$DIM";     EFFORT_LABEL="low";;
+        medium) EFFORT_COLOR="$GREEN";   EFFORT_LABEL="med";;
+        high)   EFFORT_COLOR="$YELLOW";  EFFORT_LABEL="high";;
+        xhigh)  EFFORT_COLOR="$MAGENTA"; EFFORT_LABEL="xhigh";;
+        max)    EFFORT_COLOR="$RED";     EFFORT_LABEL="max";;
+        *)      EFFORT_COLOR="$DIM";     EFFORT_LABEL="$EFFORT";;
+    esac
+    EFFORT_INFO=" │ ${EFFORT_COLOR}󰓅 ${EFFORT_LABEL}${RESET}"
+fi
 
 # ── Battery icon (nerd font, dynamic) ─────────────────────────
 battery_icon() {
@@ -123,4 +138,4 @@ if [ -n "$FIVE_H" ]; then
 fi
 
 # ── Output ─────────────────────────────────────────────────────
-echo -e "${DIM}󰉋${RESET} ${YELLOW}${DIR##*/}${RESET} │ ${MAGENTA}${BOLD}${MODEL_ICON} ${MODEL}${RESET} │ ${CTX_COLOR}⚡ ${PCT}%${RESET}${GIT_INFO}${LIMITS}"
+echo -e "${DIM}󰉋${RESET} ${YELLOW}${DIR##*/}${RESET} │ ${MAGENTA}${BOLD}${MODEL_ICON} ${MODEL}${RESET}${EFFORT_INFO} │ ${CTX_COLOR}⚡ ${PCT}%${RESET}${GIT_INFO}${LIMITS}"
