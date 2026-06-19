@@ -3,7 +3,7 @@ description: Audit perf du repo (render-first-auth, mutations optimistes, asset 
 allowed-tools: Bash(ls:*), Bash(grep:*)
 ---
 
-Audit performance du repo courant. Identifie les écarts sur les trois axes ci-dessous et applique les fixes — sans toucher au runtime métier.
+Audit performance du repo courant. Identifie les écarts sur les axes ci-dessous et applique les fixes — sans toucher au runtime métier.
 
 ## Contexte injecté
 
@@ -65,7 +65,10 @@ Si des mutations critiques ne sont pas optimistes, liste les fichiers et propose
 ### 4. Build & bundler config (Linear-style)
 
 - [ ] `target: "esnext"` dans la config Vite/build — aucune transpile ES5, aucun polyfill legacy.
+- [ ] `modulePreload: { polyfill: false }` — cibles modernes, pas de polyfill de préchargement legacy.
 - [ ] **Per-package vendoring** : chaque dépendance npm >~3KB a son propre chunk (`manualChunks` par package) pour cache invalidation indépendante.
+  - **Client-only / TanStack Start** : `manualChunks` générique par package OK (`vendor-${pkg}` pour tout `node_modules`).
+  - **⚠️ Astro SSR** : le générique par package **compile mais casse le serveur au boot** (`ReferenceError: Cannot access '_getEnv' before initialization` — TDZ `astro:env` entre `vendor-astro`/`vendor-astrojs`). **Exclure `astro/` et `@astrojs/*` du split** (les garder dans le chunk par défaut), le reste en per-package. Toujours **boot-tester le serveur** après (build vert ≠ serveur qui démarre — cf. Garde-fous).
 - [ ] Tree-shaking agressif activé, dead code éliminé (vérifier qu'aucune lib n'est importée en barrel-import qui défait le shaking).
 - [ ] Code splitting route-level — un chunk par route, chargé on-demand (pas un bundle monolithique).
 
@@ -87,6 +90,7 @@ Selon le framework détecté :
 - **TanStack Start** :
   - [ ] `prerender: { enabled: true, crawlLinks: true }` dans le plugin `tanstackStart()` de `vite.config.*` — les routes statiques (landing, docs, marketing, pages légales) émises en HTML au build.
   - [ ] `filter` pour exclure explicitement les routes authentifiées / dynamiques du crawl, plutôt que de les laisser échouer (`failOnError` est `true` par défaut).
+  - [ ] Activer le prerender **boote le serveur au build** (le plugin lance `vite preview`) : prévoir les env de build requis (ex. `SESSION_SECRET` factice) et, en Docker, binder `preview: { host: '127.0.0.1' }` (sinon `localhost`→`::1` → ConnectionRefused dans le sandbox).
   - [ ] Routes purement client (dashboard derrière auth) : `ssr: false` sur la route plutôt qu'un SSR runtime inutile qui alourdit le TTFB.
   - [ ] Route paramétrée (`/users/$id`) jamais prérenderée sans entrée `pages` explicite ou lien crawlé — sinon skip silencieux à surfacer.
 - **Astro** :
@@ -103,7 +107,7 @@ Si le repo sert en SSR runtime ce qui est déjà statique, ou laisse des landing
 
 La donnée doit arriver avant le clic, et en parallèle — jamais en chaîne. Cible les loaders, le préchargement à l'intention, et les waterfalls réseau.
 
-- [ ] **Préchargement à l'intention** : navigation préchargée sur hover/focus/viewport. TanStack Router → `defaultPreload: 'intent'` (+ `defaultPreloadStaleTime`) ; `<Link prefetch>` côté Next/Astro pour les liens above-the-fold.
+- [ ] **Préchargement à l'intention** : navigation préchargée sur hover/focus/viewport. TanStack Router → `defaultPreload: 'intent'` (+ `defaultPreloadStaleTime`) ; `<Link prefetch>` côté Next/Astro pour les liens above-the-fold. **Anti-pattern fréquent** : `defaultPreloadStaleTime: 0` annule le bénéfice de l'intent-preload (donnée jetée aussitôt préchargée) → `30_000`.
 - [ ] **Loaders parallèles, pas séquentiels** : les données d'une route partent en même temps, jamais `await a()` puis `await b()` quand b ne dépend pas de a. Repérer les waterfalls (un fetch qui attend le résultat d'un fetch parent sans dépendance réelle).
 - [ ] **Pas de waterfall client après le mount** : la donnée critique est chargée par le loader de route (serveur/router), pas par un `useEffect(() => fetch())` qui ne part qu'après l'hydratation.
 - [ ] **Dédup & cache des requêtes** : une même clé de données n'est pas fetchée N fois sur un paint (TanStack Query `staleTime` correct, Router loader deduping, pas de fetch dupliqué entre layout et page).
@@ -167,6 +171,8 @@ Une ligne par axe touché, format `cz`/`ga` prêt à coller. Skip si aucun fix a
 - Migration vers observables granulaires (axe 5) : ne JAMAIS l'appliquer en masse — surface en reco avec liste des composants impactés.
 - Prerendering (axe 6) : ne JAMAIS convertir une route authentifiée ou data-dynamique en statique — la bascule prerender ne s'applique qu'aux routes sûres (landing, docs, légal) ; le reste en reco.
 - Passage en loader de route (axe 7) : si le refactor dépasse 20 lignes par route, surface en reco — ne l'applique pas.
+- **Validation SSR = build + boot.** Toute modif de chunking/bundler/render-strategy sur une app SSR (Astro, TanStack Start, Next…) se valide en **démarrant le serveur buildé** (`node ./dist/server/entry.mjs` ou l'image Docker) + un `curl` sur une route — pas seulement par un build vert. Certains bugs (TDZ de chunking) ne pètent qu'au runtime.
+- **Changement de deps = resync du lockfile.** Tout fix qui ajoute/retire un package (dep inutilisée retirée, self-host de fonts via `@fontsource-*`) relance l'install (`vp install` / `bun install`) pour synchroniser le lockfile — sinon le build prod `--frozen-lockfile` (Docker/Coolify) échoue.
 - Monorepo : audite chaque package séparément, résume en tableau.
 
 Procède.

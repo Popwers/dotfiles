@@ -90,6 +90,8 @@ C'est ce test qui valide « passe en prod sans souci ». Un `ERR_MODULE_NOT_FOUN
 - **Épingle les versions de base** et **matche l'ABI** build↔runtime (musl/glibc) — sinon une dep native casse.
 - **`USER` non-root + `--chown`** sur tous les `COPY`, et pré-crée les dossiers écrits (`mkdir -p … && chown …`) — un volume monté sous un user non-root échoue sinon.
 - **Image sans deps = pas de script ad-hoc** dans le conteneur : bundle les outils d'ops dont l'opérateur a besoin et documente leur invocation (`docker exec …`).
+- **`docker build` vert ≠ conteneur qui démarre.** Un changement de config/bundler (ex. `manualChunks`) peut compiler proprement puis **crasher au boot** (TDZ de chunking, import circulaire SSR). Toujours `docker run` + lire `docker logs` (pas seulement le code de sortie du build) avant de valider.
+- **Changement de deps = resync du lockfile** avant de builder : retirer/ajouter un package sans mettre à jour le lockfile casse l'install prod `--frozen-lockfile` (le build échoue au stage `install`).
 
 ## Format attendu en sortie
 - Stack + runtime détectés, et palier retenu (Tier 1/Tier 2) **avec la preuve** (sortie de l'étape B).
