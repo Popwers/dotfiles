@@ -4,7 +4,7 @@
 		"security-guidance@claude-plugins-official": true
 	},
 	"permissions": {
-		"defaultMode": "default",
+		"defaultMode": "auto",
 		"allow": [
 			"Read",
 			"Edit",
@@ -21,6 +21,7 @@
 			"mcp__gh_grep",
 			"mcp__serena",
 			"mcp__claude_ai_Exa",
+			"mcp__claude_ai_Sentry",
 			"mcp__plugin_chrome-devtools-mcp_chrome-devtools"
 		],
 		"deny": [
@@ -56,6 +57,7 @@
 		"padding": 0
 	},
 	"autoConnectIde": true,
+	"skipAutoPermissionPrompt": true,
 	"model": "claude-opus-4-8",
 	"env": {
 		"ENABLE_TOOL_SEARCH": "1",
@@ -67,7 +69,7 @@
 		"CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "85",
 		"CLAUDE_CODE_NO_FLICKER": "1"
 	},
-	"effortLevel": "high",
+	"effortLevel": "xhigh",
 	"spinnerTipsEnabled": false,
 	"skillListingBudgetFraction": 0.08,
 	"autoUpdatesChannel": "latest",
