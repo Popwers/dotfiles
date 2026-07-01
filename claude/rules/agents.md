@@ -5,9 +5,21 @@ globs: "**"
 
 # Model Selection
 
-- `model: haiku` — read-only agents, repetitive tasks, clear instructions, worker subagents
-- `model: sonnet` — implementation, testing, review, most coding tasks
-- `model: opus` — top tier: complex debugging, multi-file reasoning, security analysis, architectural decisions, high-stakes planning
+Match three axes, not one: **model × effort × subtask**. A subagent's cost is not its per-token price — it's price × tokens burned. A lighter model set too high fails more often on the first pass, and in an agentic loop each failure is another turn that re-reads, retries, and burns tokens. Pick the model whose first-pass success on *this* subtask minimizes loops.
+
+## Tiers
+
+- **`haiku · medium`** — read-only scanning: repo discovery, doc lookup, mechanical search. The cheap fast worker that reads code so the reasoner doesn't have to (this is what Claude Code already does for repo exploration).
+- **`sonnet · medium`** — the daily workhorse: applying an edit, running a test, implementation, routine review. Sonnet 5 clears the overwhelming majority of tasks in one pass at normal effort. This is where it's redoubtable.
+- **`opus · high`** — genuinely hard reasoning: planning, security analysis, performance analysis, deep multi-file review, complex debugging. First-pass success here avoids the loop tax; the main loop (orchestrator) holds strategy on Opus and *delegates* the mechanical work rather than doing it inline.
+
+## The `sonnet · high` anti-pattern
+
+Never run Sonnet at high/max effort. That is the one setting where it approaches Opus quality but costs *more*: a lighter model cranked up loops more, so you get the lowest per-token price multiplied by far more tokens. If a task needs high effort, it's hard reasoning → use `opus · high`. If it doesn't → keep `sonnet · medium`. There is no useful middle.
+
+## Aliases auto-upgrade
+
+Agent frontmatter uses aliases (`sonnet`, `opus`, `haiku`), not pinned IDs — so `sonnet` already resolves to the latest Sonnet (Sonnet 5) with no edit. A newer model in the same class mainly buys *fewer loops to the goal*, not a reason to crank effort. Only the main loop pins an ID (`claude-opus-4-8`) on purpose, for the strategy seat.
 
 # Subagent Delegation
 
