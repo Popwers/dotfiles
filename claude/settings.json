@@ -51,6 +51,18 @@
 		"pr": ""
 	},
 	"enableAllProjectMcpServers": true,
+	"deniedMcpServers": [
+		{ "serverName": "claude.ai Gmail" },
+		{ "serverName": "claude.ai Google Calendar" },
+		{ "serverName": "claude.ai Google Drive" },
+		{ "serverName": "claude.ai Slack" },
+		{ "serverName": "claude.ai Notion" },
+		{ "serverName": "claude.ai Todoist" },
+		{ "serverName": "claude.ai Stripe" },
+		{ "serverName": "claude.ai Microsoft 365" },
+		{ "serverName": "claude.ai n8n" },
+		{ "serverName": "claude.ai Exa" }
+	],
 	"statusLine": {
 		"type": "command",
 		"command": "~/.claude/statusline.sh",
