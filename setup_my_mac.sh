@@ -236,6 +236,17 @@ copy_file_with_status "$SCRIPT_DIR/.gitignore_global" "$HOME/.gitignore_global"
 copy_file_with_status "$SCRIPT_DIR/config.fish" "$HOME/.config/fish/config.fish"
 copy_file_with_status "$SCRIPT_DIR/init.vim" "$HOME/.config/nvim/init.vim"
 
+# GUI apps (Dock-launched) inherit PATH from launchd, not from fish config.
+# This LaunchAgent re-applies the full tool PATH at every login so Claude Code
+# desktop & co resolve vp/vpx/node/serena outside a terminal.
+copy_file_with_status "$SCRIPT_DIR/launchd/com.lionel.setenv-path.plist" "$HOME/Library/LaunchAgents/com.lionel.setenv-path.plist"
+launchctl bootout "gui/$(id -u)/com.lionel.setenv-path" 2>/dev/null || true
+if launchctl bootstrap "gui/$(id -u)" "$HOME/Library/LaunchAgents/com.lionel.setenv-path.plist" 2>/dev/null; then
+    ok "launchd PATH agent loaded"
+else
+    warn "launchd PATH agent not loaded — will apply at next login"
+fi
+
 # Install grepai
 if command -v grepai >/dev/null 2>&1; then
     skip "GrepAI"

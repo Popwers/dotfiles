@@ -32,6 +32,8 @@ dotfiles/
 │   ├── hooks.json      # Codex lifecycle hooks config
 │   ├── hooks/          # Hook scripts
 │   └── agents/         # Custom subagents
+├── launchd/            # LaunchAgents (copied to ~/Library/LaunchAgents/ + loaded)
+│   └── com.lionel.setenv-path.plist  # Sets launchd PATH at login so GUI apps find vp/serena/node
 ├── .vscode/            # Project-level VS Code / Cursor config (Vite+ / Oxc)
 │   ├── extensions.json # Recommended extensions
 │   └── settings.json   # Default formatter, code actions, npm.scriptRunner
@@ -62,6 +64,7 @@ fish -n config.fish                            # Validate fish syntax
 | Change git settings | `.gitconfig` | Edit file directly |
 | Modify vim settings | `init.vim` | Standard vimscript |
 | Add PATH entry | `config.fish` L135-141 | `fish_add_path` section (includes `~/.opencode/bin`) |
+| Add GUI (launchd) PATH entry | `launchd/com.lionel.setenv-path.plist` | Edit PATH string, re-run setup (bootout + bootstrap) |
 
 ## CODE STYLE
 

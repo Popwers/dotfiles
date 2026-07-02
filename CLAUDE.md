@@ -31,6 +31,7 @@ Les configs Claude Code et Codex sont stockées dans ce repo et synchronisées p
 | `codex/hooks.json`    | `~/.codex/hooks.json`        | copy   |
 | `codex/agents/`       | `~/.codex/agents/`           | sync   |
 | `codex/hooks/`        | `~/.codex/hooks/`            | sync   |
+| `launchd/com.lionel.setenv-path.plist` | `~/Library/LaunchAgents/com.lionel.setenv-path.plist` | copy + load |
 
 ## Anti-patterns
 
