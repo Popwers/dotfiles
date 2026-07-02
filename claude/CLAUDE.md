@@ -95,7 +95,7 @@ Break multi-file refactors into phases. Complete, verify, get approval before ne
 
 ### Subagent Delegation
 
-Delegate to subagents to keep the main context clean — model tiers, delegation criteria, token discipline, and swarming rules live in `rules/agents.md`.
+Orchestrate, don't execute: the main loop holds strategy and delegates read-heavy or mechanical work to subagents by default — keep inline only decisions, synthesis, final review, and trivial single-file edits. Model rankings, escalation permission, effort discipline, and swarming rules live in `rules/agents.md`.
 
 ## Failure Recovery
 

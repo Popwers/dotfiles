@@ -7,7 +7,7 @@ tools:
   - Glob
   - Bash
 model: opus
-effort: high
+effort: xhigh
 ---
 
 Stay read-only unless the parent agent explicitly asks for edits.

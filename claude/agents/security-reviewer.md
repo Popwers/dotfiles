@@ -7,7 +7,7 @@ tools:
   - Glob
   - Bash
 model: opus
-effort: high
+effort: xhigh
 ---
 
 Identify security vulnerabilities before they reach production.

@@ -7,27 +7,51 @@ globs: "**"
 
 Match three axes, not one: **model × effort × subtask**. A subagent's cost is not its per-token price — it's price × tokens burned. A lighter model set too high fails more often on the first pass, and in an agentic loop each failure is another turn that re-reads, retries, and burns tokens. Pick the model whose first-pass success on *this* subtask minimizes loops.
 
+## Rankings
+
+Higher = better. Cost is rate-limit burn on the subscription (higher = cheaper to run), not list price. Intelligence is how hard a problem you can hand the model unsupervised. Taste covers UI/UX, code quality, API design, and copy.
+
+| model  | cost | intelligence | taste |
+|--------|------|--------------|-------|
+| haiku  | 9    | 4            | 4     |
+| sonnet | 7    | 6            | 7     |
+| opus   | 5    | 7            | 8     |
+| fable  | 2    | 9            | 9     |
+
+How to apply:
+
+- These are defaults, not limits. You have standing permission to override them: if a cheaper model's output doesn't meet the bar, rerun or redo the work with a smarter model without asking. Judge the output, not the price tag — escalating costs less than shipping mediocre work.
+- Cost is a tie-breaker only; when axes conflict for anything that ships, intelligence > taste > cost.
+- Anything user-facing (UI, copy, API design) needs taste ≥ 7 → `sonnet` minimum, `opus` when it ships.
+- Reviews of plans and implementations: `opus · xhigh`. Escalate to `fable · high` only when Opus output doesn't cut it or the problem is genuinely frontier (subtle concurrency, security-critical design, cross-system architecture).
+- Fable holds the strategy seat: it orchestrates in the main loop and reviews the hardest work. Never spawn Fable subagents for mechanical subtasks a cheaper model clears in one pass — that's rate-limit burn with zero quality gain.
+
 ## Tiers
 
-- **`haiku · medium`** — read-only scanning: repo discovery, doc lookup, mechanical search. The cheap fast worker that reads code so the reasoner doesn't have to (this is what Claude Code already does for repo exploration).
-- **`sonnet · medium`** — the daily workhorse: applying an edit, running a test, implementation, routine review. Sonnet 5 clears the overwhelming majority of tasks in one pass at normal effort. This is where it's redoubtable.
-- **`opus · high`** — genuinely hard reasoning: planning, security analysis, performance analysis, deep multi-file review, complex debugging. First-pass success here avoids the loop tax; the main loop (orchestrator) holds strategy on Opus and *delegates* the mechanical work rather than doing it inline.
+- **`haiku · medium`** — read-only scanning: repo discovery, doc lookup, mechanical search. The cheap fast worker that reads code so the reasoner doesn't have to; every file it reads is rate-limit budget the strategy seat keeps.
+- **`sonnet · medium`** — the daily workhorse: applying an edit, running a test, clear-spec implementation, routine review, bulk/mechanical work (migrations, data shuffling). Sonnet 5 clears the overwhelming majority of tasks in one pass at normal effort — on subscription it's effectively free relative to Fable.
+- **`opus · xhigh`** — genuinely hard reasoning: planning, security analysis, performance analysis, deep multi-file review, complex debugging. First-pass success here avoids the loop tax; Opus takes xhigh well — full reasoning depth at mid-tier cost, unlike Fable where xhigh burns rate limit for worse outputs.
+- **`fable · high`** — the main loop (orchestrator) and last-resort escalation for frontier problems. Strategy, synthesis, final review — it *delegates* the mechanical work rather than doing it inline.
 
-## The `sonnet · high` anti-pattern
+## Effort discipline
 
-Never run Sonnet at high/max effort. That is the one setting where it approaches Opus quality but costs *more*: a lighter model cranked up loops more, so you get the lowest per-token price multiplied by far more tokens. If a task needs high effort, it's hard reasoning → use `opus · high`. If it doesn't → keep `sonnet · medium`. There is no useful middle.
+- **Fable runs on `high` only.** xhigh is token-hungry; max is a furnace with worse outputs than lower settings. The main loop pins `claude-fable-5` + `effortLevel: high` in settings.json on purpose.
+- **Opus subagents run on `xhigh`.** The hard-reasoning seats get full depth: they're spawned precisely because the problem is hard, and a failed first pass costs more in loops than the extra effort does.
+- **Never run Sonnet at high/max effort.** That is the one setting where it approaches Opus quality but costs *more*: a lighter model cranked up loops more, so you get the lowest per-token price multiplied by far more tokens. If a task needs high effort, it's hard reasoning → `opus · xhigh` (or `fable · high` at the frontier). If it doesn't → keep `sonnet · medium`. There is no useful middle.
 
 ## Aliases auto-upgrade
 
-Agent frontmatter uses aliases (`sonnet`, `opus`, `haiku`), not pinned IDs — so `sonnet` already resolves to the latest Sonnet (Sonnet 5) with no edit. A newer model in the same class mainly buys *fewer loops to the goal*, not a reason to crank effort. Only the main loop pins an ID (`claude-opus-4-8`) on purpose, for the strategy seat.
+Agent frontmatter uses aliases (`sonnet`, `opus`, `haiku`), not pinned IDs — so `sonnet` already resolves to the latest Sonnet (Sonnet 5) with no edit. A newer model in the same class mainly buys *fewer loops to the goal*, not a reason to crank effort. Only the main loop pins an ID (`claude-fable-5`) on purpose, for the strategy seat.
 
-# Subagent Delegation
+# Delegate by Default
 
-Delegate to subagents to keep the main context clean. Types: `Explore` (read-only scanning), `Plan` (architecture), `general-purpose` (full-capability).
+The main loop's context and rate-limit budget are the scarcest resources in the system. Every file read inline, every test log paged through, every grep result dumped into the orchestrator's context is Fable-priced tokens spent on work a subagent does at a fraction of the cost — and context pollution that degrades the strategy seat's judgment later in the session.
 
-Delegate when: read-heavy parallel work, codebase discovery, multi-angle review. Keep in main context: decisions, synthesis, final implementation, simple single-file changes.
+Default posture: **orchestrate, don't execute.** Before doing read-heavy or mechanical work inline, ask "which agent tier clears this?" and delegate it. Keep in the main context only: decisions, synthesis, cross-agent arbitration, final review, and trivial single-file edits where delegation overhead exceeds the work itself.
 
-Sequential pattern for complex tasks: Research (Explore) → Plan → Implement → Review → Verify. Use `/compact` between phases.
+Types: `Explore` (read-only scanning), `Plan` (architecture), `general-purpose` (full-capability), plus the specialized agents in `agents/` (repo-explorer, change-implementer, review-auditor, security-reviewer, test-guardian, planner, performance-optimizer, docs-researcher).
+
+Sequential pattern for complex tasks: Research (Explore/repo-explorer) → Plan (planner) → Implement (change-implementer or swarm) → Review (review-auditor + security-reviewer in parallel) → Verify (test-guardian). Use `/compact` between phases.
 
 # Subagent Token Discipline
 

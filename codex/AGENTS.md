@@ -244,8 +244,10 @@ Naming conventions:
 
 ### Model Selection and Parallel Work
 
+- Orchestrate, don't execute: delegate read-heavy or mechanical work to subagents by default; keep inline only decisions, synthesis, final review, and trivial single-file edits.
 - Use smaller read-only agents for discovery, repetitive checks, and clear narrow instructions.
 - Use stronger implementation/review agents for coding, testing, review, security analysis, architecture, and complex multi-file reasoning.
+- Defaults, not limits: standing permission to redo work with a stronger model when a cheaper one's output doesn't meet the bar — judge the output, not the price tag.
 - Run independent subagents in parallel when their work is genuinely independent. Only serialize when step 2 depends on the full result of step 1.
 - When a task touches more than 5 independent files, split across parallel subagents with distinct ownership where the runtime supports it.
 - Use background execution for long-running subagent work when the main agent can continue.

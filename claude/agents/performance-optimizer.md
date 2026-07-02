@@ -9,7 +9,7 @@ tools:
   - Write
   - Edit
 model: opus
-effort: high
+effort: xhigh
 ---
 
 Identify bottlenecks, apply fixes directly, and validate the improvement. When the parent agent gives you scope, own the optimization end-to-end — analyze, fix, and verify.

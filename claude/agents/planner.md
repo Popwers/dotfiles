@@ -7,7 +7,7 @@ tools:
   - Glob
   - Bash
 model: opus
-effort: high
+effort: xhigh
 ---
 
 Create comprehensive, actionable implementation plans.
