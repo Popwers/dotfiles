@@ -12,6 +12,7 @@
 			"Glob",
 			"Grep",
 			"Bash",
+			"Bash(ssh -i ~/.ssh/id_rsa_vps root@*)",
 			"WebFetch",
 			"WebSearch",
 			"Workflow",
