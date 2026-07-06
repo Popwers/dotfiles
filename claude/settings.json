@@ -71,7 +71,7 @@
 	},
 	"autoConnectIde": true,
 	"skipAutoPermissionPrompt": true,
-	"model": "claude-opus-4-8",
+	"model": "claude-fable-5",
 	"env": {
 		"ENABLE_TOOL_SEARCH": "1",
 		"CLAUDE_ENABLE_STREAM_WATCHDOG": "1",
@@ -82,7 +82,7 @@
 		"CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "85",
 		"CLAUDE_CODE_NO_FLICKER": "1"
 	},
-	"effortLevel": "xhigh",
+	"effortLevel": "high",
 	"spinnerTipsEnabled": false,
 	"skillListingBudgetFraction": 0.08,
 	"autoUpdatesChannel": "latest",
