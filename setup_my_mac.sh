@@ -311,10 +311,10 @@ else
 fi
 # Register local MCP servers (user scope) — only if not already registered
 if command -v claude &>/dev/null; then
-    registered_mcps=$(claude mcp list --scope user 2>/dev/null || true)
+    registered_mcps=$(claude mcp list 2>/dev/null || true)
     register_mcp_if_missing() {
         local name=$1; shift
-        if echo "$registered_mcps" | grep -q "$name"; then
+        if echo "$registered_mcps" | grep -q "^$name:"; then
             skip "MCP $name"
         else
             if claude mcp add "$@" >/dev/null 2>&1; then
@@ -481,7 +481,7 @@ declare -a skills=(
     "yeet|https://github.com/openai/skills"
     "copywriting|https://github.com/coreyhaines31/marketingskills"
     "seo-audit|https://github.com/coreyhaines31/marketingskills"
-    "page-cro|https://github.com/coreyhaines31/marketingskills"
+    "cro|https://github.com/coreyhaines31/marketingskills"
     "content-strategy|https://github.com/coreyhaines31/marketingskills"
     "site-architecture|https://github.com/coreyhaines31/marketingskills"
     "interface-feel-polish|https://github.com/Popwers/skills"
